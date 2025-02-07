@@ -1,0 +1,101 @@
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+        <p-button label="Novo" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+        <p-button severity="secondary" label="Excluir" icon="pi pi-trash" outlined (onClick)="deleteSelectedCompanies()" [disabled]="!selectedCompanies || !selectedCompanies.length" />
+    </ng-template>
+
+    <ng-template #end>
+        <p-button label="Exportar lista" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+    </ng-template>
+</p-toolbar>
+
+<p-table
+    #dt
+    [value]="companies()"
+    [rows]="10"
+    [columns]="cols"
+    [paginator]="true"
+    [globalFilterFields]="['name', 'country.name', 'representative.name', 'status']"
+    [tableStyle]="{ 'min-width': '75rem' }"
+    [(selection)]="selectedCompanies"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Exibindo {first} até {last} de {totalRecords}"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[10, 20, 30]"
+>
+    <ng-template #caption>
+        <div class="flex items-center justify-between">
+            <h5 class="m-0">Gestão de Clientes</h5>
+            <p-iconfield>
+                <p-inputicon styleClass="pi pi-search" />
+                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Procurar..." />
+            </p-iconfield>
+        </div>
+    </ng-template>
+    <ng-template #header>
+        <tr>
+            <th style="width: 3rem">
+                <p-tableHeaderCheckbox />
+            </th>
+            <th style="min-width: 16rem">ID</th>
+            <th pSortableColumn="name" style="min-width:16rem">
+                Nome
+                <p-sortIcon field="name" />
+            </th>
+            <th>CNPJ</th>
+            <th pSortableColumn="status" style="min-width: 8rem">
+                Status
+                <p-sortIcon field="status" />
+            </th>
+            <th style="min-width: 12rem"></th>
+        </tr>
+    </ng-template>
+    <ng-template #body let-Company>
+        <tr>
+            <td style="width: 3rem">
+                <p-tableCheckbox [value]="Company" />
+            </td>
+            <td style="min-width: 12rem">{{ company.id }}</td>
+            <td style="min-width: 16rem">{{ company.name }}</td>
+            <td>{{ company.identification }}</td>
+            <td>
+                <p-tag [value]="getLabelSeverity(company.status)" [severity]="getSeverity(company.status)" />
+            </td>
+            <td>
+                <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editCompany(Company)" />
+                <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteCompany(Company)" />
+            </td>
+        </tr>
+    </ng-template>
+</p-table>
+
+<p-dialog [(visible)]="companyDialog" [style]="{ width: '450px' }" header="Detalhes do Cliente" [modal]="true">
+    <ng-template #content>
+        <div class="flex flex-col gap-6">
+            <div>
+                <label for="status" class="block font-bold mb-3">Status</label>
+                <p-select [(ngModel)]="company.status" inputId="status" [options]="statuses" optionLabel="label" optionValue="label" placeholder="Selecione o Status" fluid />
+            </div>
+
+            <div>
+                <label for="name" class="block font-bold mb-3">Nome</label>
+                <input type="text" pInputText id="name" [(ngModel)]="company.name" required autofocus fluid />
+                <small class="text-red-500" *ngIf="submitted && !company.name">Name is required.</small>
+            </div>
+
+            <div>
+                <label for="identication" class="block font-bold mb-3">CNPJ</label>
+                <input type="text" pInputText id="identication" [(ngModel)]="company.identification" required autofocus fluid />
+                <small class="text-red-500" *ngIf="submitted && !company.identification">Name is required.</small>
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template #footer>
+        <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
+        <p-button label="Salvar" icon="pi pi-check" (click)="saveCompany()" />
+    </ng-template>
+</p-dialog>
+
+<p-confirmdialog [style]="{ width: '450px' }" />
