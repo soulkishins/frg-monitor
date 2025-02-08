@@ -1,5 +1,5 @@
 from db.db import get_current_user as user
-from sqlalchemy import Column, String, INT, BOOLEAN, TIMESTAMP, ForeignKey, UniqueConstraint, func
+from sqlalchemy import Column, String, FLOAT, BOOLEAN, TIMESTAMP, ForeignKey, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declarative_base, relationship
 import uuid
@@ -12,6 +12,9 @@ class Audit:
     st_created_by = Column(String, default=user, onupdate=None) # Não pode ser atualizado
     dt_modified = Column(TIMESTAMP, onupdate=func.current_timestamp())
     st_modified_by = Column(String, onupdate=user)
+    
+    def to_dict(self):
+        return {key: getattr(self, key) for key in self.__dict__ if key != "_sa_instance_state"}
 
 class User(Base, Audit):
     __tablename__ = "tb_user"
@@ -98,7 +101,7 @@ class Advertisement(Base, Audit):
     st_title = Column(String, nullable=False)
     st_description = Column(String, nullable=False)
     st_photos = Column(String, nullable=False)
-    db_price = Column(Numeric(10, 2), nullable=False)
+    db_price = Column(FLOAT, nullable=False)
     st_vendor = Column(String, nullable=False)
     st_details = Column(String)
     st_status = Column(String, nullable=False)
