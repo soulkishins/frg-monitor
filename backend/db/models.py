@@ -1,111 +1,120 @@
 from db.db import get_current_user as user
 from sqlalchemy import Column, String, INT, BOOLEAN, TIMESTAMP, ForeignKey, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship, as_declarative
+from sqlalchemy.orm import declarative_base, relationship
 import uuid
 
-@as_declarative()
-class Base:
-    __table_args__ = {'schema': 'notas'}
+Base = declarative_base()
+Base.metadata.schema = "invoices"
 
-# Colunas de Audit Padronizadas
 class Audit:
     dt_created = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=None) # Não pode ser atualizado
     st_created_by = Column(String, default=user, onupdate=None) # Não pode ser atualizado
     dt_modified = Column(TIMESTAMP, onupdate=func.current_timestamp())
     st_modified_by = Column(String, onupdate=user)
-    in_deleted = Column(BOOLEAN, default=False)
-    dt_deleted = Column(TIMESTAMP)
-    st_deleted_by = Column(String)
-    
-    def delete(self):
-        self.in_deleted = True
-        self.dt_deleted = func.current_timestamp()
-        self.st_deleted_by = user()
 
-# Definição das tabelas
 class User(Base, Audit):
     __tablename__ = "tb_user"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False, onupdate=None) # Não pode ser atualizado
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, onupdate=None)
     st_name = Column(String, nullable=False)
-    st_email = Column(String, nullable=False, unique=True, onupdate=None) # Não pode ser atualizado
+    st_email = Column(String, nullable=False, unique=True, onupdate=None)
     st_phone = Column(String)
-
+    
     attributes = relationship("UserAttr", back_populates="user", lazy=True)
 
 class UserAttr(Base, Audit):
     __tablename__ = "tb_user_attr"
     
-    id_user = Column(UUID(as_uuid=True), ForeignKey(User.id), primary_key=True, nullable=False, onupdate=None) # Não pode ser atualizado
-    id_attr = Column(String, primary_key=True, nullable=False, onupdate=None) # Não pode ser atualizado
+    id_user = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_user.id"), primary_key=True, onupdate=None)
+    id_attr = Column(String, primary_key=True, onupdate=None)
     st_value = Column(String, nullable=False)
     
-    user = relationship("User", back_populates="attributes", lazy=True, innerjoin=True)
+    user = relationship("User", back_populates="attributes", lazy=True)
 
-class Entity(Base, Audit):
-    __tablename__ = "tb_entity"
+class Category(Base, Audit):
+    __tablename__ = "tb_category"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False, onupdate=None) # Não pode ser atualizado
-    st_document = Column(String, nullable=False, onupdate=None) # Não pode ser atualizado
-    st_document_type = Column(String, nullable=False, onupdate=None) # Não pode ser atualizado
-    st_name = Column(String, nullable=False)
-    st_email = Column(String)
-    st_phone = Column(String)
-    st_status = Column(String)
-    
-    #__table_args__ = (UniqueConstraint("st_document", "st_document_type", name="uq_entity"),)
-
-    attributes = relationship("EntityAttr", back_populates="entity", lazy=True)
-    invoices = relationship("Invoice", back_populates="entity", lazy=True)
-
-class EntityAttr(Base, Audit):
-    __tablename__ = "tb_entity_attr"
-    
-    id_entity = Column(UUID(as_uuid=True), ForeignKey(Entity.id), primary_key=True, nullable=False, onupdate=None) # Não pode ser atualizado
-    id_attr = Column(String, primary_key=True, nullable=False, onupdate=None) # Não pode ser atualizado
-    st_value = Column(String, nullable=False)
-    
-    entity = relationship("Entity", back_populates="attributes", lazy=True, innerjoin=True)
-
-class Invoice(Base, Audit):
-    __tablename__ = "tb_invoice"
-    
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False, onupdate=None) # Não pode ser atualizado
-    st_invoice_code = Column(String, nullable=False, onupdate=None) # Não pode ser atualizado
-    st_invoice_type = Column(String, nullable=False, onupdate=None) # Não pode ser atualizado
-    id_entity = Column(UUID(as_uuid=True), ForeignKey(Entity.id), nullable=False, onupdate=None) # Não pode ser atualizado
-    st_payer = Column(String) # Não pode ser atualizado
-    st_issuer = Column(String, nullable=False, onupdate=None) # Não pode ser atualizado
-    st_carrier = Column(String)
+    id_category = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, onupdate=None)
+    st_category = Column(String, nullable=False)
     st_status = Column(String, nullable=False)
-    st_reason = Column(String)
-    dt_invoice = Column(TIMESTAMP, nullable=False)
     
-    #__table_args__ = (UniqueConstraint("st_invoice_code", "st_invoice_type", name="uq_invoice"),)
-    
-    entity = relationship("Entity", back_populates="invoices", lazy=True, innerjoin=True)
-    attributes = relationship("InvoiceAttr", back_populates="invoice", lazy=True)
+    subcategories = relationship("Subcategory", back_populates="category", lazy=True)
 
-class InvoiceAttr(Base, Audit):
-    __tablename__ = "tb_invoice_attr"
+class Subcategory(Base, Audit):
+    __tablename__ = "tb_subcategory"
     
-    id_invoice = Column(UUID(as_uuid=True), ForeignKey(Invoice.id), primary_key=True, nullable=False, onupdate=None) # Não pode ser atualizado
-    id_attr = Column(String, primary_key=True, nullable=False, onupdate=None) # Não pode ser atualizado
-    st_value = Column(String, nullable=False)
+    id_subcategory = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, onupdate=None)
+    id_category = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_category.id_category"), nullable=False)
+    st_subcategory = Column(String, nullable=False)
+    st_status = Column(String, nullable=False)
     
-    invoice = relationship("Invoice", back_populates="attributes", lazy=True, innerjoin=True)
+    category = relationship("Category", back_populates="subcategories", lazy=True)
 
-class InvoiceDocs(Base, Audit):
-    __tablename__ = "tb_invoice_docs"
+class Client(Base, Audit):
+    __tablename__ = "tb_client"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False, onupdate=None) # Não pode ser atualizado
-    id_entity = Column(UUID(as_uuid=True), ForeignKey(Entity.id), nullable=False, onupdate=None) # Não pode ser atualizado
-    id_invoice = Column(UUID(as_uuid=True), ForeignKey(Invoice.id))
-    st_invoice_code = Column(String, nullable=False, onupdate=None) # Não pode ser atualizado
-    st_invoice_type = Column(String, nullable=False, onupdate=None) # Não pode ser atualizado
-    st_doctype = Column(String, nullable=False)
-    st_filename = Column(String, nullable=False)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, onupdate=None)
+    st_name = Column(String, nullable=False)
+    st_document = Column(String, nullable=False, unique=True)
+    st_status = Column(String, nullable=False)
 
-    entity = relationship("Entity", lazy=True, innerjoin=True)
-    invoice = relationship("Invoice", lazy=True)
+class ClientBrand(Base, Audit):
+    __tablename__ = "tb_client_brand"
+    
+    id_brand = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, onupdate=None)
+    id_client = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_client.id"), nullable=False)
+    st_brand = Column(String, nullable=False)
+    st_status = Column(String, nullable=False)
+    
+    client = relationship("Client", lazy=True)
+
+class ClientBrandProduct(Base, Audit):
+    __tablename__ = "tb_client_brand_product"
+    
+    id_product = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, onupdate=None)
+    id_brand = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_client_brand.id_brand"), nullable=False)
+    id_subcategory = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_subcategory.id_subcategory"), nullable=False)
+    st_product = Column(String, nullable=False)
+    st_variety = Column(String, nullable=False)
+    st_status = Column(String, nullable=False)
+
+class Keyword(Base, Audit):
+    __tablename__ = "tb_keyword"
+    
+    id_keyword = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, onupdate=None)
+    id_brand = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_client_brand.id_brand"), nullable=False, onupdate=None)
+    st_keyword = Column(String, nullable=False)
+    st_product = Column(String, nullable=False)
+    st_status = Column(String, nullable=False)
+
+class Advertisement(Base, Audit):
+    __tablename__ = "tb_advertisement"
+    
+    id_advertisement = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, onupdate=None)
+    id_brand = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_client_brand.id_brand"), nullable=False, onupdate=None)
+    st_plataform = Column(String, nullable=False)
+    st_url = Column(String, nullable=False)
+    st_title = Column(String, nullable=False)
+    st_description = Column(String, nullable=False)
+    st_photos = Column(String, nullable=False)
+    db_price = Column(Numeric(10, 2), nullable=False)
+    st_vendor = Column(String, nullable=False)
+    st_details = Column(String)
+    st_status = Column(String, nullable=False)
+
+class AdvertisementProduct(Base, Audit):
+    __tablename__ = "tb_advertisement_product"
+    
+    id_advertisement = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_advertisement.id_advertisement"), primary_key=True, onupdate=None)
+    id_product = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_client_brand_product.id_product"), primary_key=True, onupdate=None)
+    st_varity_seq = Column(String, nullable=False, onupdate=None)
+    st_varity_name = Column(String, nullable=False, onupdate=None)
+
+class AdvertisementHistory(Base, Audit):
+    __tablename__ = "tb_advertisement_history"
+    
+    id_advertisement = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_advertisement.id_advertisement"), primary_key=True, onupdate=None)
+    dt_history = Column(TIMESTAMP, primary_key=True, onupdate=None)
+    st_status = Column(String, nullable=False)
+    st_action = Column(String, nullable=False)
