@@ -88,9 +88,6 @@ class Crud:
             where.append(self.get_model().st_created_by.ilike(f"%{filters['st_created_by']}%"))
         if 'st_modified_by' in filters:
             where.append(self.get_model().st_modified_by.ilike(f"%{filters['st_modified_by']}%"))
-        if 'st_deleted_by' in filters:
-            where.append(self.get_model().st_deleted_by.ilike(f"%{filters['st_deleted_by']}%"))
-
         if 'dt_created' in filters:
             dt_created = self.get_range_datetime(filters['dt_created'])
             where.append(self.get_model().dt_created >= dt_created[0])
@@ -99,16 +96,6 @@ class Crud:
             dt_modified = self.get_range_datetime(filters['dt_modified'])
             where.append(self.get_model().dt_modified >= dt_modified[0])
             where.append(self.get_model().dt_modified <= dt_modified[1])
-        if 'dt_deleted' in filters:
-            dt_deleted = self.get_range_datetime(filters['dt_deleted'])
-            where.append(self.get_model().dt_deleted >= dt_deleted[0])
-            where.append(self.get_model().dt_deleted <= dt_deleted[1])
-
-        if 'in_deleted' in filters:
-            where.append(self.get_model().in_deleted == bool(filters['in_deleted']))
-        elif 'all' not in filters:
-            where.append(self.get_model().in_deleted == False)
-
         return where
 
     def get_joins(self, indexes, filters) -> list:

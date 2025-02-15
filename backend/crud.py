@@ -56,12 +56,15 @@ __DEFAULT_ERRORS = {
 
 def get_crud_service(operation_name, user, session):
     # Matrix - Operações de CRUD vinculadas ao usuario da sessao
+    if operation_name == "user":
+        from operations.user import UserCrud
+        return UserCrud(user, session)
     if operation_name == "client":
-        from operations.client import MatrixAccountCrud
-        return MatrixAccountCrud(user, session)
+        from operations.client import ClientCrud
+        return ClientCrud(user, session)
     if operation_name == "client_brand":
-        from operations.client_brand import MatrixUserCrud
-        return MatrixUserCrud(user, session)
+        from operations.client_brand import ClientBrandCrud
+        return ClientBrandCrud(user, session)
     if operation_name == "client_brand_product":
         from operations.client_brand_product import MatrixEntityCrud
         return MatrixEntityCrud(user, session)
@@ -168,6 +171,8 @@ def lambda_handler(event, context):
                 body = body if body else "{}"
                 
                 service, method = operation_name.split('.')
+                
+                print('Executando operação: ', operation_name)
 
                 crud_service = get_crud_service(service, username, session)
                 if not crud_service:
@@ -222,9 +227,9 @@ if __name__ == "__main__":
         {
             "headers": {"Authorization": "e.eyJzdWIiOiJjMzVjNmE1YS0zMDAxLTcwMjQtNjdkMC1kNWZiYzI4YzE2NmIiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLnNhLWVhc3QtMS5hbWF6b25hd3MuY29tXC9zYS1lYXN0LTFfM1FBM3NoZDBmIiwicGhvbmVfbnVtYmVyX3ZlcmlmaWVkIjpmYWxzZSwiY29nbml0bzp1c2VybmFtZSI6ImMzNWM2YTVhLTMwMDEtNzAyNC02N2QwLWQ1ZmJjMjhjMTY2YiIsIm9yaWdpbl9qdGkiOiJhNjQ0OTI4My1mMzdkLTRlZDMtYmY2YS04NzNlOTBhODhhNDEiLCJhdWQiOiI0dmJmYW82NzFiNHZyamxwbzdsOHU0N2xiYyIsImV2ZW50X2lkIjoiNTQyZjU0YjMtN2U4NC00YTZiLWFkZjgtZmI1N2RhNTQ3NTE0IiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE3MzkyMzMyOTgsIm5hbWUiOiJCcnVubyBBbnR1bmVzIiwicGhvbmVfbnVtYmVyIjoiKzU1MTE5MzMzMzQ1NjciLCJleHAiOjE3MzkyMzY4OTgsImlhdCI6MTczOTIzMzI5OCwianRpIjoiNGFhM2NkMmYtM2JmMy00YjdiLThmMzctYjVhNDEyNmE2ZmRkIiwiZW1haWwiOiJicnVuby5iYWNzQGdtYWlsLmNvbSJ9.u"},
             "httpMethod": "GET",
-            "pathParameters": {"account": "6d92ddea-965d-4520-b764-2449ae33c18c", "entity": "9984e675-9a03-4c36-bb61-e432c2d64e75"},
-            "queryStringParameters": {"st_entity_name": "Inativacao"},
-            "requestContext": {"operationName": "matrix_entity.list"},
+            #"pathParameters": {"account": "6d92ddea-965d-4520-b764-2449ae33c18c", "entity": "9984e675-9a03-4c36-bb61-e432c2d64e75"},
+            #"queryStringParameters": {"st_entity_name": "Inativacao"},
+            "requestContext": {"operationName": "client_brand.list"},
             "body": json.dumps(
                 {
                     "entity": {
