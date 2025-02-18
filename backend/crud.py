@@ -59,6 +59,12 @@ def get_crud_service(operation_name, user, session):
     if operation_name == "user":
         from operations.user import UserCrud
         return UserCrud(user, session)
+    if operation_name == "category":
+        from operations.category import CategoryCrud
+        return CategoryCrud(user, session)
+    if operation_name == "subcategory":
+        from operations.subcategory import SubcategoryCrud
+        return SubcategoryCrud(user, session)    
     if operation_name == "client":
         from operations.client import ClientCrud
         return ClientCrud(user, session)
@@ -66,20 +72,14 @@ def get_crud_service(operation_name, user, session):
         from operations.client_brand import ClientBrandCrud
         return ClientBrandCrud(user, session)
     if operation_name == "client_brand_product":
-        from operations.client_brand_product import MatrixEntityCrud
-        return MatrixEntityCrud(user, session)
+        from operations.client_brand_product import ClientBrandProductCrud
+        return ClientBrandProductCrud(user, session)
     if operation_name == "keyword":
-        from operations.keyword import MatrixEntityCertCrud
-        return MatrixEntityCertCrud(user, session)
-    if operation_name == "category":
-        from operations.category import MatrixUserEntityCrud
-        return MatrixUserEntityCrud(user, session)
-    if operation_name == "subcategory":
-        from operations.subcategory import MatrixInvoiceCrud
-        return MatrixInvoiceCrud(user, session)
+        from operations.keyword import KeywordCrud
+        return KeywordCrud(user, session)
     if operation_name == "advertisement":
-        from operations.advertisement import ProfileCrud
-        return ProfileCrud(user, session)
+        from operations.advertisement import AdvertisementCrud
+        return AdvertisementCrud(user, session)
     return None
 
 def return_value(status_code, body, *, json_transform = None):
@@ -227,31 +227,11 @@ if __name__ == "__main__":
         {
             "headers": {"Authorization": "e.eyJzdWIiOiJjMzVjNmE1YS0zMDAxLTcwMjQtNjdkMC1kNWZiYzI4YzE2NmIiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLnNhLWVhc3QtMS5hbWF6b25hd3MuY29tXC9zYS1lYXN0LTFfM1FBM3NoZDBmIiwicGhvbmVfbnVtYmVyX3ZlcmlmaWVkIjpmYWxzZSwiY29nbml0bzp1c2VybmFtZSI6ImMzNWM2YTVhLTMwMDEtNzAyNC02N2QwLWQ1ZmJjMjhjMTY2YiIsIm9yaWdpbl9qdGkiOiJhNjQ0OTI4My1mMzdkLTRlZDMtYmY2YS04NzNlOTBhODhhNDEiLCJhdWQiOiI0dmJmYW82NzFiNHZyamxwbzdsOHU0N2xiYyIsImV2ZW50X2lkIjoiNTQyZjU0YjMtN2U4NC00YTZiLWFkZjgtZmI1N2RhNTQ3NTE0IiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE3MzkyMzMyOTgsIm5hbWUiOiJCcnVubyBBbnR1bmVzIiwicGhvbmVfbnVtYmVyIjoiKzU1MTE5MzMzMzQ1NjciLCJleHAiOjE3MzkyMzY4OTgsImlhdCI6MTczOTIzMzI5OCwianRpIjoiNGFhM2NkMmYtM2JmMy00YjdiLThmMzctYjVhNDEyNmE2ZmRkIiwiZW1haWwiOiJicnVuby5iYWNzQGdtYWlsLmNvbSJ9.u"},
             "httpMethod": "GET",
-            #"pathParameters": {"account": "6d92ddea-965d-4520-b764-2449ae33c18c", "entity": "9984e675-9a03-4c36-bb61-e432c2d64e75"},
-            #"queryStringParameters": {"st_entity_name": "Inativacao"},
-            "requestContext": {"operationName": "client_brand.list"},
-            "body": json.dumps(
-                {
-                    "entity": {
-                        "st_document": "52345678904321",
-                        "st_document_type": "CNPJ",
-                        "st_name": "Nome Atualizado",
-                        "st_email": "empresa4@email.com",
-                        "st_phone": "+551122223344",
-                        "st_status": "AC|IN",
-                        "attributes": [
-                            {
-                                "id_attr": "photo2",
-                                "st_value": "image2.png"
-                            },
-                            {
-                                "id_attr": "attr4",
-                                "st_value": "valor4"
-                            }
-                        ]
-                    }
-                }
-            )
+            "requestContext": {"operationName": "keyword.read"},
+            "pathParameters": {
+                "keyword": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+            },
+            "body": "{}"
         },
         None
     )

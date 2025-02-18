@@ -6,7 +6,7 @@ class CategoryCrud(Crud):
         return Category
 
     def filter_by_pk(self, indexes) -> list:
-        return (Category.id == indexes['category'],)
+        return (Category.id_category == indexes['category'],)
 
     def filter_by(self, indexes, filters) -> list:
         where = []

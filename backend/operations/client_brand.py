@@ -21,8 +21,12 @@ class ClientBrandCrud(Crud):
         if 'st_client_name' in filters:
             where.append(Client.st_name.ilike(f"%{filters['st_client_name']}%"))
         if 'st_brand' in filters:
-            where.append(ClientBrand.st_brand.ilike(f"%{filters['st_email']}%"))
+            where.append(ClientBrand.st_brand.ilike(f"%{filters['st_brand']}%"))
         if 'st_status' in filters:
-            where.append(Client.st_status == filters['st_status'])
+            where.append(ClientBrand.st_status == filters['st_status'])
 
         return where + super().filter_by(indexes, filters)
+
+    def to_model(self, indexes, data) -> ClientBrand:
+        data['id_client'] = indexes['client']
+        return super().to_model(indexes, data)
