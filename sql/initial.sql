@@ -164,6 +164,7 @@ create table if not exists tb_advertisement_history (
 	dt_history timestamp not null,
 	st_status varchar not null,
 	st_action varchar not null,
+	st_history varchar null,
 	dt_created timestamp not null,
 	dt_modified timestamp,
 	st_created_by varchar not null,
