@@ -13,7 +13,7 @@ class ClientBrandProductCrud(Crud):
         return (contains_eager(ClientBrandProduct.brand), contains_eager(ClientBrandProduct.subcategory))
 
     def filter_by_pk(self, indexes) -> list:
-        return (ClientBrandProduct.id_product == indexes['client_brand_prod'],)
+        return (ClientBrandProduct.id_product == indexes['product'],)
 
     def filter_by(self, indexes, filters) -> list:
         where = []
