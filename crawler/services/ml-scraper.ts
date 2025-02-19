@@ -10,7 +10,7 @@ export class MLScraper {
     public async searchAdvertisements(keyword: string): Promise<IMLPage> {
         try {
             const searchUrl = `https://lista.mercadolivre.com.br/${encodeURIComponent(keyword)}`;
-            const response = await axios.get(searchUrl);
+            const response = await axios.get(searchUrl, {timeout: 5000});
             const $ = cheerio.load(response.data);
             
             return {
@@ -55,7 +55,7 @@ export class MLScraper {
                 return { advertisements: [], pages: [] };
             }
 
-            const response = await axios.get(nextPageUrl);
+            const response = await axios.get(nextPageUrl, {timeout: 5000});
             const $ = cheerio.load(response.data);
             
             return {

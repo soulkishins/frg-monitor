@@ -214,6 +214,7 @@ export interface ProductInfo {
 export interface PhotoInfo {
     id: string;
     url: string;
+    advertisementId: string;
 }
 
 export interface IAdvertisementHistory {

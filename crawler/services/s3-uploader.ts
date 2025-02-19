@@ -16,6 +16,7 @@ export class S3Uploader {
     public async uploadImage(params: {
         imageUrl: string;
         photoId: string;
+        advertisementId: string;
         platform: string;
     }): Promise<string> {
         try {

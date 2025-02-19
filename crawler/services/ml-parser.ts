@@ -34,7 +34,24 @@ export class MLParser {
 
     private async extractPreloadedState(url: string): Promise<PreloadedState | null> {
         try {
-            const response = await axios.get(url);
+            const response = await axios.get(url, {
+                headers: {
+                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+                    'accept-language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,zh-HK;q=0.6,zh-SG;q=0.5,zh;q=0.4',
+                    'cache-control': 'max-age=0',
+                    'sec-ch-ua': '"Not A(Brand";v="8", "Chromium";v="132", "Google Chrome";v="132"',
+                    'sec-ch-ua-mobile': '?0',
+                    'sec-ch-ua-platform': '"Windows"',
+                    'sec-fetch-dest': 'document',
+                    'sec-fetch-mode': 'navigate',
+                    'sec-fetch-site': 'none',
+                    'sec-fetch-user': '?1',
+                    'upgrade-insecure-requests': '1',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36',
+                    'viewport-width': '1536'
+                },
+                timeout: 5000
+            });
             const match = response.data.match(MLParser.PRELOADED_STATE_REGEX);
             
             if (!match?.[1]) return null;
@@ -120,7 +137,8 @@ export class MLParser {
                     photo => {
                         return {
                             id: photo.id,
-                            url: pictureConfig.template_zoom.replace('{id}', photo.id).replace('{sanitizedTitle}', '')
+                            url: pictureConfig.template_zoom.replace('{id}', photo.id).replace('{sanitizedTitle}', ''),
+                            advertisementId: result.id
                         }
                     }
                 );
@@ -151,6 +169,7 @@ export class MLParser {
                 this.uploader.uploadImage({
                     imageUrl: photo.url,
                     photoId: photo.id,
+                    advertisementId: photo.advertisementId,
                     platform
                 })
             )

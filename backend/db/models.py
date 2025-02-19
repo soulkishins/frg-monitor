@@ -211,9 +211,13 @@ class AdvertisementHistory(Base, Audit):
     dt_history = Column(TIMESTAMP, primary_key=True, onupdate=None)
     st_status = Column(String, nullable=False)
     st_action = Column(String, nullable=False)
+    st_history = Column(String, nullable=False)
+    st_ml_json = Column(String, nullable=False)
 
     advertisement = relationship("Advertisement", lazy=True)
 
     def _json_fields(self):
-        return ["id_advertisement", "dt_history", "st_status", "st_action"] + super()._json_fields()
+        return ["id_advertisement", "dt_history", "st_status", "st_action", "st_history"] + super()._json_fields()
 
+    def _full_json_fields(self):
+        return ["id_advertisement", "dt_history", "st_status", "st_action", "st_history", "st_ml_json"]
