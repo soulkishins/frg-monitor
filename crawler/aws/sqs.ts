@@ -31,7 +31,7 @@ export class SQSService {
 
             // Add message attributes if they exist
             if (payload.messageAttributes) {
-                params.MessageAttributes = Object.entries(payload.messageAttributes).reduce((acc, [key, value]) => {
+                params.MessageAttributes = Object.entries(payload.messageAttributes).reduce((acc: Record<string, any>, [key, value]) => {
                     acc[key] = {
                         DataType: typeof value === 'number' ? 'Number' : 'String',
                         StringValue: value.toString()

@@ -36,10 +36,10 @@ export class AdvertisementService {
         params: { idBrand: string; brandProducts: IClientBrandProduct[] }
     ): Promise<void> {
         const advertisements = await this.scraper.readAdvertisements(page);
-        
-        for (const advertisement of advertisements) {
-            await this.processAdvertisement(advertisement, params);
-        }
+
+        await Promise.all(
+            advertisements.map(advertisement => this.processAdvertisement(advertisement, params))
+        );
     }
 
     private async processAdvertisement(
@@ -93,10 +93,12 @@ export class AdvertisementService {
         action: 'CRAWLER_CREATED' | 'CRAWLER_UPDATED',
         status: string
     ): Promise<void> {
+        const ml_json = advertisement.ml_json || {};
         await this.adManager.addHistory({
             id_advertisement: adId,
             st_status: status || 'NEW',
             st_action: action,
+            st_ml_json: JSON.stringify(ml_json),
             st_history: JSON.stringify(advertisement)
         });
     }

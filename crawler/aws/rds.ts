@@ -67,13 +67,13 @@ export class AdvertisementManager {
     async addHistory(data: IAdvertisementHistory): Promise<void> {
         const query = `
             INSERT INTO tb_advertisement_history (
-                id_advertisement, dt_history, st_status, st_action, st_history, st_created_by, dt_created
-            ) VALUES ($1, CURRENT_TIMESTAMP, $2, $3, $4, 'crawler', CURRENT_TIMESTAMP)
+                id_advertisement, dt_history, st_status, st_action, st_history, st_ml_json, st_created_by, dt_created
+            ) VALUES ($1, CURRENT_TIMESTAMP, $2, $3, $4, $5, 'crawler', CURRENT_TIMESTAMP)
         `;
         
         const values = [
             data.id_advertisement, data.st_status,
-            data.st_action, data.st_history
+            data.st_action, data.st_history, data.st_ml_json
         ];
 
         await this.pool.query(query, values);

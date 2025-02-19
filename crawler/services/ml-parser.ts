@@ -22,21 +22,6 @@ export class MLParser {
             const advertisementInfo = MLParser.extractAdvertisementInfo(preloadedState);
             const s3Photos = await this.uploadPhotos(advertisementInfo.photos, st_plataform);
 
-            if (!advertisementInfo.title
-                || !advertisementInfo.description
-                || !advertisementInfo.price
-                || !advertisementInfo.stock
-                || !advertisementInfo.seller
-                || !advertisementInfo.photos
-            ) {
-                console.log(
-                    `${advertisementInfo.id} - ERROR: Informações incompletas ---------------`,
-                    advertisementInfo,
-                    JSON.stringify(preloadedState, null, 2),
-                    `${advertisementInfo.id} - ERROR: Informações incompletas ---------------`,
-                );
-            }
-
             return this.createAdvertisement(advertisementInfo, cleanUrl, s3Photos, st_plataform);
         } catch (error) {
             return this.createErrorAdvertisement(url, st_plataform, error as Error);
@@ -66,7 +51,8 @@ export class MLParser {
     public static extractAdvertisementInfo(preloadedState: PreloadedState): ProductInfo {
         try {
             const result: ProductInfo = {
-                id: preloadedState.initialState.id
+                id: preloadedState.initialState.id,
+                ml_json: preloadedState
             };
 
             // Extraia descrição do anúncio
@@ -198,7 +184,8 @@ export class MLParser {
                     relatedSearches: info.relatedSearches
                 }
             }),
-            st_status: 'NEW'
+            st_status: 'NEW',
+            ml_json: info.ml_json
         };
     }
 
@@ -218,7 +205,8 @@ export class MLParser {
             st_photos: 'N/A',
             db_price: Number(url.price),
             st_vendor: 'N/A',
-            st_status: 'ERROR'
+            st_status: 'ERROR',
+            ml_json: undefined
         };
     }
 } 

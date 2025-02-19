@@ -3,6 +3,7 @@
 # Compiled output
 /dist
 /tmp
+/coverage
 /out-tsc
 /bazel-out
 
@@ -41,3 +42,6 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Build
+lambda_function.zip

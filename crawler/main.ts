@@ -5,7 +5,7 @@ import { MLParser } from './services/ml-parser';
 import { MLScraper } from './services/ml-scraper';
 import { AdvertisementService } from './services/advertisement-service';
 
-export const handler = async (event) => {
+export const handler = async (event: any) => {
     try {
         for (const record of event.Records) {
             console.log('Iniciando crawler...', JSON.stringify(event));

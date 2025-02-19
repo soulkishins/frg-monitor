@@ -15,7 +15,9 @@ export interface IBaseAdvertisement {
 }
 
 // Estende a interface base
-export interface IMLAdvertisement extends IBaseAdvertisement {}
+export interface IMLAdvertisement extends IBaseAdvertisement {
+    ml_json: any;
+}
 
 // Estende a interface base
 export interface IAdvertisement extends IBaseAdvertisement {}
@@ -206,6 +208,7 @@ export interface ProductInfo {
     };
     photos?: PhotoInfo[];
     relatedSearches?: string[];
+    ml_json: any;
 }
 
 export interface PhotoInfo {
@@ -218,6 +221,7 @@ export interface IAdvertisementHistory {
     st_status: string;
     st_action: string;
     st_history?: string;
+    st_ml_json?: string;
 }
 
 export interface DatabaseConfig {
