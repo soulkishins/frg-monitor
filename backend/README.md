@@ -71,9 +71,7 @@ The Lambda function expects an event with the following structure
 ```bash
 zip -r lambda_function.zip . -x "*.git*" "*__pycache__*" "*.venv*" "*python*"
 
-aws lambda update-function-code \
-    --function-name matrix-download-invoices \
-    --zip-file fileb://lambda_function.zip
+aws lambda update-function-code --function-name near-crud-client --zip-file fileb://lambda_function.zip
 
 pip install -r requirements-pkg.txt -t python/
 
