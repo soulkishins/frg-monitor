@@ -98,7 +98,7 @@ export class AdvertisementService {
             id_advertisement: adId,
             st_status: status || 'NEW',
             st_action: action,
-            st_ml_json: JSON.stringify(ml_json),
+            st_ml_json: ml_json,
             st_history: JSON.stringify(advertisement)
         });
     }

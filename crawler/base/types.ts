@@ -208,7 +208,6 @@ export interface ProductInfo {
     };
     photos?: PhotoInfo[];
     relatedSearches?: string[];
-    ml_json: any;
 }
 
 export interface PhotoInfo {

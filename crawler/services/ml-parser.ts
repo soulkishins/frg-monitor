@@ -14,17 +14,16 @@ export class MLParser {
         try {
             const cleanUrl = this.removeUrlHash(url.link);
             const preloadedState = await this.extractPreloadedState(cleanUrl);
-            
-            if (!preloadedState) {
-                throw new ParsingError('Não foi possível extrair os dados do produto');
+            try {
+                const advertisementInfo = MLParser.extractAdvertisementInfo(preloadedState);
+                const s3Photos = await this.uploadPhotos(advertisementInfo.photos, st_plataform);
+                return this.createAdvertisement(advertisementInfo, cleanUrl, s3Photos, st_plataform, preloadedState.response);
             }
-
-            const advertisementInfo = MLParser.extractAdvertisementInfo(preloadedState);
-            const s3Photos = await this.uploadPhotos(advertisementInfo.photos, st_plataform);
-
-            return this.createAdvertisement(advertisementInfo, cleanUrl, s3Photos, st_plataform);
+            catch (error) {
+                return this.createErrorAdvertisement(url, st_plataform, error as Error, preloadedState.response);
+            }
         } catch (error) {
-            return this.createErrorAdvertisement(url, st_plataform, error as Error);
+            return this.createErrorAdvertisement(url, st_plataform, error as Error, (error as ParsingError).html);
         }
     }
 
@@ -32,7 +31,8 @@ export class MLParser {
         return url.substring(0, url.indexOf('#'));
     }
 
-    private async extractPreloadedState(url: string): Promise<PreloadedState | null> {
+    private async extractPreloadedState(url: string): Promise<PreloadedState> {
+        var data = '';
         try {
             const response = await axios.get(url, {
                 headers: {
@@ -52,24 +52,25 @@ export class MLParser {
                 },
                 timeout: 5000
             });
-            const match = response.data.match(MLParser.PRELOADED_STATE_REGEX);
+            data = response.data;
+            const match = data.match(MLParser.PRELOADED_STATE_REGEX);
             
-            if (!match?.[1]) return null;
+            if (!match?.[1])
+                throw new ParsingError('PreloadedState not found', data);
 
             const jsonStr = match[1].replace(/\\u002F/g, '/');
             const preloadedState = JSON.parse(jsonStr);
-            preloadedState.response = response.data;
+            preloadedState.response = data;
             return preloadedState;
         } catch (error) {
-            throw new ParsingError('Falha ao extrair PreloadedState', error as Error);
+            throw new ParsingError('Falha ao extrair PreloadedState', data, error as Error);
         }
     }
 
     public static extractAdvertisementInfo(preloadedState: PreloadedState): ProductInfo {
         try {
             const result: ProductInfo = {
-                id: preloadedState.initialState.id,
-                ml_json: preloadedState
+                id: preloadedState.initialState.id
             };
 
             // Extraia descrição do anúncio
@@ -180,7 +181,8 @@ export class MLParser {
         info: ProductInfo,
         url: string,
         photos: string[],
-        platform: string
+        platform: string,
+        html: string
     ): IMLAdvertisement {
         return {
             id_advertisement: '',
@@ -204,14 +206,15 @@ export class MLParser {
                 }
             }),
             st_status: 'NEW',
-            ml_json: info.ml_json
+            ml_json: html
         };
     }
 
     private createErrorAdvertisement(
         url: IMLAdvertisementUrl,
         platform: string,
-        error: Error
+        error: Error,
+        html: string
     ): IMLAdvertisement {
         return {
             id_advertisement: '',
@@ -225,7 +228,7 @@ export class MLParser {
             db_price: Number(url.price),
             st_vendor: 'N/A',
             st_status: 'ERROR',
-            ml_json: undefined
+            ml_json: html
         };
     }
 } 

@@ -13,9 +13,12 @@ export class ScrapingError extends Error {
 }
 
 export class ParsingError extends Error {
-    constructor(message: string, public readonly originalError?: Error) {
+    public readonly html: string;
+
+    constructor(message: string, html:string, public readonly originalError?: Error) {
         super(`Parsing Error: ${message}`);
         this.name = 'ParsingError';
+        this.html = html;
     }
 }
 
