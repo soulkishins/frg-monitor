@@ -90,6 +90,12 @@ def return_value(status_code, body, *, json_transform = None):
         body = [to_dict(obj, json_transform) for obj in body]
     return {
         "statusCode": status_code,
+        "headers": {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+            "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+            "Content-Type": "application/json"
+        },
         "body": json.dumps(body, default=str)
     }
 
