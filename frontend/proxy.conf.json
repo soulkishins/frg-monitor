@@ -1,0 +1,10 @@
+{
+    "/api": {
+        "target": "https://az7xxxrt1g.execute-api.sa-east-1.amazonaws.com/dev",
+        "secure": true,
+        "changeOrigin": true,
+        "pathRewrite": {
+            "^/api": "/dev"
+        }
+    }
+} 

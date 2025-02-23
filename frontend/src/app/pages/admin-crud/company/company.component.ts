@@ -18,14 +18,8 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-//import { Company } from '../../../layout/models/company.model'
-
-interface Company {
-    id?: string;
-    name?: string;
-    identification?: string;
-    status?: string;
-}
+import { CompanyService } from '../../service/company.service';
+import { Company, CompanyResponse, CompanyRequest } from '../../../layout/models/company.model';
 
 interface Column {
     field: string;
@@ -85,7 +79,8 @@ export class CompanyCrud implements OnInit {
 
     constructor(
         private messageService: MessageService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private companyService: CompanyService
     ) {}
 
     exportCSV() {
@@ -97,12 +92,33 @@ export class CompanyCrud implements OnInit {
     }
 
     loadDataAndFields() {
-        this.companies.set(this.generateRandomClients());
+        this.companyService.getClients().subscribe({
+            next: (data: CompanyResponse[]) => {
+                const mappedCompanies: Company[] = data.map(item => ({
+                    id: item.id,
+                    name: item.st_name,
+                    identification: item.st_document,
+                    status: item.st_status.toLowerCase()
+                }));
+                this.companies.set(mappedCompanies);
+            },
+            error: (error) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: 'Erro ao carregar os clientes',
+                    life: 3000
+                });
+                console.error('Erro ao carregar clientes:', error);
+                // Carrega dados mockados em caso de erro
+                this.companies.set(this.generateRandomClients());
+            }
+        });
 
         this.statuses = [
-            { label: 'Ativo', value: 'active' },
-            { label: 'Inativo', value: 'inactive' },
-            { label: 'Lead', value: 'lead' }
+            { label: 'Ativo', value: 'ACTIVE' },
+            { label: 'Inativo', value: 'INACTIVE' },
+            { label: 'Lead', value: 'LEAD' }
         ];
 
         this.cols = [
@@ -157,17 +173,31 @@ export class CompanyCrud implements OnInit {
 
     deleteCompany(company: Company) {
         this.confirmationService.confirm({
-            message: 'Are you sure you want to delete ' + company.name + '?',
-            header: 'Confirm',
+            message: 'Tem certeza que deseja excluir ' + company.name + '?',
+            header: 'Confirmação',
             icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Sim',
+            rejectLabel: 'Não',
             accept: () => {
-                this.companies.set(this.companies().filter((val) => val.id !== company.id));
-                this.company = {};
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'company Deleted',
-                    life: 3000
+                this.companyService.deleteClient(company).subscribe({
+                    next: () => {
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Sucesso',
+                            detail: 'Cliente excluído',
+                            life: 3000
+                        });
+                        this.loadDataAndFields(); // Recarrega a lista
+                    },
+                    error: (error) => {
+                        console.error('Erro ao excluir cliente:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao excluir cliente',
+                            life: 3000
+                        });
+                    }
                 });
             }
         });
@@ -218,29 +248,63 @@ export class CompanyCrud implements OnInit {
 
     saveCompany() {
         this.submitted = true;
-        let _companies = this.companies();
+
         if (this.company.name?.trim()) {
+            // Prepara o objeto de requisição com os dados do formulário
+            const companyRequest: CompanyRequest = {
+                st_name: this.company.name.trim(),
+                st_document: this.company.identification ? this.company.identification.replace(/[^\d]/g, '') : '', // Remove caracteres não numéricos do CNPJ
+                st_status: this.company.status || 'ACTIVE'
+            };
+
             if (this.company.id) {
-                _companies[this.findIndexById(this.company.id)] = this.company;
-                this.companies.set([..._companies]);
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'company Updated',
-                    life: 3000
+                // Atualizar cliente existente
+                this.companyService.putClient(this.company.id, companyRequest).subscribe({
+                    next: () => {
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Sucesso',
+                            detail: 'Cliente atualizado',
+                            life: 3000
+                        });
+                        this.loadDataAndFields(); // Recarrega a lista
+                    },
+                    error: (error) => {
+                        console.error('Erro ao atualizar cliente:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao atualizar cliente',
+                            life: 3000
+                        });
+                    }
                 });
             } else {
-                this.company.id = this.createId();
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'company Created',
-                    life: 3000
+                // Criar novo cliente
+                this.companyService.postClient(companyRequest).subscribe({
+                    next: () => {
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Sucesso',
+                            detail: 'Cliente criado',
+                            life: 3000
+                        });
+                        this.loadDataAndFields(); // Recarrega a lista
+                    },
+                    error: (error) => {
+                        console.error('Erro ao criar cliente:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao criar cliente',
+                            life: 3000
+                        });
+                    }
                 });
-                this.companies.set([..._companies, this.company]);
             }
 
             this.companyDialog = false;
+            this.company = {};
         }
     }
 
