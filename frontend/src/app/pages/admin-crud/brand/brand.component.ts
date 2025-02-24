@@ -18,7 +18,11 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { Product, ProductService } from '../../service/product.service';
+import { BrandService } from '../../service/brand.service';
+import { Brand, BrandResponse } from '../../../layout/models/brand.model';
+import { CompanyService } from '../../service/company.service';
+import { CompanyResponse } from '../../../layout/models/company.model';
+import { forkJoin } from 'rxjs';
 
 interface Column {
     field: string;
@@ -55,20 +59,22 @@ interface ExportColumn {
         ConfirmDialogModule
     ],
     templateUrl: './brand.component.html',
-    providers: [MessageService, ProductService, ConfirmationService]
+    providers: [MessageService, BrandService, CompanyService, ConfirmationService]
 })
 export class BrandCrud implements OnInit {
     productDialog: boolean = false;
 
-    products = signal<Product[]>([]);
+    products = signal<Brand[]>([]);
 
-    product!: Product;
+    product!: Brand;
 
-    selectedProducts!: Product[] | null;
+    selectedProducts!: Brand[] | null;
 
     submitted: boolean = false;
 
     statuses!: any[];
+
+    clients: any[] = [];
 
     @ViewChild('dt') dt!: Table;
 
@@ -77,7 +83,8 @@ export class BrandCrud implements OnInit {
     cols!: Column[];
 
     constructor(
-        private productService: ProductService,
+        private brandService: BrandService,
+        private companyService: CompanyService,
         private messageService: MessageService,
         private confirmationService: ConfirmationService
     ) {}
@@ -86,27 +93,90 @@ export class BrandCrud implements OnInit {
         this.dt.exportCSV();
     }
 
-    ngOnInit() {
-        this.loadDemoData();
+    loadClients() {
+        this.companyService.getClients().subscribe({
+            next: (companies: CompanyResponse[]) => {
+                this.clients = companies.map(company => ({
+                    label: company.st_name,
+                    value: company.id
+                }));
+            },
+            error: (error) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: 'Erro ao carregar os clientes',
+                    life: 3000
+                });
+                console.error('Erro ao carregar clientes:', error);
+            }
+        });
     }
 
-    loadDemoData() {
-        this.productService.getProducts().then((data) => {
-            this.products.set(data);
+    ngOnInit() {
+        this.loadBrandData();
+        this.loadClients();
+    }
+
+    loadBrandData() {
+        this.companyService.getClients().subscribe({
+            next: (companies: CompanyResponse[]) => {
+                // Criar um Map de empresas para acesso rápido
+                const companyMap = new Map(companies.map(company => [company.id, company]));
+
+                // Criar um array de observables para todas as chamadas de getBrands
+                const brandRequests = companies.map(company => 
+                    this.brandService.getBrands(company.id)
+                );
+
+                // Executar todas as chamadas em paralelo
+                forkJoin(brandRequests).subscribe({
+                    next: (brandsArrays) => {
+                        // Combinar todos os arrays de marcas em um único array e remover duplicatas
+                        const uniqueBrands = new Map();
+                        brandsArrays.flat().forEach(brand => {
+                            uniqueBrands.set(brand.id_brand, {
+                                id: brand.id_brand,
+                                name: brand.st_brand,
+                                status: brand.st_status,
+                                client_name: companyMap.get(brand.id_client)?.st_name || 'Cliente não encontrado'
+                            });
+                        });
+                        
+                        const allBrands = Array.from(uniqueBrands.values());
+                        this.products.set(allBrands);
+                    },
+                    error: (error) => {
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao carregar as marcas',
+                            life: 3000
+                        });
+                        console.error('Erro ao carregar marcas:', error);
+                    }
+                });
+            },
+            error: (error) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: 'Erro ao carregar os clientes',
+                    life: 3000
+                });
+                console.error('Erro ao carregar clientes:', error);
+            }
         });
 
         this.statuses = [
-            { label: 'INSTOCK', value: 'instock' },
-            { label: 'LOWSTOCK', value: 'lowstock' },
-            { label: 'OUTOFSTOCK', value: 'outofstock' }
+            { label: 'Ativo', value: 'ACTIVE' },
+            { label: 'Inativo', value: 'INACTIVE' }
         ];
 
         this.cols = [
-            { field: 'code', header: 'Code', customExportHeader: 'Product Code' },
-            { field: 'name', header: 'Name' },
-            { field: 'image', header: 'Image' },
-            { field: 'price', header: 'Price' },
-            { field: 'category', header: 'Category' }
+            { field: 'id', header: 'ID' },
+            { field: 'name', header: 'Nome' },
+            { field: 'status', header: 'Status' }
         ];
 
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
@@ -122,25 +192,65 @@ export class BrandCrud implements OnInit {
         this.productDialog = true;
     }
 
-    editProduct(product: Product) {
-        this.product = { ...product };
-        this.productDialog = true;
-    }
-
     deleteSelectedProducts() {
         this.confirmationService.confirm({
-            message: 'Are you sure you want to delete the selected products?',
-            header: 'Confirm',
+            message: 'Tem certeza que deseja excluir as marcas selecionadas?',
+            header: 'Confirmar',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
                 this.products.set(this.products().filter((val) => !this.selectedProducts?.includes(val)));
                 this.selectedProducts = null;
                 this.messageService.add({
                     severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Products Deleted',
+                    summary: 'Sucesso',
+                    detail: 'Marcas excluídas',
                     life: 3000
                 });
+            }
+        });
+    }
+
+    editProduct(product: Brand) {
+        this.product = { ...product };
+        // Encontrar o ID do cliente baseado no client_name
+        const client = this.clients.find(c => c.label === product.client_name);
+        if (client) {
+            this.product.client_id = client.value;
+        }
+        this.productDialog = true;
+    }
+
+    deleteProduct(product: Brand) {
+        this.confirmationService.confirm({
+            message: 'Tem certeza que deseja excluir a marca ' + product.name + '?',
+            header: 'Confirmar',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+                // Encontrar o ID do cliente baseado no client_name
+                const client = this.clients.find(c => c.label === product.client_name);
+                if (client && product.id) {
+                    this.brandService.deleteBrand(client.value, product.id).subscribe({
+                        next: () => {
+                            this.messageService.add({
+                                severity: 'success',
+                                summary: 'Sucesso',
+                                detail: 'Marca excluída',
+                                life: 3000
+                            });
+                            this.loadBrandData(); // Recarregar os dados
+                            this.product = {};
+                        },
+                        error: (error) => {
+                            this.messageService.add({
+                                severity: 'error',
+                                summary: 'Erro',
+                                detail: 'Erro ao excluir marca',
+                                life: 3000
+                            });
+                            console.error('Erro ao excluir marca:', error);
+                        }
+                    });
+                }
             }
         });
     }
@@ -150,22 +260,75 @@ export class BrandCrud implements OnInit {
         this.submitted = false;
     }
 
-    deleteProduct(product: Product) {
-        this.confirmationService.confirm({
-            message: 'Are you sure you want to delete ' + product.name + '?',
-            header: 'Confirm',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                this.products.set(this.products().filter((val) => val.id !== product.id));
-                this.product = {};
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Deleted',
-                    life: 3000
+    saveProduct() {
+        this.submitted = true;
+
+        if (this.product.name?.trim() && this.product.client_id && this.product.status) {
+            if (this.product.id) {
+                const index = this.findIndexById(this.product.id);
+                if (index >= 0) {
+                    // Criar brandRequest para atualização
+                    const brandRequest = {
+                        id_client: this.product.client_id,
+                        st_brand: this.product.name,
+                        st_status: this.product.status
+                    };
+
+                    this.brandService.putBrand(this.product.client_id, this.product.id, brandRequest).subscribe({
+                        next: (response) => {
+                            this.messageService.add({
+                                severity: 'success',
+                                summary: 'Sucesso',
+                                detail: 'Marca atualizada',
+                                life: 3000
+                            });
+                            this.loadBrandData(); // Recarregar os dados
+                            this.productDialog = false;
+                            this.product = {};
+                        },
+                        error: (error) => {
+                            this.messageService.add({
+                                severity: 'error',
+                                summary: 'Erro',
+                                detail: 'Erro ao atualizar marca',
+                                life: 3000
+                            });
+                            console.error('Erro ao atualizar marca:', error);
+                        }
+                    });
+                }
+            } else {
+                // Criar nova marca
+                const brandRequest = {
+                    id_client: this.product.client_id,
+                    st_brand: this.product.name,
+                    st_status: this.product.status
+                };
+
+                this.brandService.postBrand(this.product.client_id, brandRequest).subscribe({
+                    next: (response) => {
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Sucesso',
+                            detail: 'Marca criada',
+                            life: 3000
+                        });
+                        this.loadBrandData(); // Recarregar os dados
+                        this.productDialog = false;
+                        this.product = {};
+                    },
+                    error: (error) => {
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao criar marca',
+                            life: 3000
+                        });
+                        console.error('Erro ao criar marca:', error);
+                    }
                 });
             }
-        });
+        }
     }
 
     findIndexById(id: string): number {
@@ -176,13 +339,12 @@ export class BrandCrud implements OnInit {
                 break;
             }
         }
-
         return index;
     }
 
     createId(): string {
         let id = '';
-        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         for (var i = 0; i < 5; i++) {
             id += chars.charAt(Math.floor(Math.random() * chars.length));
         }
@@ -191,44 +353,23 @@ export class BrandCrud implements OnInit {
 
     getSeverity(status: string) {
         switch (status) {
-            case 'INSTOCK':
+            case 'ACTIVE':
                 return 'success';
-            case 'LOWSTOCK':
-                return 'warn';
-            case 'OUTOFSTOCK':
+            case 'INACTIVE':
                 return 'danger';
             default:
                 return 'info';
         }
     }
 
-    saveProduct() {
-        this.submitted = true;
-        let _products = this.products();
-        if (this.product.name?.trim()) {
-            if (this.product.id) {
-                _products[this.findIndexById(this.product.id)] = this.product;
-                this.products.set([..._products]);
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Updated',
-                    life: 3000
-                });
-            } else {
-                this.product.id = this.createId();
-                this.product.image = 'product-placeholder.svg';
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Created',
-                    life: 3000
-                });
-                this.products.set([..._products, this.product]);
-            }
-
-            this.productDialog = false;
-            this.product = {};
+    getStatusLabel(status: string) {
+        switch (status) {
+            case 'ACTIVE':
+                return 'Ativo';
+            case 'INACTIVE':
+                return 'Inativo';
+            default:
+                return status;
         }
     }
 }

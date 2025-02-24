@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environment/environment';
-import { CompanyResponse, Company, CompanyRequest } from '../../layout/models/company.model';
+import { BrandResponse, Brand, BrandRequest } from '../../layout/models/brand.model';
 
 @Injectable({
   providedIn: 'root'
 })
-export class CompanyService {
+export class BrandService {
   private readonly baseUrl = `${environment.api_url}/cliente`;
   private readonly headers: HttpHeaders;
 
@@ -21,24 +21,29 @@ export class CompanyService {
     });
   }
 
-  getClients(): Observable<CompanyResponse[]> {
-    return this.http.get<CompanyResponse[]>(this.baseUrl, { headers: this.headers });
+  getBrands(clientId: string): Observable<BrandResponse[]> {
+    const url = `${this.baseUrl}/${clientId}/marca`;
+    return this.http.get<BrandResponse[]>(url, { headers: this.headers });
   }
 
-  getClient(id: string): Observable<CompanyResponse> {
-    return this.http.get<CompanyResponse>(`${this.baseUrl}/${id}`, { headers: this.headers });
+  getBrand(clientId: string, id: string): Observable<BrandResponse> {
+    const url = `${this.baseUrl}/${clientId}/marca/${id}`;
+    return this.http.get<BrandResponse>(url, { headers: this.headers });
   }
 
-  postClient(client: CompanyRequest): Observable<CompanyResponse> {
-    return this.http.post<CompanyResponse>(`${this.baseUrl}`, client, { headers: this.headers });
+  postBrand(clientId: string, brand: BrandRequest): Observable<BrandResponse> {
+    const url = `${this.baseUrl}/${clientId}/marca`;
+    return this.http.post<BrandResponse>(url, brand, { headers: this.headers });
   }  
 
-  putClient(id: string, client: CompanyRequest): Observable<CompanyResponse> {
-    return this.http.put<CompanyResponse>(`${this.baseUrl}/${id}`, client, { headers: this.headers });
+  putBrand(clientId: string, id: string, brand: BrandRequest): Observable<BrandResponse> {
+    const url = `${this.baseUrl}/${clientId}/marca/${id}`;
+    return this.http.put<BrandResponse>(url, brand, { headers: this.headers });
   }
 
-  deleteClient(client: Company): Observable<CompanyResponse[]> {
-    return this.http.delete<CompanyResponse[]>(`${this.baseUrl}/${client.id}`, { headers: this.headers });
+  deleteBrand(clientId: string, id: string): Observable<BrandResponse[]> {
+    const url = `${this.baseUrl}/${clientId}/marca/${id}`;
+    return this.http.delete<BrandResponse[]>(url, { headers: this.headers });
   }
 
 }
