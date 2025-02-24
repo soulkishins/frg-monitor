@@ -71,6 +71,23 @@ export class CompanyCrud implements OnInit {
 
     statuses!: any[];
 
+    createStatuses: any[] = [
+        { label: 'Ativo', value: 'ACTIVE' },
+        { label: 'Lead', value: 'LEAD' }
+    ];
+
+    editStatuses: any[] = [
+        { label: 'Ativo', value: 'ACTIVE' },
+        { label: 'Inativo', value: 'INACTIVE' },
+        { label: 'Lead', value: 'LEAD' }
+    ];
+
+    isValidCNPJ: boolean = true;
+
+    isDuplicatedCNPJ: boolean = false;
+
+    isEditing: boolean = false;
+
     @ViewChild('dt') dt!: Table;
 
     exportColumns!: ExportColumn[];
@@ -115,12 +132,6 @@ export class CompanyCrud implements OnInit {
             }
         });
 
-        this.statuses = [
-            { label: 'Ativo', value: 'ACTIVE' },
-            { label: 'Inativo', value: 'INACTIVE' },
-            { label: 'Lead', value: 'LEAD' }
-        ];
-
         this.cols = [
             { field: 'id', header: 'ID', customExportHeader: 'ID da Empresa' },
             { field: 'name', header: 'Razão Social' },
@@ -136,13 +147,24 @@ export class CompanyCrud implements OnInit {
     }
 
     openNew() {
-        this.company = {};
+        this.company = {
+            status: 'ACTIVE'
+        };
         this.submitted = false;
+        this.isValidCNPJ = true;
+        this.isDuplicatedCNPJ = false;
+        this.isEditing = false;
+        this.statuses = this.createStatuses;
         this.companyDialog = true;
     }
 
     editCompany(company: Company) {
         this.company = { ...company };
+        this.isValidCNPJ = true;
+        this.isDuplicatedCNPJ = false;
+        this.submitted = false;
+        this.isEditing = true;
+        this.statuses = this.editStatuses;
         this.companyDialog = true;
     }
 
@@ -179,22 +201,29 @@ export class CompanyCrud implements OnInit {
             acceptLabel: 'Sim',
             rejectLabel: 'Não',
             accept: () => {
-                this.companyService.deleteClient(company).subscribe({
+                // Prepara o objeto de requisição mantendo os dados atuais e alterando apenas o status
+                const companyRequest: CompanyRequest = {
+                    st_name: company.name!,
+                    st_document: company.identification!.replace(/[^\d]/g, ''),
+                    st_status: 'INACTIVE'
+                };
+
+                this.companyService.putClient(company.id!, companyRequest).subscribe({
                     next: () => {
                         this.messageService.add({
                             severity: 'success',
                             summary: 'Sucesso',
-                            detail: 'Cliente excluído',
+                            detail: 'Cliente inativado com sucesso',
                             life: 3000
                         });
                         this.loadDataAndFields(); // Recarrega a lista
                     },
                     error: (error) => {
-                        console.error('Erro ao excluir cliente:', error);
+                        console.error('Erro ao inativar cliente:', error);
                         this.messageService.add({
                             severity: 'error',
                             summary: 'Erro',
-                            detail: 'Erro ao excluir cliente',
+                            detail: 'Erro ao inativar cliente',
                             life: 3000
                         });
                     }
@@ -246,66 +275,168 @@ export class CompanyCrud implements OnInit {
         }
     }
 
+    validateCNPJ(cnpj: string): boolean {
+        // Remove caracteres não numéricos
+        cnpj = cnpj.replace(/[^\d]/g, '');
+
+        // Verifica se tem 14 dígitos
+        if (cnpj.length !== 14) return false;
+
+        // Verifica se todos os dígitos são iguais
+        if (/^(\d)\1+$/.test(cnpj)) return false;
+
+        // Validação dos dígitos verificadores
+        let tamanho = cnpj.length - 2;
+        let numeros = cnpj.substring(0, tamanho);
+        const digitos = cnpj.substring(tamanho);
+        let soma = 0;
+        let pos = tamanho - 7;
+
+        // Primeiro dígito verificador
+        for (let i = tamanho; i >= 1; i--) {
+            soma += parseInt(numeros.charAt(tamanho - i)) * pos--;
+            if (pos < 2) pos = 9;
+        }
+
+        let resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+        if (resultado !== parseInt(digitos.charAt(0))) return false;
+
+        // Segundo dígito verificador
+        tamanho = tamanho + 1;
+        numeros = cnpj.substring(0, tamanho);
+        soma = 0;
+        pos = tamanho - 7;
+
+        for (let i = tamanho; i >= 1; i--) {
+            soma += parseInt(numeros.charAt(tamanho - i)) * pos--;
+            if (pos < 2) pos = 9;
+        }
+
+        resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+        if (resultado !== parseInt(digitos.charAt(1))) return false;
+
+        return true;
+    }
+
+    validateCompanyIdentification() {
+        if (this.company.identification) {
+            this.isValidCNPJ = this.validateCNPJ(this.company.identification);
+            
+            // Verifica se o CNPJ já existe
+            if (this.isValidCNPJ && !this.isEditing) {
+                const normalizedCNPJ = this.company.identification.replace(/[^\d]/g, '');
+                this.isDuplicatedCNPJ = this.companies().some(comp => 
+                    comp.identification?.replace(/[^\d]/g, '') === normalizedCNPJ
+                );
+            } else {
+                this.isDuplicatedCNPJ = false;
+            }
+        } else {
+            this.isValidCNPJ = true;
+            this.isDuplicatedCNPJ = false;
+        }
+    }
+
     saveCompany() {
         this.submitted = true;
 
-        if (this.company.name?.trim()) {
-            // Prepara o objeto de requisição com os dados do formulário
-            const companyRequest: CompanyRequest = {
-                st_name: this.company.name.trim(),
-                st_document: this.company.identification ? this.company.identification.replace(/[^\d]/g, '') : '', // Remove caracteres não numéricos do CNPJ
-                st_status: this.company.status || 'ACTIVE'
-            };
-
-            if (this.company.id) {
-                // Atualizar cliente existente
-                this.companyService.putClient(this.company.id, companyRequest).subscribe({
-                    next: () => {
-                        this.messageService.add({
-                            severity: 'success',
-                            summary: 'Sucesso',
-                            detail: 'Cliente atualizado',
-                            life: 3000
-                        });
-                        this.loadDataAndFields(); // Recarrega a lista
-                    },
-                    error: (error) => {
-                        console.error('Erro ao atualizar cliente:', error);
-                        this.messageService.add({
-                            severity: 'error',
-                            summary: 'Erro',
-                            detail: 'Erro ao atualizar cliente',
-                            life: 3000
-                        });
-                    }
-                });
-            } else {
-                // Criar novo cliente
-                this.companyService.postClient(companyRequest).subscribe({
-                    next: () => {
-                        this.messageService.add({
-                            severity: 'success',
-                            summary: 'Sucesso',
-                            detail: 'Cliente criado',
-                            life: 3000
-                        });
-                        this.loadDataAndFields(); // Recarrega a lista
-                    },
-                    error: (error) => {
-                        console.error('Erro ao criar cliente:', error);
-                        this.messageService.add({
-                            severity: 'error',
-                            summary: 'Erro',
-                            detail: 'Erro ao criar cliente',
-                            life: 3000
-                        });
-                    }
-                });
-            }
-
-            this.companyDialog = false;
-            this.company = {};
+        if (!this.company.name?.trim()) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Erro',
+                detail: 'Nome é obrigatório',
+                life: 3000
+            });
+            return;
         }
+
+        if (!this.company.identification) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Erro',
+                detail: 'CNPJ é obrigatório',
+                life: 3000
+            });
+            return;
+        }
+
+        // Valida CNPJ
+        if (!this.validateCNPJ(this.company.identification)) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Erro',
+                detail: 'CNPJ inválido',
+                life: 3000
+            });
+            return;
+        }
+
+        // Verifica CNPJ duplicado
+        if (!this.isEditing && this.isDuplicatedCNPJ) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Erro',
+                detail: 'CNPJ já cadastrado',
+                life: 3000
+            });
+            return;
+        }
+
+        // Prepara o objeto de requisição com os dados do formulário
+        const companyRequest: CompanyRequest = {
+            st_name: this.company.name.trim(),
+            st_document: this.company.identification.replace(/[^\d]/g, ''), // Remove caracteres não numéricos do CNPJ
+            st_status: this.company.status || 'ACTIVE'
+        };
+
+        if (this.company.id) {
+            // Atualizar cliente existente
+            this.companyService.putClient(this.company.id, companyRequest).subscribe({
+                next: () => {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Sucesso',
+                        detail: 'Cliente atualizado',
+                        life: 3000
+                    });
+                    this.loadDataAndFields(); // Recarrega a lista
+                },
+                error: (error) => {
+                    console.error('Erro ao atualizar cliente:', error);
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Erro',
+                        detail: 'Erro ao atualizar cliente',
+                        life: 3000
+                    });
+                }
+            });
+        } else {
+            // Criar novo cliente
+            this.companyService.postClient(companyRequest).subscribe({
+                next: () => {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Sucesso',
+                        detail: 'Cliente criado',
+                        life: 3000
+                    });
+                    this.loadDataAndFields(); // Recarrega a lista
+                },
+                error: (error) => {
+                    console.error('Erro ao criar cliente:', error);
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Erro',
+                        detail: 'Erro ao criar cliente',
+                        life: 3000
+                    });
+                }
+            });
+        }
+
+        this.companyDialog = false;
+        this.company = {};
     }
 
     generateRandomClients(): Company[] {

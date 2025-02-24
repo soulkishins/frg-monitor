@@ -81,13 +81,15 @@
             <div>
                 <label for="name" class="block font-bold mb-3">Nome</label>
                 <input type="text" pInputText id="name" [(ngModel)]="company.name" required autofocus fluid />
-                <small class="text-red-500" *ngIf="submitted && !company.name">Name is required.</small>
+                <small class="text-red-500" *ngIf="submitted && !company.name">Nome é obrigatório.</small>
             </div>
 
             <div>
                 <label for="identication" class="block font-bold mb-3">CNPJ</label>
-                <input type="text" pInputText id="identication" [(ngModel)]="company.identification" required autofocus fluid />
-                <small class="text-red-500" *ngIf="submitted && !company.identification">Name is required.</small>
+                <input type="text" pInputText id="identication" [(ngModel)]="company.identification" (ngModelChange)="validateCompanyIdentification()" [disabled]="isEditing" required autofocus fluid />
+                <small class="text-red-500" *ngIf="submitted && !company.identification">CNPJ é obrigatório</small>
+                <small class="text-red-500" *ngIf="submitted && company.identification && !isValidCNPJ">CNPJ inválido</small>
+                <small class="text-red-500" *ngIf="submitted && company.identification && isValidCNPJ && isDuplicatedCNPJ">CNPJ já cadastrado</small>
             </div>
         </div>
     </ng-template>
