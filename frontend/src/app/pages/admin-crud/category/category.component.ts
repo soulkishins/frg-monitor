@@ -18,7 +18,9 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { Product, ProductService } from '../../service/product.service';
+import { DropdownModule } from 'primeng/dropdown';
+import { CategoryService } from '../../service/category.service';
+import { CategoryResponse } from '../../../layout/models/category.model';
 
 interface Column {
     field: string;
@@ -52,23 +54,27 @@ interface ExportColumn {
         TagModule,
         InputIconModule,
         IconFieldModule,
-        ConfirmDialogModule
+        ConfirmDialogModule,
+        DropdownModule
     ],
     templateUrl: './category.component.html',
-    providers: [MessageService, ProductService, ConfirmationService]
+    providers: [MessageService, CategoryService, ConfirmationService]
 })
 export class CategoryCrud implements OnInit {
-    productDialog: boolean = false;
+    categoryDialog: boolean = false;
 
-    products = signal<Product[]>([]);
+    categories = signal<CategoryResponse[]>([]);
 
-    product!: Product;
+    category!: CategoryResponse;
 
-    selectedProducts!: Product[] | null;
+    selectedCategories!: CategoryResponse[] | null;
 
     submitted: boolean = false;
 
-    statuses!: any[];
+    statusOptions = [
+        { label: 'Ativo', value: 'active' },
+        { label: 'Inativo', value: 'inactive' }
+    ];
 
     @ViewChild('dt') dt!: Table;
 
@@ -77,7 +83,7 @@ export class CategoryCrud implements OnInit {
     cols!: Column[];
 
     constructor(
-        private productService: ProductService,
+        private categoryService: CategoryService,
         private messageService: MessageService,
         private confirmationService: ConfirmationService
     ) {}
@@ -87,26 +93,29 @@ export class CategoryCrud implements OnInit {
     }
 
     ngOnInit() {
-        this.loadDemoData();
+        this.loadCategoryData();
     }
 
-    loadDemoData() {
-        this.productService.getProducts().then((data) => {
-            this.products.set(data);
-        });
-
-        this.statuses = [
-            { label: 'INSTOCK', value: 'instock' },
-            { label: 'LOWSTOCK', value: 'lowstock' },
-            { label: 'OUTOFSTOCK', value: 'outofstock' }
-        ];
+    loadCategoryData() {
+        this.categoryService.getCategories().subscribe(
+            (data) => {
+                this.categories.set(data);
+            },
+            (error) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: 'Erro ao carregar categorias',
+                    life: 3000
+                });
+            }
+        );
 
         this.cols = [
-            { field: 'code', header: 'Code', customExportHeader: 'Product Code' },
-            { field: 'name', header: 'Name' },
-            { field: 'image', header: 'Image' },
-            { field: 'price', header: 'Price' },
-            { field: 'category', header: 'Category' }
+            { field: 'st_category', header: 'Nome' },
+            { field: 'st_status', header: 'Status' },
+            { field: 'dt_created', header: 'Data Criação' },
+            { field: 'st_created_by', header: 'Criado por' }
         ];
 
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
@@ -117,66 +126,96 @@ export class CategoryCrud implements OnInit {
     }
 
     openNew() {
-        this.product = {};
+        this.category = {} as CategoryResponse;
         this.submitted = false;
-        this.productDialog = true;
+        this.categoryDialog = true;
     }
 
-    editProduct(product: Product) {
-        this.product = { ...product };
-        this.productDialog = true;
+    editCategory(category: CategoryResponse) {
+        this.category = { ...category };
+        this.categoryDialog = true;
     }
 
-    deleteSelectedProducts() {
+    deleteSelectedCategories() {
         this.confirmationService.confirm({
-            message: 'Are you sure you want to delete the selected products?',
-            header: 'Confirm',
+            message: 'Tem certeza que deseja excluir as categorias selecionadas?',
+            header: 'Confirmar',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.products.set(this.products().filter((val) => !this.selectedProducts?.includes(val)));
-                this.selectedProducts = null;
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Products Deleted',
-                    life: 3000
-                });
+                if (this.selectedCategories) {
+                    // Criar um array de Promises para todas as exclusões
+                    const deletePromises = this.selectedCategories.map(category => 
+                        this.categoryService.deleteCategory(category.id_category).toPromise()
+                    );
+
+                    // Executar todas as exclusões em paralelo
+                    Promise.all(deletePromises)
+                        .then(() => {
+                            this.categories.set(this.categories().filter((val) => !this.selectedCategories?.includes(val)));
+                            this.selectedCategories = null;
+                            this.messageService.add({
+                                severity: 'success',
+                                summary: 'Sucesso',
+                                detail: 'Categorias Excluídas',
+                                life: 3000
+                            });
+                        })
+                        .catch(() => {
+                            this.messageService.add({
+                                severity: 'error',
+                                summary: 'Erro',
+                                detail: 'Erro ao excluir categorias',
+                                life: 3000
+                            });
+                        });
+                }
             }
         });
     }
 
     hideDialog() {
-        this.productDialog = false;
+        this.categoryDialog = false;
         this.submitted = false;
     }
 
-    deleteProduct(product: Product) {
+    deleteCategory(category: CategoryResponse) {
         this.confirmationService.confirm({
-            message: 'Are you sure you want to delete ' + product.name + '?',
-            header: 'Confirm',
+            message: 'Tem certeza que deseja excluir a categoria ' + category.st_category + '?',
+            header: 'Confirmar',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.products.set(this.products().filter((val) => val.id !== product.id));
-                this.product = {};
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Deleted',
-                    life: 3000
-                });
+                this.categoryService.deleteCategory(category.id_category).subscribe(
+                    (response) => {
+                        this.categories.set(this.categories().filter((val) => val.id_category !== category.id_category));
+                        this.category = {} as CategoryResponse;
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Sucesso',
+                            detail: 'Categoria Excluída',
+                            life: 3000
+                        });
+                    },
+                    (error) => {
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao excluir categoria',
+                            life: 3000
+                        });
+                    }
+                );
             }
         });
     }
 
     findIndexById(id: string): number {
         let index = -1;
-        for (let i = 0; i < this.products().length; i++) {
-            if (this.products()[i].id === id) {
+        for (let i = 0; i < this.categories().length; i++) {
+            if (this.categories()[i].id_category === id) {
                 index = i;
                 break;
             }
         }
-
         return index;
     }
 
@@ -189,46 +228,68 @@ export class CategoryCrud implements OnInit {
         return id;
     }
 
-    getSeverity(status: string) {
-        switch (status) {
-            case 'INSTOCK':
-                return 'success';
-            case 'LOWSTOCK':
-                return 'warn';
-            case 'OUTOFSTOCK':
-                return 'danger';
-            default:
-                return 'info';
-        }
-    }
-
-    saveProduct() {
+    saveCategory() {
         this.submitted = true;
-        let _products = this.products();
-        if (this.product.name?.trim()) {
-            if (this.product.id) {
-                _products[this.findIndexById(this.product.id)] = this.product;
-                this.products.set([..._products]);
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Updated',
-                    life: 3000
-                });
-            } else {
-                this.product.id = this.createId();
-                this.product.image = 'product-placeholder.svg';
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Created',
-                    life: 3000
-                });
-                this.products.set([..._products, this.product]);
-            }
+        
+        if (this.category.st_category?.trim() && this.category.st_status) {
+            const categoryRequest = {
+                st_category: this.category.st_category,
+                st_status: this.category.st_status
+            };
 
-            this.productDialog = false;
-            this.product = {};
+            if (this.category.id_category) {
+                // Atualizar categoria existente
+                this.categoryService.putCategory(this.category.id_category, categoryRequest).subscribe(
+                    (response) => {
+                        const index = this.findIndexById(this.category.id_category);
+                        const _categories = this.categories();
+                        _categories[index] = response;
+                        this.categories.set([..._categories]);
+
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Sucesso',
+                            detail: 'Categoria Atualizada',
+                            life: 3000
+                        });
+                        this.categoryDialog = false;
+                        this.category = {} as CategoryResponse;
+                    },
+                    (error) => {
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao atualizar categoria',
+                            life: 3000
+                        });
+                    }
+                );
+            } else {
+                // Criar nova categoria
+                this.categoryService.postCategory(categoryRequest).subscribe(
+                    (response) => {
+                        const _categories = this.categories();
+                        this.categories.set([..._categories, response]);
+
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Sucesso',
+                            detail: 'Categoria Criada',
+                            life: 3000
+                        });
+                        this.categoryDialog = false;
+                        this.category = {} as CategoryResponse;
+                    },
+                    (error) => {
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao criar categoria',
+                            life: 3000
+                        });
+                    }
+                );
+            }
         }
     }
 }

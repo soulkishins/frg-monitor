@@ -19,6 +19,12 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { Product, ProductService } from '../../service/product.service';
+import { CategoryService } from '../../service/category.service';
+import { CategoryResponse } from '../../../layout/models/category.model';
+import { SubCategoryService } from '../../service/sub-category.service';
+import { SubCategoryResponse } from '../../../layout/models/sub-category.model';
+import { forkJoin } from 'rxjs';
+import { SubCategoryRequest } from '../../../layout/models/sub-category.model';
 
 interface Column {
     field: string;
@@ -55,20 +61,20 @@ interface ExportColumn {
         ConfirmDialogModule
     ],
     templateUrl: './subcategory.component.html',
-    providers: [MessageService, ProductService, ConfirmationService]
+    providers: [MessageService, ProductService, ConfirmationService, CategoryService, SubCategoryService]
 })
 export class SubCategoryCrud implements OnInit {
     productDialog: boolean = false;
+    subCategoryDialog: boolean = false;
 
     products = signal<Product[]>([]);
-
     product!: Product;
-
     selectedProducts!: Product[] | null;
-
     submitted: boolean = false;
-
-    statuses!: any[];
+    statuses: any[] = [
+        { label: 'ATIVO', value: 'ATIVO' },
+        { label: 'INATIVO', value: 'INATIVO' }
+    ];
 
     @ViewChild('dt') dt!: Table;
 
@@ -76,8 +82,16 @@ export class SubCategoryCrud implements OnInit {
 
     cols!: Column[];
 
+    categories = signal<CategoryResponse[]>([]);
+    subCategories = signal<SubCategoryResponse[]>([]);
+    selectedSubCategories!: SubCategoryResponse[] | null;
+
+    subCategory: SubCategoryResponse = {} as SubCategoryResponse;
+
     constructor(
         private productService: ProductService,
+        private categoryService: CategoryService,
+        private subCategoryService: SubCategoryService,
         private messageService: MessageService,
         private confirmationService: ConfirmationService
     ) {}
@@ -87,26 +101,47 @@ export class SubCategoryCrud implements OnInit {
     }
 
     ngOnInit() {
-        this.loadDemoData();
+        this.loadSubCategoryData();
     }
 
-    loadDemoData() {
-        this.productService.getProducts().then((data) => {
-            this.products.set(data);
-        });
-
-        this.statuses = [
-            { label: 'INSTOCK', value: 'instock' },
-            { label: 'LOWSTOCK', value: 'lowstock' },
-            { label: 'OUTOFSTOCK', value: 'outofstock' }
-        ];
+    loadSubCategoryData() {
+        this.categoryService.getCategories().subscribe(
+            (data) => {
+                this.categories.set(data);
+                
+                // Para cada categoria, buscar suas subcategorias
+                data.forEach(category => {
+                    this.subCategoryService.getSubCategories(category.id_category).subscribe(
+                        (subCategories) => {
+                            const currentSubCategories = this.subCategories();
+                            this.subCategories.set([...currentSubCategories, ...subCategories]);
+                        },
+                        (error) => {
+                            this.messageService.add({
+                                severity: 'error',
+                                summary: 'Erro',
+                                detail: `Erro ao carregar subcategorias da categoria ${category.st_category}`,
+                                life: 3000
+                            });
+                        }
+                    );
+                });
+            },
+            (error) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: 'Erro ao carregar categorias',
+                    life: 3000
+                });
+            }
+        );
 
         this.cols = [
-            { field: 'code', header: 'Code', customExportHeader: 'Product Code' },
-            { field: 'name', header: 'Name' },
-            { field: 'image', header: 'Image' },
-            { field: 'price', header: 'Price' },
-            { field: 'category', header: 'Category' }
+            { field: 'id_subcategory', header: 'ID' },
+            { field: 'id_category', header: 'Categoria' },
+            { field: 'st_subcategory', header: 'Descrição' },
+            { field: 'st_status', header: 'Status' }
         ];
 
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
@@ -117,9 +152,9 @@ export class SubCategoryCrud implements OnInit {
     }
 
     openNew() {
-        this.product = {};
+        this.subCategory = {} as SubCategoryResponse;
         this.submitted = false;
-        this.productDialog = true;
+        this.subCategoryDialog = true;
     }
 
     editProduct(product: Product) {
@@ -146,7 +181,7 @@ export class SubCategoryCrud implements OnInit {
     }
 
     hideDialog() {
-        this.productDialog = false;
+        this.subCategoryDialog = false;
         this.submitted = false;
     }
 
@@ -189,13 +224,11 @@ export class SubCategoryCrud implements OnInit {
         return id;
     }
 
-    getSeverity(status: string) {
+    getSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined {
         switch (status) {
-            case 'INSTOCK':
+            case 'ATIVO':
                 return 'success';
-            case 'LOWSTOCK':
-                return 'warn';
-            case 'OUTOFSTOCK':
+            case 'INATIVO':
                 return 'danger';
             default:
                 return 'info';
@@ -229,6 +262,163 @@ export class SubCategoryCrud implements OnInit {
 
             this.productDialog = false;
             this.product = {};
+        }
+    }
+
+    getCategoryName(categoryId: string): string {
+        const category = this.categories().find(cat => cat.id_category === categoryId);
+        return category ? category.st_category : categoryId;
+    }
+
+    editSubCategory(subCategory: SubCategoryResponse) {
+        this.subCategory = { ...subCategory };
+        this.subCategoryDialog = true;
+    }
+
+    deleteSubCategory(subCategory: SubCategoryResponse) {
+        this.confirmationService.confirm({
+            message: `Tem certeza que deseja excluir a subcategoria ${subCategory.st_subcategory}?`,
+            header: 'Confirmar',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+                this.subCategoryService.deleteSubCategory(subCategory.id_category, subCategory.id_subcategory).subscribe(
+                    () => {
+                        this.subCategories.set(this.subCategories().filter(sc => sc.id_subcategory !== subCategory.id_subcategory));
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Sucesso',
+                            detail: 'Subcategoria excluída com sucesso',
+                            life: 3000
+                        });
+                    },
+                    (error) => {
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao excluir subcategoria',
+                            life: 3000
+                        });
+                    }
+                );
+            }
+        });
+    }
+
+    deleteSelectedSubCategories() {
+        this.confirmationService.confirm({
+            message: 'Tem certeza que deseja excluir as subcategorias selecionadas?',
+            header: 'Confirmar',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+                if (this.selectedSubCategories) {
+                    const deletePromises = this.selectedSubCategories.map(subCategory =>
+                        this.subCategoryService.deleteSubCategory(subCategory.id_category, subCategory.id_subcategory)
+                    );
+
+                    // Executar todas as exclusões em paralelo
+                    forkJoin(deletePromises).subscribe(
+                        () => {
+                            this.subCategories.set(
+                                this.subCategories().filter(
+                                    sc => !this.selectedSubCategories?.some(
+                                        selected => selected.id_subcategory === sc.id_subcategory
+                                    )
+                                )
+                            );
+                            this.selectedSubCategories = null;
+                            this.messageService.add({
+                                severity: 'success',
+                                summary: 'Sucesso',
+                                detail: 'Subcategorias excluídas com sucesso',
+                                life: 3000
+                            });
+                        },
+                        (error) => {
+                            this.messageService.add({
+                                severity: 'error',
+                                summary: 'Erro',
+                                detail: 'Erro ao excluir subcategorias',
+                                life: 3000
+                            });
+                        }
+                    );
+                }
+            }
+        });
+    }
+
+    saveSubCategory() {
+        this.submitted = true;
+
+        if (this.subCategory.st_subcategory?.trim() && this.subCategory.id_category && this.subCategory.st_status) {
+            const subCategoryRequest: SubCategoryRequest = {
+                id_category: this.subCategory.id_category,
+                st_subcategory: this.subCategory.st_subcategory,
+                st_status: this.subCategory.st_status
+            };
+
+            if (this.subCategory.id_subcategory) {
+                // Atualizar subcategoria existente
+                this.subCategoryService.putSubCategory(
+                    this.subCategory.id_category,
+                    this.subCategory.id_subcategory,
+                    subCategoryRequest
+                ).subscribe(
+                    (response) => {
+                        const index = this.subCategories().findIndex(
+                            sc => sc.id_subcategory === this.subCategory.id_subcategory
+                        );
+                        if (index > -1) {
+                            const updatedSubCategories = this.subCategories();
+                            updatedSubCategories[index] = response;
+                            this.subCategories.set([...updatedSubCategories]);
+                        }
+
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Sucesso',
+                            detail: 'Subcategoria atualizada com sucesso',
+                            life: 3000
+                        });
+                        this.subCategoryDialog = false;
+                        this.subCategory = {} as SubCategoryResponse;
+                    },
+                    (error) => {
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao atualizar subcategoria',
+                            life: 3000
+                        });
+                    }
+                );
+            } else {
+                // Criar nova subcategoria
+                this.subCategoryService.postSubCategory(
+                    this.subCategory.id_category,
+                    subCategoryRequest
+                ).subscribe(
+                    (response) => {
+                        this.subCategories.set([...this.subCategories(), response]);
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Sucesso',
+                            detail: 'Subcategoria criada com sucesso',
+                            life: 3000
+                        });
+                        this.subCategoryDialog = false;
+                        this.subCategory = {} as SubCategoryResponse;
+                    },
+                    (error) => {
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao criar subcategoria',
+                            life: 3000
+                        });
+                    }
+                );
+            }
         }
     }
 }
