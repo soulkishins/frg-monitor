@@ -18,7 +18,7 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { Product, ProductService } from '../../service/product.service';
+import { Product, ProductService } from '../../old/service/product.service';
 import { CategoryService } from '../../service/category.service';
 import { CategoryResponse } from '../../../layout/models/category.model';
 import { SubCategoryService } from '../../service/sub-category.service';

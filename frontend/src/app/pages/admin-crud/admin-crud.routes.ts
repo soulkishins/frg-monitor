@@ -1,18 +1,12 @@
 import { Routes } from '@angular/router';
-import { Crud } from '../old/crud/crud';
-import { CategoryCrud } from './category/category.component';
-import { CompanyCrud } from './company/company.component';
-import { ProductCrud } from './products/product.component';
-import { SubCategoryCrud } from './subcategory/subcategory.component';
-import { UserCrud } from './users/user.component';
-import { BrandCrud } from './brand/brand.component';
+import { canMatchGuard } from '../service/auth.guard';
 
 export default [
-    { path: 'categoria', component: CategoryCrud },
-    { path: 'subcategoria', component: SubCategoryCrud },
-    { path: 'cliente', component: CompanyCrud },
-    { path: 'marca', component: BrandCrud },
-    { path: 'produto', component: ProductCrud },
-    { path: 'usuario', component: UserCrud },
+    { path: 'categoria', loadComponent: import('./category/category.component').then(c => c.CategoryCrud), canMatch: canMatchGuard },
+    { path: 'subcategoria', loadComponent: import('./subcategory/subcategory.component').then(c => c.SubCategoryCrud), canMatch: canMatchGuard },
+    { path: 'cliente', loadComponent: import('./company/company.component').then(c => c.CompanyCrud), canMatch: canMatchGuard },
+    { path: 'marca', loadComponent: import('./brand/brand.component').then(c => c.BrandCrud), canMatch: canMatchGuard },
+    { path: 'produto', loadComponent: import('./products/product.component').then(c => c.ProductCrud), canMatch: canMatchGuard },
+    { path: 'usuario', loadComponent: import('./users/user.component').then(c => c.UserCrud), canMatch: canMatchGuard },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

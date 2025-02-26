@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
-import { Crud } from '../old/crud/crud';
 
 export default [
-    { path: 'anuncio', component: Crud },
+    { path: 'anuncio', loadComponent: import('../old/crud/crud').then(c => c.Crud) },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;
