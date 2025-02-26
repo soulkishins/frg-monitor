@@ -6,6 +6,8 @@ import { CognitoUserSession } from 'amazon-cognito-identity-js';
 import { CognitoService } from './cognito.service';
 
 export const canMatchGuard: CanMatchFn = (route, segments) => {
+  console.log('Guard | canMatchGuard Initiate');
+
   const router = inject(Router);
   const cognitoService = inject(CognitoService);
 
@@ -18,6 +20,8 @@ export const canMatchGuard: CanMatchFn = (route, segments) => {
 };
 
 export const canActivateGuard: CanActivateFn = (route, state) => {
+  console.log('Guard | canActivateGuard Initiate');
+
   const router = inject(Router);
   const cognitoService = inject(CognitoService);
 
@@ -30,6 +34,13 @@ export const canActivateGuard: CanActivateFn = (route, state) => {
 };
 
 function thenSession(current: CognitoUserSession, cognitoService: CognitoService, router: Router, resolve: any) {
+  console.log('Guard | Has Current Session', current != null && current != undefined);
+  if (!current) {
+    router.navigate(['/auth/login']);
+    resolve(false);
+    return;
+  }
+  console.log('Guard | Validate Current Session', current.isValid);
   if (current.isValid()) {
     resolve(true);
     return;
@@ -41,6 +52,7 @@ function thenSession(current: CognitoUserSession, cognitoService: CognitoService
 }
 
 function thenRefresh(session: CognitoUserSession, router: Router): boolean {
+  console.log('Guard | Validate Renew Session', session.isValid);
   if (!session.isValid()) {
     router.navigate(['/auth/login']);
     return false;
