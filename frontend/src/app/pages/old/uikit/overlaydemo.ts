@@ -10,7 +10,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 import { TooltipModule } from 'primeng/tooltip';
 import { TableModule } from 'primeng/table';
-import { ProductOld, ProductServiceOld } from '../../service/product-old.service';
+import { Product, ProductService } from '../service/product.service';
 
 @Component({
     selector: 'app-overlay-demo',
@@ -133,14 +133,14 @@ import { ProductOld, ProductServiceOld } from '../../service/product-old.service
             </div>
         </div>
     </div>`,
-    providers: [ConfirmationService, MessageService, ProductServiceOld]
+    providers: [ConfirmationService, MessageService, ProductService]
 })
 export class OverlayDemo implements OnInit {
     images: any[] = [];
 
     display: boolean = false;
 
-    products: ProductOld[] = [];
+    products: Product[] = [];
 
     visibleLeft: boolean = false;
 
@@ -154,10 +154,10 @@ export class OverlayDemo implements OnInit {
 
     displayConfirmation: boolean = false;
 
-    selectedProduct!: ProductOld;
+    selectedProduct!: Product;
 
     constructor(
-        private productService: ProductServiceOld,
+        private productService: ProductService,
         private confirmationService: ConfirmationService,
         private messageService: MessageService
     ) {}

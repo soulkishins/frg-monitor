@@ -17,7 +17,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { TagModule } from 'primeng/tag';
 import { Customer, CustomerService, Representative } from '../service/customer.service';
-import { ProductOld, ProductServiceOld } from '../../service/product-old.service';
+import { Product, ProductService } from '../service/product.service';
 
 interface expandedRows {
     [key: string]: boolean;
@@ -403,7 +403,7 @@ interface expandedRows {
             font-weight: bold;
         }
     `,
-    providers: [ConfirmationService, MessageService, CustomerService, ProductServiceOld]
+    providers: [ConfirmationService, MessageService, CustomerService, ProductService]
 })
 export class TableDemo implements OnInit {
     customers1: Customer[] = [];
@@ -420,7 +420,7 @@ export class TableDemo implements OnInit {
 
     statuses: any[] = [];
 
-    products: ProductOld[] = [];
+    products: Product[] = [];
 
     rowGroupMetadata: any;
 
@@ -438,7 +438,7 @@ export class TableDemo implements OnInit {
 
     constructor(
         private customerService: CustomerService,
-        private productService: ProductServiceOld
+        private productService: ProductService
     ) {}
 
     ngOnInit() {

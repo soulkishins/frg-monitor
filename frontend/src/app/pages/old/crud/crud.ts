@@ -18,7 +18,7 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ProductOld, ProductServiceOld } from '../../service/product-old.service';
+import { Product, ProductService } from '../service/product.service';
 
 interface Column {
     field: string;
@@ -208,16 +208,16 @@ interface ExportColumn {
 
         <p-confirmdialog [style]="{ width: '450px' }" />
     `,
-    providers: [MessageService, ProductServiceOld, ConfirmationService]
+    providers: [MessageService, ProductService, ConfirmationService]
 })
 export class Crud implements OnInit {
     productDialog: boolean = false;
 
-    products = signal<ProductOld[]>([]);
+    products = signal<Product[]>([]);
 
-    product!: ProductOld;
+    product!: Product;
 
-    selectedProducts!: ProductOld[] | null;
+    selectedProducts!: Product[] | null;
 
     submitted: boolean = false;
 
@@ -230,7 +230,7 @@ export class Crud implements OnInit {
     cols!: Column[];
 
     constructor(
-        private productService: ProductServiceOld,
+        private productService: ProductService,
         private messageService: MessageService,
         private confirmationService: ConfirmationService
     ) {}
@@ -275,7 +275,7 @@ export class Crud implements OnInit {
         this.productDialog = true;
     }
 
-    editProduct(product: ProductOld) {
+    editProduct(product: Product) {
         this.product = { ...product };
         this.productDialog = true;
     }
@@ -303,7 +303,7 @@ export class Crud implements OnInit {
         this.submitted = false;
     }
 
-    deleteProduct(product: ProductOld) {
+    deleteProduct(product: Product) {
         this.confirmationService.confirm({
             message: 'Are you sure you want to delete ' + product.name + '?',
             header: 'Confirm',

@@ -3,7 +3,7 @@ import { RippleModule } from 'primeng/ripple';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
-import { ProductOld, ProductServiceOld } from '../../service/product-old.service';
+import { Product, ProductService } from '../../old/service/product.service';
 
 @Component({
     standalone: true,
@@ -34,12 +34,12 @@ import { ProductOld, ProductServiceOld } from '../../service/product-old.service
             </ng-template>
         </p-table>
     </div>`,
-    providers: [ProductServiceOld]
+    providers: [ProductService]
 })
 export class RecentSalesWidget {
-    products!: ProductOld[];
+    products!: Product[];
 
-    constructor(private productService: ProductServiceOld) {}
+    constructor(private productService: ProductService) {}
 
     ngOnInit() {
         this.productService.getProductsSmallOld().then((data) => (this.products = data));

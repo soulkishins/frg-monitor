@@ -18,7 +18,6 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ProductOld, ProductServiceOld } from '../../service/product-old.service';
 import { ProductService } from '../../service/product.service';
 import { ProductResponse } from '../../../layout/models/product.model';
 import { CompanyService } from '../../service/company.service';
@@ -29,7 +28,7 @@ import { CategoryService } from '../../service/category.service';
 import { SubCategoryService } from '../../service/sub-category.service';
 import { CategoryResponse } from '../../../layout/models/category.model';
 import { SubCategoryResponse } from '../../../layout/models/sub-category.model';
-import { forkJoin, from } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { mergeMap, map } from 'rxjs/operators';
 import { ProductRequest } from '../../../layout/models/product.model';
 
@@ -68,7 +67,7 @@ interface ExportColumn {
         ConfirmDialogModule
     ],
     templateUrl: './product.component.html',
-    providers: [MessageService, ProductServiceOld, ProductService, CompanyService, BrandService, CategoryService, SubCategoryService, ConfirmationService]
+    providers: [MessageService, ProductService, CompanyService, BrandService, CategoryService, SubCategoryService, ConfirmationService]
 })
 export class ProductCrud implements OnInit {
     productDialog: boolean = false;
