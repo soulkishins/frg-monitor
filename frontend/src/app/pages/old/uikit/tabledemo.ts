@@ -17,7 +17,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { TagModule } from 'primeng/tag';
 import { Customer, CustomerService, Representative } from '../../service/customer.service';
-import { Product, ProductService } from '../../service/product.service';
+import { ProductOld, ProductServiceOld } from '../../service/product-old.service';
 
 interface expandedRows {
     [key: string]: boolean;
@@ -403,7 +403,7 @@ interface expandedRows {
             font-weight: bold;
         }
     `,
-    providers: [ConfirmationService, MessageService, CustomerService, ProductService]
+    providers: [ConfirmationService, MessageService, CustomerService, ProductServiceOld]
 })
 export class TableDemo implements OnInit {
     customers1: Customer[] = [];
@@ -420,7 +420,7 @@ export class TableDemo implements OnInit {
 
     statuses: any[] = [];
 
-    products: Product[] = [];
+    products: ProductOld[] = [];
 
     rowGroupMetadata: any;
 
@@ -438,7 +438,7 @@ export class TableDemo implements OnInit {
 
     constructor(
         private customerService: CustomerService,
-        private productService: ProductService
+        private productService: ProductServiceOld
     ) {}
 
     ngOnInit() {
@@ -451,7 +451,7 @@ export class TableDemo implements OnInit {
         });
         this.customerService.getCustomersMedium().then((customers) => (this.customers2 = customers));
         this.customerService.getCustomersLarge().then((customers) => (this.customers3 = customers));
-        this.productService.getProductsWithOrdersSmall().then((data) => (this.products = data));
+        this.productService.getProductsWithOrdersSmallOld().then((data: any) => (this.products = data));
 
         this.representatives = [
             { name: 'Amy Elsner', image: 'amyelsner.png' },

@@ -1,12 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-interface InventoryStatus {
+interface InventoryStatusOld {
     label: string;
     value: string;
 }
 
-export interface Product {
+export interface ProductOld {
     id?: string;
     code?: string;
     name?: string;
@@ -20,8 +20,8 @@ export interface Product {
 }
 
 @Injectable()
-export class ProductService {
-    getProductsData() {
+export class ProductServiceOld {
+    getProductsDataOld() {
         return [
             {
                 id: '1000',
@@ -386,7 +386,7 @@ export class ProductService {
         ];
     }
 
-    getProductsWithOrdersData() {
+    getProductsWithOrdersDataOld() {
         return [
             {
                 id: '1000',
@@ -1257,39 +1257,39 @@ export class ProductService {
 
     constructor(private http: HttpClient) {}
 
-    getProductsMini() {
-        return Promise.resolve(this.getProductsData().slice(0, 5));
+    getProductsMiniOld() {
+        return Promise.resolve(this.getProductsDataOld().slice(0, 5));
     }
 
-    getProductsSmall() {
-        return Promise.resolve(this.getProductsData().slice(0, 10));
+    getProductsSmallOld() {
+        return Promise.resolve(this.getProductsDataOld().slice(0, 10));
     }
 
-    getProducts() {
-        return Promise.resolve(this.getProductsData());
+    getProductsOld() {
+        return Promise.resolve(this.getProductsDataOld());
     }
 
-    getProductsWithOrdersSmall() {
-        return Promise.resolve(this.getProductsWithOrdersData().slice(0, 10));
+    getProductsWithOrdersSmallOld() {
+        return Promise.resolve(this.getProductsWithOrdersDataOld().slice(0, 10));
     }
 
-    generatePrduct(): Product {
-        const product: Product = {
-            id: this.generateId(),
-            name: this.generateName(),
+    generatePrductOld(): ProductOld {
+        const product: ProductOld = {
+            id: this.generateIdOld(),
+            name: this.generateNameOld(),
             description: 'Product Description',
-            price: this.generatePrice(),
-            quantity: this.generateQuantity(),
+            price: this.generatePriceOld(),
+            quantity: this.generateQuantityOld(),
             category: 'Product Category',
-            inventoryStatus: this.generateStatus(),
-            rating: this.generateRating()
+            inventoryStatus: this.generateStatusOld(),
+            rating: this.generateRatingOld()
         };
 
         product.image = product.name?.toLocaleLowerCase().split(/[ ,]+/).join('-') + '.jpg';
         return product;
     }
 
-    generateId() {
+    generateIdOld() {
         let text = '';
         let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
@@ -1300,23 +1300,23 @@ export class ProductService {
         return text;
     }
 
-    generateName() {
+    generateNameOld() {
         return this.productNames[Math.floor(Math.random() * Math.floor(30))];
     }
 
-    generatePrice() {
+    generatePriceOld() {
         return Math.floor(Math.random() * Math.floor(299) + 1);
     }
 
-    generateQuantity() {
+    generateQuantityOld() {
         return Math.floor(Math.random() * Math.floor(75) + 1);
     }
 
-    generateStatus() {
+    generateStatusOld() {
         return this.status[Math.floor(Math.random() * Math.floor(3))];
     }
 
-    generateRating() {
+    generateRatingOld() {
         return Math.floor(Math.random() * Math.floor(5) + 1);
     }
 }
