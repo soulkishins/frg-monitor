@@ -1,7 +1,7 @@
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
         <p-button label="Nova" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-        <p-button severity="secondary" label="Excluir" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
+        <p-button severity="secondary" label="Excluir" icon="pi pi-trash" outlined (onClick)="deleteSelectedBrands()" [disabled]="!selectedBrands || !selectedBrands.length" />
     </ng-template>
 
     <ng-template #end>
@@ -11,13 +11,13 @@
 
 <p-table
     #dt
-    [value]="products()"
+    [value]="brands()"
     [rows]="10"
     [columns]="cols"
     [paginator]="true"
     [globalFilterFields]="['name', 'client_name', 'status']"
     [tableStyle]="{ 'min-width': '75rem' }"
-    [(selection)]="selectedProducts"
+    [(selection)]="selectedBrands"
     [rowHover]="true"
     dataKey="id"
     currentPageReportTemplate="Mostrando {first} até {last} de {totalRecords} marcas"
@@ -57,44 +57,44 @@
             <th style="min-width: 12rem"></th>
         </tr>
     </ng-template>
-    <ng-template #body let-product>
+    <ng-template #body let-brand>
         <tr>
             <td style="width: 3rem">
-                <p-tableCheckbox [value]="product" />
+                <p-tableCheckbox [value]="brand" />
             </td>
-            <td style="min-width: 16rem">{{ product.id }}</td>
-            <td style="min-width: 16rem">{{ product.name }}</td>
-            <td style="min-width: 16rem">{{ product.client_name }}</td>
+            <td style="min-width: 16rem">{{ brand.id }}</td>
+            <td style="min-width: 16rem">{{ brand.name }}</td>
+            <td style="min-width: 16rem">{{ brand.client_name }}</td>
             <td>
-                <p-tag [value]="getStatusLabel(product.status)" [severity]="getSeverity(product.status)" />
+                <p-tag [value]="getStatusLabel(brand.status)" [severity]="getSeverity(brand.status)" />
             </td>
             <td>
-                <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editProduct(product)" />
-                <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteProduct(product)" />
+                <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editBrand(brand)" />
+                <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteBrand(brand)" />
             </td>
         </tr>
     </ng-template>
 </p-table>
 
-<p-dialog [(visible)]="productDialog" [style]="{ width: '450px' }" header="Detalhes da Marca" [modal]="true">
+<p-dialog [(visible)]="brandDialog" [style]="{ width: '450px' }" header="Detalhes da Marca" [modal]="true">
     <ng-template #content>
         <div class="flex flex-col gap-6">
             <div>
                 <label for="client" class="block font-bold mb-3">Cliente</label>
-                <p-select [(ngModel)]="product.client_id" inputId="client" [options]="clients" optionLabel="label" optionValue="value" placeholder="Selecione um Cliente" fluid required />
-                <small class="text-red-500" *ngIf="submitted && !product.client_id">Campo obrigatório</small>
+                <p-select [(ngModel)]="brand.client_id" inputId="client" [options]="clients" optionLabel="label" optionValue="value" placeholder="Selecione um Cliente" fluid required />
+                <small class="text-red-500" *ngIf="submitted && !brand.client_id">Campo obrigatório</small>
             </div>
 
             <div>
                 <label for="status" class="block font-bold mb-3">Status</label>
-                <p-select [(ngModel)]="product.status" inputId="status" [options]="statuses" optionLabel="label" optionValue="value" placeholder="Selecione um Status" fluid required />
-                <small class="text-red-500" *ngIf="submitted && !product.status">Campo obrigatório</small>
+                <p-select [(ngModel)]="brand.status" inputId="status" [options]="statuses" optionLabel="label" optionValue="value" placeholder="Selecione um Status" fluid required />
+                <small class="text-red-500" *ngIf="submitted && !brand.status">Campo obrigatório</small>
             </div>
 
             <div>
                 <label for="name" class="block font-bold mb-3">Nome</label>
-                <input type="text" pInputText id="name" [(ngModel)]="product.name" required autofocus fluid />
-                <small class="text-red-500" *ngIf="submitted && !product.name">Campo obrigatório</small>
+                <input type="text" pInputText id="name" [(ngModel)]="brand.name" required autofocus fluid />
+                <small class="text-red-500" *ngIf="submitted && !brand.name">Campo obrigatório</small>
             </div>
 
         </div>
@@ -102,7 +102,7 @@
 
     <ng-template #footer>
         <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
-        <p-button label="Salvar" icon="pi pi-check" (click)="saveProduct()" />
+        <p-button label="Salvar" icon="pi pi-check" (click)="saveBrand()" />
     </ng-template>
 </p-dialog>
 
