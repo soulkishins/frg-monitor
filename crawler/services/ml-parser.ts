@@ -1,7 +1,7 @@
 import axios from "axios";
 import { ParsingError } from "../errors";
 import { S3Uploader } from "./s3-uploader";
-import { IMLAdvertisement, IMLAdvertisementUrl, PreloadedState, ProductInfo, PhotoInfo, PriceComponent } from "../base/types";
+import { IMLAdvertisement, IMLAdvertisementUrl, PreloadedState, ProductInfo, PhotoInfo, PriceComponent, AdvertisementResponse } from "../base/types";
 
 export class MLParser {
     private static readonly PRELOADED_STATE_REGEX = /window\.__PRELOADED_STATE__\s*=\s*({[\s\S]*?});/;
@@ -13,17 +13,20 @@ export class MLParser {
 
         try {
             const cleanUrl = this.removeUrlHash(url.link);
-            const preloadedState = await this.extractPreloadedState(cleanUrl);
-            try {
-                const advertisementInfo = MLParser.extractAdvertisementInfo(preloadedState);
-                const s3Photos = await this.uploadPhotos(advertisementInfo.photos, st_plataform);
-                return this.createAdvertisement(advertisementInfo, cleanUrl, s3Photos, st_plataform, preloadedState.response);
+            const response = await this.requestData(cleanUrl);
+            
+            if (response.status > 299) {
+                url.link = response.url
+                return this.createErrorAdvertisement(url, st_plataform, 'Response with status code ' + response.status, response.html);
             }
-            catch (error) {
-                return this.createErrorAdvertisement(url, st_plataform, error as Error, preloadedState.response);
-            }
-        } catch (error) {
-            return this.createErrorAdvertisement(url, st_plataform, error as Error, (error as ParsingError).html);
+
+            const preloadedState = this.extractPreloadedState(response.html);
+            const advertisementInfo = MLParser.extractAdvertisementInfo(preloadedState);
+            const s3Photos = await this.uploadPhotos(advertisementInfo.photos, st_plataform);
+
+            return this.createAdvertisement(advertisementInfo, response.url, s3Photos, st_plataform, response.html);
+        } catch (error: any) {
+            return this.createErrorAdvertisement(url, st_plataform, error.message, (error as ParsingError).html);
         }
     }
 
@@ -31,8 +34,7 @@ export class MLParser {
         return url.substring(0, url.indexOf('#'));
     }
 
-    private async extractPreloadedState(url: string): Promise<PreloadedState> {
-        var data = '';
+    private async requestData(url: string): Promise<AdvertisementResponse> {
         try {
             const response = await axios.get(url, {
                 headers: {
@@ -50,21 +52,36 @@ export class MLParser {
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36',
                     'viewport-width': '1536'
                 },
-                timeout: 5000
+                timeout: 5000,
+                maxRedirects: 10
             });
-            data = response.data;
-            const match = data.match(MLParser.PRELOADED_STATE_REGEX);
-            
-            if (!match?.[1])
-                throw new ParsingError('PreloadedState not found', data);
-
-            const jsonStr = match[1].replace(/\\u002F/g, '/');
-            const preloadedState = JSON.parse(jsonStr);
-            preloadedState.response = data;
-            return preloadedState;
-        } catch (error) {
-            throw new ParsingError('Falha ao extrair PreloadedState', data, error as Error);
+            return {
+                html: response.data,
+                url: response.request?.res?.responseUrl || url,
+                status: response.status
+            };
+        } catch (error: any) {
+            if (error.response) {
+                return {
+                    html: error.response.data,
+                    url: error.response.request?.res?.responseUrl || url,
+                    status: error.response.status
+                };
+            }
+            return {
+                html: error.message,
+                url: url,
+                status: 500
+            };
         }
+    }
+
+    private extractPreloadedState(html: string): PreloadedState {
+        const match = html.match(MLParser.PRELOADED_STATE_REGEX);
+        if (!match?.[1])
+            throw new ParsingError('PreloadedState not found', html);
+        const jsonStr = match[1].replace(/\\u002F/g, '/');
+        return JSON.parse(jsonStr) as PreloadedState;
     }
 
     public static extractAdvertisementInfo(preloadedState: PreloadedState): ProductInfo {
@@ -74,9 +91,8 @@ export class MLParser {
             };
 
             // Extraia descrição do anúncio
-            const descriptionComponent = preloadedState.initialState.components.description || preloadedState.initialState.components.content_left?.find(
-                comp => comp.type === 'description'
-            );
+            const descriptionComponent = preloadedState.initialState.components.description 
+                || preloadedState.initialState.components.content_left?.find((comp: any) => comp.type === 'description');
             if (descriptionComponent) {
                 result.description = descriptionComponent.content;
             }
@@ -130,12 +146,22 @@ export class MLParser {
                     reputation_rank: sellerComponent.seller_info.thermometer?.rank
                 };
             }
+            else {
+                const seller_data = preloadedState.initialState.components.seller_data;
+                if (seller_data?.components) {
+                    const seller_header = seller_data.components.find((comp: any) => comp.type === 'seller_header');
+                    result.seller = {
+                        name: seller_header?.title?.text.replace('Vendido por ', '')
+                    };
+                }
+            }
 
-            const galleryComponent = preloadedState.initialState.components.fixed?.gallery;
+            const galleryComponent = preloadedState.initialState.components.fixed?.gallery
+            || preloadedState.initialState.components.gallery;
             if (galleryComponent?.pictures) {
                 const pictureConfig = galleryComponent.picture_config;
                 result.photos = galleryComponent.pictures.map(
-                    photo => {
+                    (photo: any) => {
                         return {
                             id: photo.id,
                             url: pictureConfig.template_zoom.replace('{id}', photo.id).replace('{sanitizedTitle}', ''),
@@ -146,12 +172,13 @@ export class MLParser {
             }
 
             // Extrair buscas relacionadas
-            const relatedComponent = preloadedState.initialState.components.related_searches || preloadedState.initialState.components.head?.find(
-                comp => comp.type === 'related_searches'
+            const relatedComponent = preloadedState.initialState.components.related_searches 
+            || preloadedState.initialState.components.head?.find(
+                (comp: any) => comp.type === 'related_searches'
             );
             if (relatedComponent?.related_searches) {
                 result.relatedSearches = relatedComponent.related_searches.map(
-                    search => search.label.text
+                    (search: any) => search.label.text
                 );
             }
 
@@ -213,17 +240,17 @@ export class MLParser {
     private createErrorAdvertisement(
         url: IMLAdvertisementUrl,
         platform: string,
-        error: Error,
+        error: string,
         html: string
     ): IMLAdvertisement {
         return {
             id_advertisement: '',
             id_brand: '',
             st_plataform: platform,
-            st_plataform_id: url.link.match(/MLB-\d+/)?.[0] || 'N/A',
+            st_plataform_id: url.link.match(/MLB-\d+/)?.[0].replace('-', '') || url.link.match(/MLB\d+/)?.[0] || 'N/A',
             st_url: url.link,
             st_title: url.title,
-            st_description: `Erro ao extrair detalhes do anúncio: ${error.message}`,
+            st_description: `Erro: ${error}`,
             st_photos: 'N/A',
             db_price: Number(url.price),
             st_vendor: 'N/A',

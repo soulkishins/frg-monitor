@@ -16,6 +16,11 @@ export class AdvertisementManager {
             },
             options: `-c search_path=${config.schema}`
         });
+        // Definir o fuso horário para cada nova conexão criada no pool
+        this.pool.on('connect', async (client) => {
+            await client.query("SET TIME ZONE 'America/Sao_Paulo'");
+            console.log("Timezone configurado para America/Sao_Paulo");
+        });
     }
 
     async createAdvertisement(data: IAdvertisement): Promise<string> {
@@ -180,8 +185,15 @@ export class AdvertisementManager {
                 param++;
             }
 
+            if (data.st_status === 'NEW' && record.st_status !== 'ERROR') {
+                query += 'st_status = $' + param + ',';
+                values.push(data.st_status);
+                param++;
+            }
+
             if (query.length > 0) {
-                query = query.slice(0, -1);
+                query += 'dt_modified = CURRENT_TIMESTAMP, ';
+                query += 'st_modified_by = \'crawler\' ';
 
                 values.push(record.id_advertisement);
 

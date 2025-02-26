@@ -56,7 +56,7 @@ export class ConfigManager {
         }
 
         try {
-            const dbSecret = await this.fetchSecret(process.env.RDS_SECRET_NAME || 'matrix/db/hml');
+            const dbSecret = await this.fetchSecret(process.env.RDS_SECRET_NAME || 'matrix/db/local');
 
             this.config = {
                 database: {

@@ -64,131 +64,17 @@ export interface GalleryPicture {
     height: number;
 }
 
-export interface GalleryConfig {
-    template: string;
-    template_thumbnail: string;
-    template_zoom: string;
-    template_2x: string;
-    template_thumbnail_2x: string;
+export interface AdvertisementResponse {
+    url: string;
+    html: string;
+    status: number;
 }
 
-export interface Gallery {
-    id: string;
-    type: string;
-    picture_config: GalleryConfig;
-    pictures: GalleryPicture[];
-    videos: any[]; // Array vazio no exemplo
-    previews: Record<string, any>; // Objeto vazio no exemplo
-    track: {
-        analytics_event: {
-            section: string;
-            action: string;
-            label: string;
-            custom_dimensions: {
-                [key: string]: string;
-            };
-        };
-    };
-    show_share: boolean;
-    gallery_type: string;
-    set_paddings: boolean;
-    accessibility_text: string;
-}
-
-export interface Fixed {
-    grouped_header_item: {
-        id: string;
-        type: string;
-        state: string;
-        components: string[];
-    };
-    gallery: Gallery;
-}
 
 export interface PreloadedState {
-    response: string;
     initialState: {
         id: string;
-        components: {
-            description?: {
-                content: string;
-            };
-            content_left?: Array<{
-                type: string;
-                content?: string;
-            }>;
-            short_description?: Array<{
-                type: string;
-                title?: string;
-                subtitle?: string;
-                price?: {
-                    value: number;
-                    original_value?: number;
-                };
-                quantity_selector?: {
-                    available_quantity: number;
-                };
-            }>;
-            header?: {
-                type: string;
-                title: string;
-                subtitle?: string;
-            };
-            price?: {
-                type: string;
-                price: {
-                    value: number;
-                    original_value?: number;
-                };
-            };
-            available_quantity?: {
-                type: string;
-                picker?: {
-                    track?: {
-                        melidata_event?: {
-                            event_data?: {
-                                quantity: number;
-                            };
-                        };
-                    };
-                };
-            };
-            seller_experiment?: {
-                seller_info?: {
-                    title: string;
-                    power_seller_status?: {
-                        title: string;
-                    };
-                    thermometer?: {
-                        rank: string;
-                    };
-                };
-            };
-            gallery?: {
-                pictures?: Array<{
-                    id: string;
-                }>;
-                picture_config?: {
-                    template_zoom: string;
-                };
-            };
-            related_searches?: {
-                related_searches: Array<{
-                    label: {
-                        text: string;
-                    };
-                }>;
-            };
-            head?: Array<{
-                type: string;
-                related_searches?: Array<{
-                    label: {
-                        text: string;
-                    };
-                }>;
-            }>;
-            fixed?: Fixed;
-        };
+        components: { [key: string]: any;}
     };
 }
 

@@ -22,7 +22,7 @@ export class S3Uploader {
         try {
             const response = await axios.get(params.imageUrl, { responseType: 'arraybuffer' });
             const extension = params.imageUrl.split('.').pop();
-            const key = `anuncios/${params.platform}/${params.photoId}.${extension}`;
+            const key = `anuncios/${params.platform}/${params.advertisementId}/${params.photoId}.${extension}`;
 
             await this.s3.putObject({
                 Bucket: this.bucketName,
