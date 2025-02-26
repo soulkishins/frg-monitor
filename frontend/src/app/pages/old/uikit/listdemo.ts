@@ -7,7 +7,7 @@ import { OrderListModule } from 'primeng/orderlist';
 import { PickListModule } from 'primeng/picklist';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { TagModule } from 'primeng/tag';
-import { Product, ProductService } from '../service/product.service';
+import { ProductOld, ProductServiceOld } from '../../service/product-old.service';
 
 @Component({
     selector: 'app-list-demo',
@@ -150,14 +150,14 @@ import { Product, ProductService } from '../service/product.service';
             }
         }
     `,
-    providers: [ProductService]
+    providers: [ProductServiceOld]
 })
 export class ListDemo {
     layout: 'list' | 'grid' = 'list';
 
     options = ['list', 'grid'];
 
-    products: Product[] = [];
+    products: ProductOld[] = [];
 
     sourceCities: any[] = [];
 
@@ -165,10 +165,10 @@ export class ListDemo {
 
     orderCities: any[] = [];
 
-    constructor(private productService: ProductService) {}
+    constructor(private productService: ProductServiceOld) {}
 
     ngOnInit() {
-        this.productService.getProductsSmall().then((data) => (this.products = data.slice(0, 6)));
+        this.productService.getProductsSmallOld().then((data) => (this.products = data.slice(0, 6)));
 
         this.sourceCities = [
             { name: 'San Francisco', code: 'SF' },
@@ -193,7 +193,7 @@ export class ListDemo {
         ];
     }
 
-    getSeverity(product: Product) {
+    getSeverity(product: ProductOld) {
         switch (product.inventoryStatus) {
             case 'INSTOCK':
                 return 'success';

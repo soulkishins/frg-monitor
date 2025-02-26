@@ -6,7 +6,7 @@ import { GalleriaModule } from 'primeng/galleria';
 import { ImageModule } from 'primeng/image';
 import { TagModule } from 'primeng/tag';
 import { PhotoService } from '../service/photo.service';
-import { Product, ProductService } from '../service/product.service';
+import { ProductOld, ProductServiceOld } from '../../service/product-old.service';
 
 @Component({
     selector: 'app-media-demo',
@@ -54,10 +54,10 @@ import { Product, ProductService } from '../service/product.service';
                 </ng-template>
             </p-galleria>
         </div>`,
-    providers: [ProductService, PhotoService]
+    providers: [ProductServiceOld, PhotoService]
 })
 export class MediaDemo implements OnInit {
-    products!: Product[];
+    products!: ProductOld[];
 
     images!: any[];
 
@@ -99,12 +99,12 @@ export class MediaDemo implements OnInit {
     ];
 
     constructor(
-        private productService: ProductService,
+        private productService: ProductServiceOld,
         private photoService: PhotoService
     ) {}
 
     ngOnInit() {
-        this.productService.getProductsSmall().then((products) => {
+        this.productService.getProductsSmallOld().then((products) => {
             this.products = products;
         });
 

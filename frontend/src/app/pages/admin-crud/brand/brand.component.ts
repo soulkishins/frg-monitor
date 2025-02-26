@@ -62,13 +62,13 @@ interface ExportColumn {
     providers: [MessageService, BrandService, CompanyService, ConfirmationService]
 })
 export class BrandCrud implements OnInit {
-    productDialog: boolean = false;
+    brandDialog: boolean = false;
 
-    products = signal<Brand[]>([]);
+    brands = signal<Brand[]>([]);
 
-    product!: Brand;
+    brand!: Brand;
 
-    selectedProducts!: Brand[] | null;
+    selectedBrands!: Brand[] | null;
 
     submitted: boolean = false;
 
@@ -144,7 +144,7 @@ export class BrandCrud implements OnInit {
                         });
                         
                         const allBrands = Array.from(uniqueBrands.values());
-                        this.products.set(allBrands);
+                        this.brands.set(allBrands);
                     },
                     error: (error) => {
                         this.messageService.add({
@@ -187,19 +187,19 @@ export class BrandCrud implements OnInit {
     }
 
     openNew() {
-        this.product = {};
+        this.brand = {};
         this.submitted = false;
-        this.productDialog = true;
+        this.brandDialog = true;
     }
 
-    deleteSelectedProducts() {
+    deleteSelectedBrands() {
         this.confirmationService.confirm({
             message: 'Tem certeza que deseja excluir as marcas selecionadas?',
             header: 'Confirmar',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.products.set(this.products().filter((val) => !this.selectedProducts?.includes(val)));
-                this.selectedProducts = null;
+                this.brands.set(this.brands().filter((val) => !this.selectedBrands?.includes(val)));
+                this.selectedBrands = null;
                 this.messageService.add({
                     severity: 'success',
                     summary: 'Sucesso',
@@ -210,26 +210,26 @@ export class BrandCrud implements OnInit {
         });
     }
 
-    editProduct(product: Brand) {
-        this.product = { ...product };
+    editBrand(brand: Brand) {
+        this.brand = { ...brand };
         // Encontrar o ID do cliente baseado no client_name
-        const client = this.clients.find(c => c.label === product.client_name);
+        const client = this.clients.find(c => c.label === brand.client_name);
         if (client) {
-            this.product.client_id = client.value;
+            this.brand.client_id = client.value;
         }
-        this.productDialog = true;
+        this.brandDialog = true;
     }
 
-    deleteProduct(product: Brand) {
+    deleteBrand(brand: Brand) {
         this.confirmationService.confirm({
-            message: 'Tem certeza que deseja excluir a marca ' + product.name + '?',
+            message: 'Tem certeza que deseja excluir a marca ' + brand.name + '?',
             header: 'Confirmar',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
                 // Encontrar o ID do cliente baseado no client_name
-                const client = this.clients.find(c => c.label === product.client_name);
-                if (client && product.id) {
-                    this.brandService.deleteBrand(client.value, product.id).subscribe({
+                const client = this.clients.find(c => c.label === brand.client_name);
+                if (client && brand.id) {
+                    this.brandService.deleteBrand(client.value, brand.id).subscribe({
                         next: () => {
                             this.messageService.add({
                                 severity: 'success',
@@ -238,7 +238,7 @@ export class BrandCrud implements OnInit {
                                 life: 3000
                             });
                             this.loadBrandData(); // Recarregar os dados
-                            this.product = {};
+                            this.brand = {};
                         },
                         error: (error) => {
                             this.messageService.add({
@@ -256,25 +256,25 @@ export class BrandCrud implements OnInit {
     }
 
     hideDialog() {
-        this.productDialog = false;
+        this.brandDialog = false;
         this.submitted = false;
     }
 
-    saveProduct() {
+    saveBrand() {
         this.submitted = true;
 
-        if (this.product.name?.trim() && this.product.client_id && this.product.status) {
-            if (this.product.id) {
-                const index = this.findIndexById(this.product.id);
+        if (this.brand.name?.trim() && this.brand.client_id && this.brand.status) {
+            if (this.brand.id) {
+                const index = this.findIndexById(this.brand.id);
                 if (index >= 0) {
                     // Criar brandRequest para atualização
                     const brandRequest = {
-                        id_client: this.product.client_id,
-                        st_brand: this.product.name,
-                        st_status: this.product.status
+                        id_client: this.brand.client_id,
+                        st_brand: this.brand.name,
+                        st_status: this.brand.status
                     };
 
-                    this.brandService.putBrand(this.product.client_id, this.product.id, brandRequest).subscribe({
+                    this.brandService.putBrand(this.brand.client_id, this.brand.id, brandRequest).subscribe({
                         next: (response) => {
                             this.messageService.add({
                                 severity: 'success',
@@ -283,8 +283,8 @@ export class BrandCrud implements OnInit {
                                 life: 3000
                             });
                             this.loadBrandData(); // Recarregar os dados
-                            this.productDialog = false;
-                            this.product = {};
+                            this.brandDialog = false;
+                            this.brand = {};
                         },
                         error: (error) => {
                             this.messageService.add({
@@ -300,12 +300,12 @@ export class BrandCrud implements OnInit {
             } else {
                 // Criar nova marca
                 const brandRequest = {
-                    id_client: this.product.client_id,
-                    st_brand: this.product.name,
-                    st_status: this.product.status
+                    id_client: this.brand.client_id,
+                    st_brand: this.brand.name,
+                    st_status: this.brand.status
                 };
 
-                this.brandService.postBrand(this.product.client_id, brandRequest).subscribe({
+                this.brandService.postBrand(this.brand.client_id, brandRequest).subscribe({
                     next: (response) => {
                         this.messageService.add({
                             severity: 'success',
@@ -314,8 +314,8 @@ export class BrandCrud implements OnInit {
                             life: 3000
                         });
                         this.loadBrandData(); // Recarregar os dados
-                        this.productDialog = false;
-                        this.product = {};
+                        this.brandDialog = false;
+                        this.brand = {};
                     },
                     error: (error) => {
                         this.messageService.add({
@@ -333,8 +333,8 @@ export class BrandCrud implements OnInit {
 
     findIndexById(id: string): number {
         let index = -1;
-        for (let i = 0; i < this.products().length; i++) {
-            if (this.products()[i].id === id) {
+        for (let i = 0; i < this.brands().length; i++) {
+            if (this.brands()[i].id === id) {
                 index = i;
                 break;
             }

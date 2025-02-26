@@ -18,7 +18,6 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { Product, ProductService } from '../../old/service/product.service';
 import { CategoryService } from '../../service/category.service';
 import { CategoryResponse } from '../../../layout/models/category.model';
 import { SubCategoryService } from '../../service/sub-category.service';
@@ -61,15 +60,17 @@ interface ExportColumn {
         ConfirmDialogModule
     ],
     templateUrl: './subcategory.component.html',
-    providers: [MessageService, ProductService, ConfirmationService, CategoryService, SubCategoryService]
+    providers: [MessageService, ConfirmationService, CategoryService, SubCategoryService]
 })
 export class SubCategoryCrud implements OnInit {
-    productDialog: boolean = false;
     subCategoryDialog: boolean = false;
 
-    products = signal<Product[]>([]);
-    product!: Product;
-    selectedProducts!: Product[] | null;
+    categories = signal<CategoryResponse[]>([]);
+    subCategories = signal<SubCategoryResponse[]>([]);
+    selectedSubCategories!: SubCategoryResponse[] | null;
+
+    subCategory: SubCategoryResponse = {} as SubCategoryResponse;
+
     submitted: boolean = false;
     statuses: any[] = [
         { label: 'ATIVO', value: 'ATIVO' },
@@ -82,14 +83,7 @@ export class SubCategoryCrud implements OnInit {
 
     cols!: Column[];
 
-    categories = signal<CategoryResponse[]>([]);
-    subCategories = signal<SubCategoryResponse[]>([]);
-    selectedSubCategories!: SubCategoryResponse[] | null;
-
-    subCategory: SubCategoryResponse = {} as SubCategoryResponse;
-
     constructor(
-        private productService: ProductService,
         private categoryService: CategoryService,
         private subCategoryService: SubCategoryService,
         private messageService: MessageService,
@@ -157,71 +151,14 @@ export class SubCategoryCrud implements OnInit {
         this.subCategoryDialog = true;
     }
 
-    editProduct(product: Product) {
-        this.product = { ...product };
-        this.productDialog = true;
-    }
-
-    deleteSelectedProducts() {
-        this.confirmationService.confirm({
-            message: 'Are you sure you want to delete the selected products?',
-            header: 'Confirm',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                this.products.set(this.products().filter((val) => !this.selectedProducts?.includes(val)));
-                this.selectedProducts = null;
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Products Deleted',
-                    life: 3000
-                });
-            }
-        });
-    }
-
     hideDialog() {
         this.subCategoryDialog = false;
         this.submitted = false;
     }
 
-    deleteProduct(product: Product) {
-        this.confirmationService.confirm({
-            message: 'Are you sure you want to delete ' + product.name + '?',
-            header: 'Confirm',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                this.products.set(this.products().filter((val) => val.id !== product.id));
-                this.product = {};
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Deleted',
-                    life: 3000
-                });
-            }
-        });
-    }
-
-    findIndexById(id: string): number {
-        let index = -1;
-        for (let i = 0; i < this.products().length; i++) {
-            if (this.products()[i].id === id) {
-                index = i;
-                break;
-            }
-        }
-
-        return index;
-    }
-
-    createId(): string {
-        let id = '';
-        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        for (var i = 0; i < 5; i++) {
-            id += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return id;
+    getCategoryName(categoryId: string): string {
+        const category = this.categories().find(cat => cat.id_category === categoryId);
+        return category ? category.st_category : categoryId;
     }
 
     getSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined {
@@ -233,41 +170,6 @@ export class SubCategoryCrud implements OnInit {
             default:
                 return 'info';
         }
-    }
-
-    saveProduct() {
-        this.submitted = true;
-        let _products = this.products();
-        if (this.product.name?.trim()) {
-            if (this.product.id) {
-                _products[this.findIndexById(this.product.id)] = this.product;
-                this.products.set([..._products]);
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Updated',
-                    life: 3000
-                });
-            } else {
-                this.product.id = this.createId();
-                this.product.image = 'product-placeholder.svg';
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Product Created',
-                    life: 3000
-                });
-                this.products.set([..._products, this.product]);
-            }
-
-            this.productDialog = false;
-            this.product = {};
-        }
-    }
-
-    getCategoryName(categoryId: string): string {
-        const category = this.categories().find(cat => cat.id_category === categoryId);
-        return category ? category.st_category : categoryId;
     }
 
     editSubCategory(subCategory: SubCategoryResponse) {

@@ -18,7 +18,7 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { Product, ProductService } from '../service/product.service';
+import { ProductOld, ProductServiceOld } from '../../service/product-old.service';
 
 interface Column {
     field: string;
@@ -208,16 +208,16 @@ interface ExportColumn {
 
         <p-confirmdialog [style]="{ width: '450px' }" />
     `,
-    providers: [MessageService, ProductService, ConfirmationService]
+    providers: [MessageService, ProductServiceOld, ConfirmationService]
 })
 export class Crud implements OnInit {
     productDialog: boolean = false;
 
-    products = signal<Product[]>([]);
+    products = signal<ProductOld[]>([]);
 
-    product!: Product;
+    product!: ProductOld;
 
-    selectedProducts!: Product[] | null;
+    selectedProducts!: ProductOld[] | null;
 
     submitted: boolean = false;
 
@@ -230,7 +230,7 @@ export class Crud implements OnInit {
     cols!: Column[];
 
     constructor(
-        private productService: ProductService,
+        private productService: ProductServiceOld,
         private messageService: MessageService,
         private confirmationService: ConfirmationService
     ) {}
@@ -244,7 +244,7 @@ export class Crud implements OnInit {
     }
 
     loadDemoData() {
-        this.productService.getProducts().then((data) => {
+        this.productService.getProductsOld().then((data) => {
             this.products.set(data);
         });
 
@@ -275,7 +275,7 @@ export class Crud implements OnInit {
         this.productDialog = true;
     }
 
-    editProduct(product: Product) {
+    editProduct(product: ProductOld) {
         this.product = { ...product };
         this.productDialog = true;
     }
@@ -303,7 +303,7 @@ export class Crud implements OnInit {
         this.submitted = false;
     }
 
-    deleteProduct(product: Product) {
+    deleteProduct(product: ProductOld) {
         this.confirmationService.confirm({
             message: 'Are you sure you want to delete ' + product.name + '?',
             header: 'Confirm',
