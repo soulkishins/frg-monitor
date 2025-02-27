@@ -19,18 +19,8 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { CompanyService } from '../../service/company.service';
-import { Company, CompanyResponse, CompanyRequest } from '../../../layout/models/company.model';
-
-interface Column {
-    field: string;
-    header: string;
-    customExportHeader?: string;
-}
-
-interface ExportColumn {
-    title: string;
-    dataKey: string;
-}
+import { Company, CompanyResponse, CompanyRequest } from '../../models/company.model';
+import { Column, ExportColumn } from '../../models/global.model';
 
 @Component({
     selector: 'app-crud',

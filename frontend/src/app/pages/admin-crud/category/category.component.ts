@@ -20,18 +20,8 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DropdownModule } from 'primeng/dropdown';
 import { CategoryService } from '../../service/category.service';
-import { CategoryResponse } from '../../../layout/models/category.model';
-
-interface Column {
-    field: string;
-    header: string;
-    customExportHeader?: string;
-}
-
-interface ExportColumn {
-    title: string;
-    dataKey: string;
-}
+import { CategoryResponse } from '../../models/category.model';
+import { Column, ExportColumn } from '../../models/global.model';
 
 @Component({
     selector: 'app-crud',

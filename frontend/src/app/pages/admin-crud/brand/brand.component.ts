@@ -19,21 +19,11 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { BrandService } from '../../service/brand.service';
-import { Brand, BrandResponse } from '../../../layout/models/brand.model';
+import { Brand } from '../../models/brand.model';
 import { CompanyService } from '../../service/company.service';
-import { CompanyResponse } from '../../../layout/models/company.model';
+import { CompanyResponse } from '../../models/company.model';
 import { forkJoin } from 'rxjs';
-
-interface Column {
-    field: string;
-    header: string;
-    customExportHeader?: string;
-}
-
-interface ExportColumn {
-    title: string;
-    dataKey: string;
-}
+import { Column, ExportColumn } from '../../models/global.model';
 
 @Component({
     selector: 'app-crud',

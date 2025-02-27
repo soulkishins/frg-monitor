@@ -32,7 +32,7 @@ export class AppMenu {
             {
                 label: 'Monitoramento',
                 items: [
-                    { label: 'Anúncios', icon: 'pi pi-fw pi-table', routerLink: ['/monitoramento/anuncio'] },
+                    { label: 'Anúncios', icon: 'pi pi-fw pi-table', routerLink: ['/anuncio/lista'] },
                 ]
             },
             {

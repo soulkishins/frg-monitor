@@ -19,22 +19,12 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { CategoryService } from '../../service/category.service';
-import { CategoryResponse } from '../../../layout/models/category.model';
+import { CategoryResponse } from '../../models/category.model';
 import { SubCategoryService } from '../../service/sub-category.service';
-import { SubCategoryResponse } from '../../../layout/models/sub-category.model';
+import { SubCategoryResponse } from '../../models/sub-category.model';
 import { forkJoin } from 'rxjs';
-import { SubCategoryRequest } from '../../../layout/models/sub-category.model';
-
-interface Column {
-    field: string;
-    header: string;
-    customExportHeader?: string;
-}
-
-interface ExportColumn {
-    title: string;
-    dataKey: string;
-}
+import { SubCategoryRequest } from '../../models/sub-category.model';
+import { Column, ExportColumn } from '../../models/global.model';
 
 @Component({
     selector: 'app-crud',

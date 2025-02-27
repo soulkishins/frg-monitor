@@ -54,10 +54,10 @@ interface ExportColumn {
         IconFieldModule,
         ConfirmDialogModule
     ],
-    templateUrl: './category.component.html',
+    templateUrl: './advertisement-view.component.html',
     providers: [MessageService, ProductService, ConfirmationService]
 })
-export class CategoryCrud implements OnInit {
+export class AdvertisementDetail implements OnInit {
     productDialog: boolean = false;
 
     products = signal<Product[]>([]);

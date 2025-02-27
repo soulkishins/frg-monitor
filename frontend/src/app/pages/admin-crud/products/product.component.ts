@@ -19,29 +19,19 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ProductService } from '../../service/product.service';
-import { ProductResponse } from '../../../layout/models/product.model';
+import { ProductResponse } from '../../models/product.model';
 import { CompanyService } from '../../service/company.service';
 import { BrandService } from '../../service/brand.service';
-import { CompanyResponse } from '../../../layout/models/company.model';
-import { BrandResponse } from '../../../layout/models/brand.model';
+import { CompanyResponse } from '../../models/company.model';
+import { BrandResponse } from '../../models/brand.model';
 import { CategoryService } from '../../service/category.service';
 import { SubCategoryService } from '../../service/sub-category.service';
-import { CategoryResponse } from '../../../layout/models/category.model';
-import { SubCategoryResponse } from '../../../layout/models/sub-category.model';
+import { CategoryResponse } from '../../models/category.model';
+import { SubCategoryResponse } from '../../models/sub-category.model';
 import { forkJoin } from 'rxjs';
 import { mergeMap, map } from 'rxjs/operators';
-import { ProductRequest } from '../../../layout/models/product.model';
-
-interface Column {
-    field: string;
-    header: string;
-    customExportHeader?: string;
-}
-
-interface ExportColumn {
-    title: string;
-    dataKey: string;
-}
+import { ProductRequest } from '../../models/product.model';
+import { Column, ExportColumn } from '../../models/global.model';
 
 @Component({
     selector: 'app-crud',
