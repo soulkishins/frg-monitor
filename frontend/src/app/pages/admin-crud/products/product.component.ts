@@ -90,8 +90,13 @@ export class ProductCrud implements OnInit {
     // Novas propriedades para variedades e preços
     currentVariety: string = '';
     currentPrice: number = 0;
-    varietyList: Array<{variety: string, price: number}> = [];
+    varietyList: Array<{variety: string, price: number, status?: string}> = [];
     selectedVarietyIndex: number = -1;
+
+    // Getter para lista filtrada
+    get filteredVarietyList() {
+        return this.varietyList.filter(v => v.status !== 'deleted');
+    }
 
     clients: CompanyResponse[] = [];
     brands: BrandResponse[] = [];
@@ -337,6 +342,19 @@ export class ProductCrud implements OnInit {
     editProduct(product: ProductResponse) {
         this.product = { ...product };
         
+        // Carregar lista de variedades do JSON
+        try {
+            const parsedVarieties = product.st_variety ? JSON.parse(product.st_variety) : [];
+            // Filtrar apenas variedades não deletadas ou manter o status existente
+            this.varietyList = parsedVarieties.map((v: any) => ({
+                ...v,
+                status: v.status || 'active'
+            }));
+        } catch (error) {
+            console.error('Erro ao parsear variedades:', error);
+            this.varietyList = [];
+        }
+        
         // Carregar cliente e marca
         if (this.product.brand?.client) {
             this.selectedClient = this.product.brand.client.id;
@@ -458,10 +476,13 @@ export class ProductCrud implements OnInit {
     saveProduct() {
         this.submitted = true;
 
-        if (!this.product.st_product || !this.product.st_variety || !this.product.st_status || 
+        if (!this.product.st_product || !this.product.st_status || 
             !this.product.id_brand || !this.product.id_subcategory) {
             return;
         }
+
+        // Converter a lista de variedades para JSON string
+        this.product.st_variety = JSON.stringify(this.varietyList);
 
         const productRequest: ProductRequest = {
             id_brand: this.product.id_brand,
@@ -510,14 +531,16 @@ export class ProductCrud implements OnInit {
                 // Atualiza a linha existente
                 this.varietyList[this.selectedVarietyIndex] = {
                     variety: this.currentVariety,
-                    price: Number(this.currentPrice)
+                    price: Number(this.currentPrice),
+                    status: 'active'
                 };
                 this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Variedade atualizada', life: 3000 });
             } else {
                 // Adiciona nova linha
                 this.varietyList.push({
                     variety: this.currentVariety,
-                    price: Number(this.currentPrice)
+                    price: Number(this.currentPrice),
+                    status: 'active'
                 });
                 this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Variedade adicionada', life: 3000 });
             }
@@ -530,8 +553,9 @@ export class ProductCrud implements OnInit {
     }
 
     // Método para remover variedade da lista
-    removeVariety(index: number) {
-        this.varietyList.splice(index, 1);
+    removeVariety(index: number, event: Event) {
+        event.stopPropagation(); // Evita que o evento de clique da linha seja disparado
+        this.varietyList[index].status = 'deleted';
         if (this.selectedVarietyIndex === index) {
             this.currentVariety = '';
             this.currentPrice = 0;
@@ -540,10 +564,12 @@ export class ProductCrud implements OnInit {
     }
 
     // Método para selecionar variedade da lista
-    selectVariety(variety: {variety: string, price: number}, index: number) {
-        this.currentVariety = variety.variety;
-        this.currentPrice = variety.price;
-        this.selectedVarietyIndex = index;
-        this.messageService.add({ severity: 'info', summary: 'Selecionado', detail: 'Variedade selecionada para edição', life: 3000 });
+    selectVariety(variety: {variety: string, price: number, status?: string}, index: number) {
+        if (variety.status !== 'deleted') {
+            this.currentVariety = variety.variety;
+            this.currentPrice = variety.price;
+            this.selectedVarietyIndex = index;
+            this.messageService.add({ severity: 'info', summary: 'Selecionado', detail: 'Variedade selecionada para edição', life: 3000 });
+        }
     }
 }

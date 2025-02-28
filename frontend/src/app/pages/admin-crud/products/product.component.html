@@ -154,7 +154,7 @@
                 </div>
 
                 <div class="mt-4">
-                    <p-table [value]="varietyList" [tableStyle]="{ 'min-width': '100%' }">
+                    <p-table [value]="filteredVarietyList" [tableStyle]="{ 'min-width': '100%' }">
                         <ng-template pTemplate="header">
                             <tr>
                                 <th>Variedade</th>
@@ -168,7 +168,7 @@
                                 <td>{{variety.variety}}</td>
                                 <td>{{variety.price | currency:'BRL':'symbol':'1.2-2':'pt-BR'}}</td>
                                 <td>
-                                    <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (onClick)="removeVariety(i)" />
+                                    <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (onClick)="removeVariety(i, $event)" />
                                 </td>
                             </tr>
                         </ng-template>
