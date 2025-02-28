@@ -38,17 +38,13 @@
             <th style="width: 3rem">
                 <p-tableHeaderCheckbox />
             </th>
-            <th pSortableColumn="id" style="min-width: 16rem">
-                ID
-                <p-sortIcon field="id" />
-            </th>
-            <th pSortableColumn="name" style="min-width:16rem">
-                Nome
-                <p-sortIcon field="name" />
-            </th>
             <th pSortableColumn="client_name" style="min-width:16rem">
                 Cliente
                 <p-sortIcon field="client_name" />
+            </th>            
+            <th pSortableColumn="name" style="min-width:16rem">
+                Marca
+                <p-sortIcon field="name" />
             </th>
             <th pSortableColumn="status" style="min-width: 10rem">
                 Status
@@ -62,9 +58,8 @@
             <td style="width: 3rem">
                 <p-tableCheckbox [value]="brand" />
             </td>
-            <td style="min-width: 16rem">{{ brand.id }}</td>
-            <td style="min-width: 16rem">{{ brand.name }}</td>
             <td style="min-width: 16rem">{{ brand.client_name }}</td>
+            <td style="min-width: 16rem">{{ brand.name }}</td>
             <td>
                 <p-tag [value]="getStatusLabel(brand.status)" [severity]="getSeverity(brand.status)" />
             </td>

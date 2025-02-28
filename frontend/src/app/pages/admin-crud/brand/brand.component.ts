@@ -105,56 +105,39 @@ export class BrandCrud implements OnInit {
 
     ngOnInit() {
         this.loadBrandData();
-        this.loadClients();
     }
 
     loadBrandData() {
-        this.companyService.getClients().subscribe({
-            next: (companies: CompanyResponse[]) => {
+        forkJoin({
+            companies: this.companyService.getClients(),
+            brands: this.brandService.getBrands()
+        }).subscribe({
+            next: ({ companies, brands }) => {
+                // Configurar clientes para o dropdown
+                this.clients = companies.map(company => ({
+                    label: company.st_name,
+                    value: company.id
+                }));
+
                 // Criar um Map de empresas para acesso rápido
                 const companyMap = new Map(companies.map(company => [company.id, company]));
-
-                // Criar um array de observables para todas as chamadas de getBrands
-                const brandRequests = companies.map(company => 
-                    this.brandService.getBrands(company.id)
-                );
-
-                // Executar todas as chamadas em paralelo
-                forkJoin(brandRequests).subscribe({
-                    next: (brandsArrays) => {
-                        // Combinar todos os arrays de marcas em um único array e remover duplicatas
-                        const uniqueBrands = new Map();
-                        brandsArrays.flat().forEach(brand => {
-                            uniqueBrands.set(brand.id_brand, {
-                                id: brand.id_brand,
-                                name: brand.st_brand,
-                                status: brand.st_status,
-                                client_name: companyMap.get(brand.id_client)?.st_name || 'Cliente não encontrado'
-                            });
-                        });
-                        
-                        const allBrands = Array.from(uniqueBrands.values());
-                        this.brands.set(allBrands);
-                    },
-                    error: (error) => {
-                        this.messageService.add({
-                            severity: 'error',
-                            summary: 'Erro',
-                            detail: 'Erro ao carregar as marcas',
-                            life: 3000
-                        });
-                        console.error('Erro ao carregar marcas:', error);
-                    }
-                });
+                
+                // Configurar marcas
+                this.brands.set(brands.map(brand => ({
+                    id: brand.id_brand,
+                    name: brand.st_brand,
+                    status: brand.st_status,
+                    client_name: companyMap.get(brand.id_client)?.st_name || 'Cliente não encontrado'
+                })));
             },
             error: (error) => {
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Erro',
-                    detail: 'Erro ao carregar os clientes',
+                    detail: 'Erro ao carregar os dados',
                     life: 3000
                 });
-                console.error('Erro ao carregar clientes:', error);
+                console.error('Erro ao carregar dados:', error);
             }
         });
 
@@ -216,10 +199,8 @@ export class BrandCrud implements OnInit {
             header: 'Confirmar',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                // Encontrar o ID do cliente baseado no client_name
-                const client = this.clients.find(c => c.label === brand.client_name);
-                if (client && brand.id) {
-                    this.brandService.deleteBrand(client.value, brand.id).subscribe({
+                if (brand.id) {
+                    this.brandService.deleteBrand(brand.id).subscribe({
                         next: () => {
                             this.messageService.add({
                                 severity: 'success',
@@ -259,12 +240,12 @@ export class BrandCrud implements OnInit {
                 if (index >= 0) {
                     // Criar brandRequest para atualização
                     const brandRequest = {
-                        id_client: this.brand.client_id,
                         st_brand: this.brand.name,
-                        st_status: this.brand.status
+                        st_status: this.brand.status,
+                        id_client: this.brand.client_id
                     };
 
-                    this.brandService.putBrand(this.brand.client_id, this.brand.id, brandRequest).subscribe({
+                    this.brandService.putBrand(this.brand.id, brandRequest).subscribe({
                         next: (response) => {
                             this.messageService.add({
                                 severity: 'success',
@@ -290,12 +271,12 @@ export class BrandCrud implements OnInit {
             } else {
                 // Criar nova marca
                 const brandRequest = {
-                    id_client: this.brand.client_id,
                     st_brand: this.brand.name,
-                    st_status: this.brand.status
+                    st_status: this.brand.status,
+                    id_client: this.brand.client_id
                 };
 
-                this.brandService.postBrand(this.brand.client_id, brandRequest).subscribe({
+                this.brandService.postBrand(brandRequest).subscribe({
                     next: (response) => {
                         this.messageService.add({
                             severity: 'success',

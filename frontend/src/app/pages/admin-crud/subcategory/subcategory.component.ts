@@ -92,30 +92,26 @@ export class SubCategoryCrud implements OnInit {
         this.categoryService.getCategories().subscribe(
             (data) => {
                 this.categories.set(data);
-                
-                // Para cada categoria, buscar suas subcategorias
-                data.forEach(category => {
-                    this.subCategoryService.getSubCategories(category.id_category).subscribe(
-                        (subCategories) => {
-                            const currentSubCategories = this.subCategories();
-                            this.subCategories.set([...currentSubCategories, ...subCategories]);
-                        },
-                        (error) => {
-                            this.messageService.add({
-                                severity: 'error',
-                                summary: 'Erro',
-                                detail: `Erro ao carregar subcategorias da categoria ${category.st_category}`,
-                                life: 3000
-                            });
-                        }
-                    );
-                });
             },
             (error) => {
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Erro',
                     detail: 'Erro ao carregar categorias',
+                    life: 3000
+                });
+            }
+        );
+
+        this.subCategoryService.getSubCategories().subscribe(
+            (subCategories) => {
+                this.subCategories.set(subCategories);
+            },
+            (error) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: 'Erro ao carregar subcategorias',
                     life: 3000
                 });
             }
@@ -173,7 +169,7 @@ export class SubCategoryCrud implements OnInit {
             header: 'Confirmar',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.subCategoryService.deleteSubCategory(subCategory.id_category, subCategory.id_subcategory).subscribe(
+                this.subCategoryService.deleteSubCategory(subCategory.id_subcategory).subscribe(
                     () => {
                         this.subCategories.set(this.subCategories().filter(sc => sc.id_subcategory !== subCategory.id_subcategory));
                         this.messageService.add({
@@ -204,7 +200,7 @@ export class SubCategoryCrud implements OnInit {
             accept: () => {
                 if (this.selectedSubCategories) {
                     const deletePromises = this.selectedSubCategories.map(subCategory =>
-                        this.subCategoryService.deleteSubCategory(subCategory.id_category, subCategory.id_subcategory)
+                        this.subCategoryService.deleteSubCategory(subCategory.id_subcategory)
                     );
 
                     // Executar todas as exclusões em paralelo
@@ -250,12 +246,7 @@ export class SubCategoryCrud implements OnInit {
             };
 
             if (this.subCategory.id_subcategory) {
-                // Atualizar subcategoria existente
-                this.subCategoryService.putSubCategory(
-                    this.subCategory.id_category,
-                    this.subCategory.id_subcategory,
-                    subCategoryRequest
-                ).subscribe(
+                this.subCategoryService.putSubCategory(this.subCategory.id_subcategory, subCategoryRequest).subscribe(
                     (response) => {
                         const index = this.subCategories().findIndex(
                             sc => sc.id_subcategory === this.subCategory.id_subcategory
@@ -286,10 +277,7 @@ export class SubCategoryCrud implements OnInit {
                 );
             } else {
                 // Criar nova subcategoria
-                this.subCategoryService.postSubCategory(
-                    this.subCategory.id_category,
-                    subCategoryRequest
-                ).subscribe(
+                this.subCategoryService.postSubCategory(subCategoryRequest).subscribe(
                     (response) => {
                         this.subCategories.set([...this.subCategories(), response]);
                         this.messageService.add({

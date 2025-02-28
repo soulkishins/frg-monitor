@@ -8,32 +8,32 @@ import { SubCategoryResponse, SubCategoryRequest } from '../models/sub-category.
   providedIn: 'root'
 })
 export class SubCategoryService {
-  private readonly baseUrl = `${environment.api_url}/categoria`;
+  private readonly baseUrl = `${environment.api_url}/sub-categoria`;
 
   constructor(private http: HttpClient) { }
 
-  getSubCategories(categoryId: string): Observable<SubCategoryResponse[]> {
-    const url = `${this.baseUrl}/${categoryId}/sub-categoria`;
+  getSubCategories(): Observable<SubCategoryResponse[]> {
+    const url = `${this.baseUrl}`;
     return this.http.get<SubCategoryResponse[]>(url);
   }
 
-  getSubCategory(categoryId: string, subCategoryId: string): Observable<SubCategoryResponse> {
-    const url = `${this.baseUrl}/${categoryId}/sub-categoria/${subCategoryId}`;
+  getSubCategory(subCategoryId: string): Observable<SubCategoryResponse> {
+    const url = `${this.baseUrl}/${subCategoryId}`;
     return this.http.get<SubCategoryResponse>(url);
   }
 
-  postSubCategory(categoryId: string, subCategory: SubCategoryRequest): Observable<SubCategoryResponse> {
-    const url = `${this.baseUrl}/${categoryId}/sub-categoria`;
+  postSubCategory(subCategory: SubCategoryRequest): Observable<SubCategoryResponse> {
+    const url = `${this.baseUrl}`;
     return this.http.post<SubCategoryResponse>(url, subCategory);
   }  
 
-  putSubCategory(categoryId: string, subCategoryId: string, subCategory: SubCategoryRequest): Observable<SubCategoryResponse> {
-    const url = `${this.baseUrl}/${categoryId}/sub-categoria/${subCategoryId}`;
+  putSubCategory(subCategoryId: string, subCategory: SubCategoryRequest): Observable<SubCategoryResponse> {
+    const url = `${this.baseUrl}/${subCategoryId}`;
     return this.http.put<SubCategoryResponse>(url, subCategory);
   }
 
-  deleteSubCategory(categoryId: string, subCategoryId: string): Observable<SubCategoryResponse[]> {
-    const url = `${this.baseUrl}/${categoryId}/sub-categoria/${subCategoryId}`;
+  deleteSubCategory(subCategoryId: string): Observable<SubCategoryResponse[]> {
+    const url = `${this.baseUrl}/${subCategoryId}`;
     return this.http.delete<SubCategoryResponse[]>(url);
   }
 

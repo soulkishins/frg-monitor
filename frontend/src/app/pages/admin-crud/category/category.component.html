@@ -38,10 +38,6 @@
             <th style="width: 3rem">
                 <p-tableHeaderCheckbox />
             </th>
-            <th pSortableColumn="id_category" style="min-width:10rem">
-                ID
-                <p-sortIcon field="id_category" />
-            </th>
             <th pSortableColumn="st_category" style="min-width:16rem">
                 Descrição
                 <p-sortIcon field="st_category" />
@@ -58,7 +54,6 @@
             <td>
                 <p-tableCheckbox [value]="category" />
             </td>
-            <td>{{ category.id_category }}</td>
             <td>{{ category.st_category }}</td>
             <td>{{ category.st_status }}</td>
             <td>

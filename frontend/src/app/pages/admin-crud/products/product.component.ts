@@ -111,8 +111,11 @@ export class ProductCrud implements OnInit {
         this.categoryService.getCategories().pipe(
             mergeMap((categories: CategoryResponse[]) => {
                 const subCategoryRequests = categories.map(category =>
-                    this.subCategoryService.getSubCategories(category.id_category).pipe(
-                        map(subcategories => ({ category, subcategories }))
+                    this.subCategoryService.getSubCategories().pipe(
+                        map(subcategories => ({ 
+                            category, 
+                            subcategories: subcategories.filter(sc => sc.id_category === category.id_category) 
+                        }))
                     )
                 );
                 return forkJoin(subCategoryRequests).pipe(
@@ -133,7 +136,7 @@ export class ProductCrud implements OnInit {
                         this.companyService.getClients().pipe(
                             mergeMap((companies: CompanyResponse[]) => {
                                 const brandRequests = companies.map(company =>
-                                    this.brandService.getBrands(company.id).pipe(
+                                    this.brandService.getBrands().pipe(
                                         mergeMap((brands: BrandResponse[]) => {
                                             const productRequests = brands.map(brand =>
                                                 this.productService.getProducts(company.id, brand.id_brand).pipe(
@@ -218,7 +221,7 @@ export class ProductCrud implements OnInit {
             this.brands = [];
             return;
         }
-        this.brandService.getBrands(clientId).subscribe({
+        this.brandService.getBrands().subscribe({
             next: (data) => {
                 this.brands = data;
             },
@@ -254,9 +257,9 @@ export class ProductCrud implements OnInit {
             this.subcategories = [];
             return;
         }
-        this.subCategoryService.getSubCategories(categoryId).subscribe({
+        this.subCategoryService.getSubCategories().subscribe({
             next: (data) => {
-                this.subcategories = data;
+                this.subcategories = data.filter(sc => sc.id_category === categoryId);
             },
             error: (error) => {
                 this.messageService.add({
@@ -318,7 +321,7 @@ export class ProductCrud implements OnInit {
                     this.selectedClient = client.id;
                     
                     // Carregar marcas do cliente selecionado
-                    this.brandService.getBrands(client.id).subscribe({
+                    this.brandService.getBrands().subscribe({
                         next: (brands) => {
                             this.brands = brands;
                         },
@@ -351,9 +354,9 @@ export class ProductCrud implements OnInit {
                 this.selectedCategory = categoryId;
                 
                 // Carregar subcategorias da categoria selecionada
-                this.subCategoryService.getSubCategories(categoryId).subscribe({
-                    next: (subcategories) => {
-                        this.subcategories = subcategories;
+                this.subCategoryService.getSubCategories().subscribe({
+                    next: (data) => {
+                        this.subcategories = data.filter(sc => sc.id_category === categoryId);
                     },
                     error: (error) => {
                         this.messageService.add({
@@ -415,7 +418,7 @@ export class ProductCrud implements OnInit {
                         if (!company) {
                             throw new Error('Cliente não encontrado');
                         }
-                        return this.brandService.getBrands(company.id).pipe(
+                        return this.brandService.getBrands().pipe(
                             map(brands => {
                                 const brand = brands.find(b => b.st_brand === product.st_brand);
                                 if (!brand) {
