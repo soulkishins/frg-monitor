@@ -1,4 +1,6 @@
 import { Component, OnInit, signal, ViewChild } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localePt from '@angular/common/locales/pt';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Table, TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
@@ -32,6 +34,10 @@ import { forkJoin } from 'rxjs';
 import { mergeMap, map } from 'rxjs/operators';
 import { ProductRequest } from '../../models/product.model';
 import { Column, ExportColumn } from '../../models/global.model';
+import { LOCALE_ID } from '@angular/core';
+
+// Registrar o locale
+registerLocaleData(localePt);
 
 @Component({
     selector: 'app-crud',
@@ -57,7 +63,16 @@ import { Column, ExportColumn } from '../../models/global.model';
         ConfirmDialogModule
     ],
     templateUrl: './product.component.html',
-    providers: [MessageService, ProductService, CompanyService, BrandService, CategoryService, SubCategoryService, ConfirmationService]
+    providers: [
+        MessageService, 
+        ProductService, 
+        CompanyService, 
+        BrandService, 
+        CategoryService, 
+        SubCategoryService, 
+        ConfirmationService,
+        { provide: LOCALE_ID, useValue: 'pt-BR' }
+    ]
 })
 export class ProductCrud implements OnInit {
     productDialog: boolean = false;
@@ -71,6 +86,12 @@ export class ProductCrud implements OnInit {
     submitted: boolean = false;
 
     statuses!: any[];
+
+    // Novas propriedades para variedades e preços
+    currentVariety: string = '';
+    currentPrice: number = 0;
+    varietyList: Array<{variety: string, price: number}> = [];
+    selectedVarietyIndex: number = -1;
 
     clients: CompanyResponse[] = [];
     brands: BrandResponse[] = [];
@@ -307,6 +328,10 @@ export class ProductCrud implements OnInit {
         this.loadCategories();
         this.submitted = false;
         this.productDialog = true;
+        this.varietyList = [];
+        this.currentVariety = '';
+        this.currentPrice = 0;
+        this.selectedVarietyIndex = -1;
     }
 
     editProduct(product: ProductResponse) {
@@ -476,5 +501,49 @@ export class ProductCrud implements OnInit {
 
     onGlobalFilter(table: Table, event: Event) {
         table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+    }
+
+    // Método para adicionar ou atualizar variedade na lista
+    addVariety() {
+        if (this.currentVariety && this.currentPrice > 0) {
+            if (this.selectedVarietyIndex > -1) {
+                // Atualiza a linha existente
+                this.varietyList[this.selectedVarietyIndex] = {
+                    variety: this.currentVariety,
+                    price: Number(this.currentPrice)
+                };
+                this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Variedade atualizada', life: 3000 });
+            } else {
+                // Adiciona nova linha
+                this.varietyList.push({
+                    variety: this.currentVariety,
+                    price: Number(this.currentPrice)
+                });
+                this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Variedade adicionada', life: 3000 });
+            }
+            this.currentVariety = '';
+            this.currentPrice = 0;
+            this.selectedVarietyIndex = -1;
+        } else {
+            this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Preencha a variedade e o preço', life: 3000 });
+        }
+    }
+
+    // Método para remover variedade da lista
+    removeVariety(index: number) {
+        this.varietyList.splice(index, 1);
+        if (this.selectedVarietyIndex === index) {
+            this.currentVariety = '';
+            this.currentPrice = 0;
+            this.selectedVarietyIndex = -1;
+        }
+    }
+
+    // Método para selecionar variedade da lista
+    selectVariety(variety: {variety: string, price: number}, index: number) {
+        this.currentVariety = variety.variety;
+        this.currentPrice = variety.price;
+        this.selectedVarietyIndex = index;
+        this.messageService.add({ severity: 'info', summary: 'Selecionado', detail: 'Variedade selecionada para edição', life: 3000 });
     }
 }
