@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CognitoUserPool, CognitoUser, AuthenticationDetails, CognitoUserSession } from 'amazon-cognito-identity-js';
+import { CognitoUserPool, CognitoUser, AuthenticationDetails, CognitoUserSession, ClientMetadata, CognitoUserAttribute } from 'amazon-cognito-identity-js';
 import { environment } from '../../../environment/environment';
 
 @Injectable({
@@ -116,7 +116,7 @@ export class CognitoService {
     });
   }
 
-  signUp(username: string, password: string, attributes: any): Promise<any> {
+  signUp(username: string, password: string, attributes: CognitoUserAttribute[], clientAttributes?: ClientMetadata): Promise<any> {
     return new Promise((resolve, reject) => {
       this.userPool.signUp(username, password, attributes, [], (err, result) => {
         if (err) {
@@ -124,7 +124,7 @@ export class CognitoService {
         } else {
           resolve(result);
         }
-      });
+      }, clientAttributes);
     });
   }
 

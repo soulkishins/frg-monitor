@@ -101,7 +101,7 @@ class Subcategory(Base, Audit):
     category = relationship("Category", back_populates="subcategories", lazy=True)
 
     def _json_fields(self):
-        return ["id_subcategory", "id_category", "st_subcategory", "st_status"] + super()._json_fields()
+        return ["id_subcategory", "id_category", "st_subcategory", "st_status", "category"] + super()._json_fields()
 
 class Client(Base, Audit):
     __tablename__ = "tb_client"
@@ -141,7 +141,7 @@ class ClientBrandProduct(Base, Audit):
     subcategory = relationship("Subcategory", lazy=True)
 
     def _json_fields(self):
-        return ["id_product", "id_brand", "id_subcategory", "st_product", "st_variety", "st_status"] + super()._json_fields()
+        return ["id_product", "id_brand", "id_subcategory", "st_product", "st_variety", "st_status", "subcategory", "brand"] + super()._json_fields()
 
 class Keyword(Base, Audit):
     __tablename__ = "tb_keyword"
