@@ -125,7 +125,7 @@ class ClientBrand(Base, Audit):
     client = relationship("Client", lazy=True)
 
     def _json_fields(self):
-        return ["id_brand", "id_client", "st_brand", "st_status"] + super()._json_fields()
+        return ["id_brand", "id_client", "st_brand", "st_status", "client"] + super()._json_fields()
 
 class ClientBrandProduct(Base, Audit):
     __tablename__ = "tb_client_brand_product"

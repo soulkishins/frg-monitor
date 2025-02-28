@@ -8,33 +8,28 @@ import { ProductResponse, ProductRequest } from '../models/product.model';
   providedIn: 'root'
 })
 export class ProductService {
-  private readonly baseUrl = `${environment.api_url}/cliente/{client}/marca/{brand}/produto`;
+  private readonly baseUrl = `${environment.api_url}/produto`;
 
   constructor(private http: HttpClient) { }
 
-  getProducts(clientId: string, brandId: string): Observable<ProductResponse[]> {
-    const url = this.baseUrl.replace('{client}', clientId).replace('{brand}', brandId);
-    return this.http.get<ProductResponse[]>(url);
+  getProducts(): Observable<ProductResponse[]> {
+    return this.http.get<ProductResponse[]>(this.baseUrl);
   }
 
-  getProduct(clientId: string, brandId: string, id: string): Observable<ProductResponse> {
-    const url = this.baseUrl.replace('{client}', clientId).replace('{brand}', brandId);
-    return this.http.get<ProductResponse>(`${url}/${id}`);
+  getProduct(id: string): Observable<ProductResponse> {
+    return this.http.get<ProductResponse>(`${this.baseUrl}/${id}`);
   }
 
-  postProduct(clientId: string, brandId: string, product: ProductRequest): Observable<ProductResponse> {
-    const url = this.baseUrl.replace('{client}', clientId).replace('{brand}', brandId);
-    return this.http.post<ProductResponse>(url, product);
+  postProduct(product: ProductRequest): Observable<ProductResponse> {
+    return this.http.post<ProductResponse>(this.baseUrl, product);
   }  
 
-  putProduct(clientId: string, brandId: string, id: string, product: ProductRequest): Observable<ProductResponse> {
-    const url = this.baseUrl.replace('{client}', clientId).replace('{brand}', brandId);
-    return this.http.put<ProductResponse>(`${url}/${id}`, product);
+  putProduct(id: string, product: ProductRequest): Observable<ProductResponse> {
+    return this.http.put<ProductResponse>(`${this.baseUrl}/${id}`, product);
   }
 
-  deleteProduct(clientId: string, brandId: string, id: string): Observable<ProductResponse[]> {
-    const url = this.baseUrl.replace('{client}', clientId).replace('{brand}', brandId);
-    return this.http.delete<ProductResponse[]>(`${url}/${id}`);
+  deleteProduct(id: string): Observable<ProductResponse[]> {
+    return this.http.delete<ProductResponse[]>(`${this.baseUrl}/${id}`);
   }
 
 }

@@ -15,7 +15,7 @@
     [rows]="10"
     [columns]="cols"
     [paginator]="true"
-    [globalFilterFields]="['id_product', 'st_client', 'st_brand', 'st_category', 'st_subcategory', 'st_product', 'st_status']"
+    [globalFilterFields]="['st_product', 'brand.client.st_name', 'brand.st_brand', 'subcategory.category.st_category', 'subcategory.st_subcategory', 'st_status']"
     [tableStyle]="{ 'min-width': '75rem' }"
     [(selection)]="selectedProducts"
     [rowHover]="true"
@@ -38,35 +38,31 @@
             <th style="width: 3rem">
                 <p-tableHeaderCheckbox />
             </th>
-            <th pSortableColumn="id_product" style="min-width:8rem">
-                ID
-                <p-sortIcon field="id_product" />
-            </th>
-            <th pSortableColumn="st_client" style="min-width:12rem">
+            <th pSortableColumn="brand.client.st_name">
                 Cliente
-                <p-sortIcon field="st_client" />
+                <p-sortIcon field="brand.client.st_name" />
             </th>
-            <th pSortableColumn="st_brand" style="min-width:12rem">
+            <th pSortableColumn="brand.st_brand">
                 Marca
-                <p-sortIcon field="st_brand" />
+                <p-sortIcon field="brand.st_brand" />
             </th>
-            <th pSortableColumn="st_category" style="min-width:12rem">
+            <th pSortableColumn="subcategory.category.st_category">
                 Categoria
-                <p-sortIcon field="st_category" />
+                <p-sortIcon field="subcategory.category.st_category" />
             </th>
-            <th pSortableColumn="st_subcategory" style="min-width:12rem">
+            <th pSortableColumn="subcategory.st_subcategory">
                 Subcategoria
-                <p-sortIcon field="st_subcategory" />
+                <p-sortIcon field="subcategory.st_subcategory" />
             </th>
-            <th pSortableColumn="st_product" style="min-width:16rem">
-                Descrição
+            <th pSortableColumn="st_product">
+                Produto
                 <p-sortIcon field="st_product" />
             </th>
-            <th pSortableColumn="st_status" style="min-width:10rem">
+            <th pSortableColumn="st_status">
                 Status
                 <p-sortIcon field="st_status" />
             </th>
-            <th style="min-width: 8rem"></th>
+            <th style="min-width: 12rem"></th>
         </tr>
     </ng-template>
     <ng-template #body let-product>
@@ -74,11 +70,10 @@
             <td>
                 <p-tableCheckbox [value]="product" />
             </td>
-            <td>{{ product.id_product }}</td>
-            <td>{{ product.st_client }}</td>
-            <td>{{ product.st_brand }}</td>
-            <td>{{ product.st_category }}</td>
-            <td>{{ product.st_subcategory }}</td>
+            <td>{{ product.brand?.client?.st_name }}</td>
+            <td>{{ product.brand?.st_brand }}</td>
+            <td>{{ product.subcategory?.category?.st_category }}</td>
+            <td>{{ product.subcategory?.st_subcategory }}</td>
             <td>{{ product.st_product }}</td>
             <td>
                 <p-tag [value]="getStatusLabel(product.st_status)" [severity]="getSeverity(product.st_status)" />
@@ -139,13 +134,6 @@
                 <label for="variety" class="block font-bold mb-3">Variedade *</label>
                 <input type="text" pInputText id="variety" [(ngModel)]="product.st_variety" required fluid />
                 <small class="text-red-500" *ngIf="submitted && !product.st_variety">Variedade é obrigatória.</small>
-            </div>
-
-            <div>
-                <label for="floorPrice" class="block font-bold mb-3">Preço de Piso da Variedade *</label>
-                <p-inputNumber id="floorPrice" [(ngModel)]="vl_floor_price" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2" 
-                    locale="pt-BR" [required]="true" placeholder="0,00" fluid />
-                <small class="text-red-500" *ngIf="submitted && !vl_floor_price">Preço de Piso é obrigatório.</small>
             </div>
         </div>
     </ng-template>

@@ -1,5 +1,5 @@
 from operations.crud_base import Crud
-from db.models import ClientBrandProduct, ClientBrand, Subcategory
+from db.models import ClientBrandProduct, ClientBrand, Subcategory, Client
 from sqlalchemy.orm import contains_eager
 
 class ClientBrandProductCrud(Crud):
@@ -7,10 +7,18 @@ class ClientBrandProductCrud(Crud):
         return ClientBrandProduct
     
     def get_joins(self, indexes, filters) -> list:
-        return (ClientBrandProduct.brand, ClientBrandProduct.subcategory, Subcategory.category)
+        return (
+            ClientBrandProduct.brand,
+            ClientBrand.client,
+            ClientBrandProduct.subcategory,
+            Subcategory.category
+        )
     
     def get_options(self) -> list:
-        return (contains_eager(ClientBrandProduct.brand), contains_eager(ClientBrandProduct.subcategory).contains_eager(Subcategory.category))
+        return (
+            contains_eager(ClientBrandProduct.brand).contains_eager(ClientBrand.client),
+            contains_eager(ClientBrandProduct.subcategory).contains_eager(Subcategory.category)
+        )
 
     def filter_by_pk(self, indexes) -> list:
         return (ClientBrandProduct.id_product == indexes['product'],)
@@ -31,7 +39,3 @@ class ClientBrandProductCrud(Crud):
             where.append(ClientBrandProduct.st_status == filters['st_status'])
 
         return where + super().filter_by(indexes, filters)
-
-    def to_model(self, indexes, data) -> ClientBrandProduct:
-        data['id_brand'] = indexes['brand']
-        return super().to_model(indexes, data)

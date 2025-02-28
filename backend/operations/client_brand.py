@@ -26,7 +26,3 @@ class ClientBrandCrud(Crud):
             where.append(ClientBrand.st_status == filters['st_status'])
 
         return where + super().filter_by(indexes, filters)
-
-    def to_model(self, indexes, data) -> ClientBrand:
-        data['id_client'] = indexes['client']
-        return super().to_model(indexes, data)
