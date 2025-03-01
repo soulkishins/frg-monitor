@@ -26,7 +26,3 @@ class SubcategoryCrud(Crud):
             where.append(Subcategory.st_status == filters['st_status'])
 
         return where + super().filter_by(indexes, filters)
-    
-    def to_model(self, indexes, data) -> Subcategory:
-        data['id_category'] = indexes['category']
-        return super().to_model(indexes, data)

@@ -1,4 +1,6 @@
 import { Component, OnInit, signal, ViewChild } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localePt from '@angular/common/locales/pt';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Table, TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
@@ -19,7 +21,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ProductService } from '../../service/product.service';
-import { ProductResponse } from '../../models/product.model';
+import { ProductResponse, Brand, Subcategory, Category, Client } from '../../models/product.model';
 import { CompanyService } from '../../service/company.service';
 import { BrandService } from '../../service/brand.service';
 import { CompanyResponse } from '../../models/company.model';
@@ -32,6 +34,10 @@ import { forkJoin } from 'rxjs';
 import { mergeMap, map } from 'rxjs/operators';
 import { ProductRequest } from '../../models/product.model';
 import { Column, ExportColumn } from '../../models/global.model';
+import { LOCALE_ID } from '@angular/core';
+
+// Registrar o locale
+registerLocaleData(localePt);
 
 @Component({
     selector: 'app-crud',
@@ -57,7 +63,16 @@ import { Column, ExportColumn } from '../../models/global.model';
         ConfirmDialogModule
     ],
     templateUrl: './product.component.html',
-    providers: [MessageService, ProductService, CompanyService, BrandService, CategoryService, SubCategoryService, ConfirmationService]
+    providers: [
+        MessageService, 
+        ProductService, 
+        CompanyService, 
+        BrandService, 
+        CategoryService, 
+        SubCategoryService, 
+        ConfirmationService,
+        { provide: LOCALE_ID, useValue: 'pt-BR' }
+    ]
 })
 export class ProductCrud implements OnInit {
     productDialog: boolean = false;
@@ -71,6 +86,17 @@ export class ProductCrud implements OnInit {
     submitted: boolean = false;
 
     statuses!: any[];
+
+    // Novas propriedades para variedades e preços
+    currentVariety: string = '';
+    currentPrice: number = 0;
+    varietyList: Array<{variety: string, price: number, status?: string}> = [];
+    selectedVarietyIndex: number = -1;
+
+    // Getter para lista filtrada
+    get filteredVarietyList() {
+        return this.varietyList.filter(v => v.status !== 'deleted');
+    }
 
     clients: CompanyResponse[] = [];
     brands: BrandResponse[] = [];
@@ -105,110 +131,47 @@ export class ProductCrud implements OnInit {
 
     ngOnInit() {
         this.loadProductData();
-    }
-
-    loadProductData() {
-        this.categoryService.getCategories().pipe(
-            mergeMap((categories: CategoryResponse[]) => {
-                const subCategoryRequests = categories.map(category =>
-                    this.subCategoryService.getSubCategories(category.id_category).pipe(
-                        map(subcategories => ({ category, subcategories }))
-                    )
-                );
-                return forkJoin(subCategoryRequests).pipe(
-                    map(results => {
-                        const categoryMap = new Map<string, string>();
-                        const subcategoryMap = new Map<string, string>();
-                        
-                        results.forEach(({ category, subcategories }) => {
-                            subcategories.forEach(subcategory => {
-                                categoryMap.set(category.id_category, category.st_category);
-                                subcategoryMap.set(subcategory.id_subcategory, subcategory.st_subcategory);
-                            });
-                        });
-                        
-                        return { categoryMap, subcategoryMap };
-                    }),
-                    mergeMap(({ categoryMap, subcategoryMap }) =>
-                        this.companyService.getClients().pipe(
-                            mergeMap((companies: CompanyResponse[]) => {
-                                const brandRequests = companies.map(company =>
-                                    this.brandService.getBrands(company.id).pipe(
-                                        mergeMap((brands: BrandResponse[]) => {
-                                            const productRequests = brands.map(brand =>
-                                                this.productService.getProducts(company.id, brand.id_brand).pipe(
-                                                    map(products => products.map(product => ({
-                                                        ...product,
-                                                        st_client: company.st_name,
-                                                        st_brand: brand.st_brand,
-                                                        st_category: categoryMap.get(product.id_subcategory.split('-')[0]) || '',
-                                                        st_subcategory: subcategoryMap.get(product.id_subcategory) || ''
-                                                    })))
-                                                )
-                                            );
-                                            return forkJoin(productRequests).pipe(
-                                                map(productsArrays => productsArrays.flat())
-                                            );
-                                        })
-                                    )
-                                );
-                                return forkJoin(brandRequests);
-                            })
-                        )
-                    )
-                );
-            })
-        ).subscribe({
-            next: (productsArrays) => {
-                const uniqueProducts = new Map();
-                productsArrays.flat().flat().forEach(product => {
-                    uniqueProducts.set(product.id_product, product);
-                });
-                
-                const allProducts = Array.from(uniqueProducts.values());
-                this.products.set(allProducts);
-            },
-            error: (error) => {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Erro',
-                    detail: 'Erro ao carregar produtos',
-                    life: 3000
-                });
-                console.error('Erro ao carregar produtos:', error);
-            }
-        });
+        this.loadClients();
+        this.loadCategories();
 
         this.statuses = [
-            { label: 'Ativo', value: 'ACTIVE' },
-            { label: 'Inativo', value: 'INACTIVE' }
+            { label: 'ATIVO', value: 'ACTIVE' },
+            { label: 'INATIVO', value: 'INACTIVE' }
         ];
 
         this.cols = [
-            { field: 'id_product', header: 'ID' },
-            { field: 'st_client', header: 'Cliente' },
-            { field: 'st_brand', header: 'Marca' },
-            { field: 'st_category', header: 'Categoria' },
-            { field: 'st_subcategory', header: 'Subcategoria' },
-            { field: 'st_product', header: 'Descrição' },
+            { field: 'brand.client.st_name', header: 'Cliente' },
+            { field: 'brand.st_brand', header: 'Marca' },
+            { field: 'subcategory.category.st_category', header: 'Categoria' },
+            { field: 'subcategory.st_subcategory', header: 'Subcategoria' },
+            { field: 'st_product', header: 'Produto' },
             { field: 'st_status', header: 'Status' }
         ];
 
-        this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
+        this.exportColumns = this.cols.map(col => ({ title: col.header, dataKey: col.field }));
+    }
+
+    loadProductData() {
+        this.productService.getProducts().subscribe({
+            next: (products) => {
+                this.products.set(products);
+                this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Produtos carregados', life: 3000 });
+            },
+            error: (error) => {
+                console.error('Erro ao carregar produtos:', error);
+                this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar produtos', life: 3000 });
+            }
+        });
     }
 
     loadClients() {
         this.companyService.getClients().subscribe({
-            next: (data) => {
-                this.clients = data;
+            next: (clients) => {
+                this.clients = clients;
             },
             error: (error) => {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Erro',
-                    detail: 'Erro ao carregar clientes',
-                    life: 3000
-                });
+                console.error('Erro ao carregar clientes:', error);
+                this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar clientes', life: 3000 });
             }
         });
     }
@@ -218,7 +181,7 @@ export class ProductCrud implements OnInit {
             this.brands = [];
             return;
         }
-        this.brandService.getBrands(clientId).subscribe({
+        this.brandService.getBrands().subscribe({
             next: (data) => {
                 this.brands = data;
             },
@@ -235,16 +198,12 @@ export class ProductCrud implements OnInit {
 
     loadCategories() {
         this.categoryService.getCategories().subscribe({
-            next: (data) => {
-                this.categories = data;
+            next: (categories) => {
+                this.categories = categories;
             },
             error: (error) => {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Erro',
-                    detail: 'Erro ao carregar categorias',
-                    life: 3000
-                });
+                console.error('Erro ao carregar categorias:', error);
+                this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar categorias', life: 3000 });
             }
         });
     }
@@ -254,9 +213,9 @@ export class ProductCrud implements OnInit {
             this.subcategories = [];
             return;
         }
-        this.subCategoryService.getSubCategories(categoryId).subscribe({
+        this.subCategoryService.getSubCategories().subscribe({
             next: (data) => {
-                this.subcategories = data;
+                this.subcategories = data.filter(sc => sc.id_category === categoryId);
             },
             error: (error) => {
                 this.messageService.add({
@@ -270,19 +229,87 @@ export class ProductCrud implements OnInit {
     }
 
     onClientChange(event: any) {
-        this.selectedClient = event.value;
-        this.loadBrands(event.value);
-        this.selectedBrand = '';
+        const clientId = event.value;
+        if (clientId) {
+            this.brandService.getBrands().subscribe({
+                next: (brands) => {
+                    this.brands = brands.filter(brand => brand.id_client === clientId);
+                },
+                error: (error) => {
+                    console.error('Erro ao carregar marcas:', error);
+                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar marcas', life: 3000 });
+                }
+            });
+        } else {
+            this.brands = [];
+        }
         this.product.id_brand = '';
     }
 
     onCategoryChange(event: any) {
-        this.selectedCategory = event.value;
-        this.loadSubcategories(event.value);
+        const categoryId = event.value;
+        if (categoryId) {
+            this.subCategoryService.getSubCategories().subscribe({
+                next: (subcategories) => {
+                    this.subcategories = subcategories.filter(subcategory => subcategory.id_category === categoryId);
+                },
+                error: (error) => {
+                    console.error('Erro ao carregar subcategorias:', error);
+                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar subcategorias', life: 3000 });
+                }
+            });
+        } else {
+            this.subcategories = [];
+        }
         this.product.id_subcategory = '';
     }
 
     openNew() {
+        const emptyCategory: Category = {
+            id_category: '',
+            st_category: '',
+            st_status: '',
+            dt_created: '',
+            st_created_by: '',
+            dt_modified: '',
+            st_modified_by: ''
+        };
+
+        const emptyClient: Client = {
+            id: '',
+            st_name: '',
+            st_document: '',
+            st_status: '',
+            dt_created: '',
+            st_created_by: '',
+            dt_modified: '',
+            st_modified_by: ''
+        };
+
+        const emptyBrand: Brand = {
+            id_brand: '',
+            id_client: '',
+            st_brand: '',
+            st_status: '',
+            client: emptyClient,
+            dt_created: '',
+            st_created_by: '',
+            dt_modified: '',
+            st_modified_by: ''
+        };
+
+        const emptySubcategory: Subcategory = {
+            id_subcategory: '',
+            id_category: '',
+            st_subcategory: '',
+            st_status: '',
+            category: emptyCategory,
+            dt_created: '',
+            st_created_by: '',
+            dt_modified: '',
+            st_modified_by: ''
+        };
+
         this.product = {
             id_product: '',
             id_brand: '',
@@ -292,8 +319,10 @@ export class ProductCrud implements OnInit {
             st_status: 'ACTIVE',
             dt_created: new Date().toISOString(),
             st_created_by: '',
-            dt_modified: null,
-            st_modified_by: null
+            dt_modified: '',
+            st_modified_by: '',
+            subcategory: emptySubcategory,
+            brand: emptyBrand
         };
         this.selectedClient = '';
         this.selectedBrand = '';
@@ -304,78 +333,56 @@ export class ProductCrud implements OnInit {
         this.loadCategories();
         this.submitted = false;
         this.productDialog = true;
+        this.varietyList = [];
+        this.currentVariety = '';
+        this.currentPrice = 0;
+        this.selectedVarietyIndex = -1;
     }
 
     editProduct(product: ProductResponse) {
         this.product = { ...product };
         
-        // Carregar clientes e selecionar o cliente atual
-        this.companyService.getClients().subscribe({
-            next: (clients) => {
-                this.clients = clients;
-                const client = clients.find(c => c.st_name === product.st_client);
-                if (client) {
-                    this.selectedClient = client.id;
-                    
-                    // Carregar marcas do cliente selecionado
-                    this.brandService.getBrands(client.id).subscribe({
-                        next: (brands) => {
-                            this.brands = brands;
-                        },
-                        error: (error) => {
-                            this.messageService.add({
-                                severity: 'error',
-                                summary: 'Erro',
-                                detail: 'Erro ao carregar marcas',
-                                life: 3000
-                            });
-                        }
-                    });
+        // Carregar lista de variedades do JSON
+        try {
+            const parsedVarieties = product.st_variety ? JSON.parse(product.st_variety) : [];
+            // Filtrar apenas variedades não deletadas ou manter o status existente
+            this.varietyList = parsedVarieties.map((v: any) => ({
+                ...v,
+                status: v.status || 'active'
+            }));
+        } catch (error) {
+            console.error('Erro ao parsear variedades:', error);
+            this.varietyList = [];
+        }
+        
+        // Carregar cliente e marca
+        if (this.product.brand?.client) {
+            this.selectedClient = this.product.brand.client.id;
+            this.brandService.getBrands().subscribe({
+                next: (brands) => {
+                    this.brands = brands.filter(b => b.id_client === this.product.brand?.client?.id);
+                },
+                error: (error) => {
+                    console.error('Erro ao carregar marcas:', error);
+                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar marcas', life: 3000 });
                 }
-            },
-            error: (error) => {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Erro',
-                    detail: 'Erro ao carregar clientes',
-                    life: 3000
-                });
-            }
-        });
+            });
+        }
 
-        // Carregar categorias e selecionar a categoria atual
-        this.categoryService.getCategories().subscribe({
-            next: (categories) => {
-                this.categories = categories;
-                const categoryId = product.id_subcategory.split('-')[0];
-                this.selectedCategory = categoryId;
-                
-                // Carregar subcategorias da categoria selecionada
-                this.subCategoryService.getSubCategories(categoryId).subscribe({
-                    next: (subcategories) => {
-                        this.subcategories = subcategories;
-                    },
-                    error: (error) => {
-                        this.messageService.add({
-                            severity: 'error',
-                            summary: 'Erro',
-                            detail: 'Erro ao carregar subcategorias',
-                            life: 3000
-                        });
-                    }
-                });
-            },
-            error: (error) => {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Erro',
-                    detail: 'Erro ao carregar categorias',
-                    life: 3000
-                });
-            }
-        });
+        // Carregar categoria e subcategoria
+        if (this.product.subcategory?.category) {
+            this.selectedCategory = this.product.subcategory.category.id_category;
+            this.subCategoryService.getSubCategories().subscribe({
+                next: (subcategories) => {
+                    this.subcategories = subcategories.filter(sc => sc.id_category === this.product.subcategory?.category?.id_category);
+                },
+                error: (error) => {
+                    console.error('Erro ao carregar subcategorias:', error);
+                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar subcategorias', life: 3000 });
+                }
+            });
+        }
 
-        this.vl_floor_price = 0;
         this.productDialog = true;
     }
 
@@ -385,14 +392,23 @@ export class ProductCrud implements OnInit {
             header: 'Confirmar',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.products.set(this.products().filter((val) => !this.selectedProducts?.includes(val)));
-                this.selectedProducts = null;
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Sucesso',
-                    detail: 'Produtos Excluídos',
-                    life: 3000
-                });
+                if (this.selectedProducts) {
+                    const deleteRequests = this.selectedProducts.map(product =>
+                        this.productService.deleteProduct(product.id_product)
+                    );
+
+                    forkJoin(deleteRequests).subscribe({
+                        next: () => {
+                            this.loadProductData();
+                            this.selectedProducts = null;
+                            this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Produtos excluídos', life: 3000 });
+                        },
+                        error: (error) => {
+                            console.error('Erro ao excluir produtos:', error);
+                            this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao excluir produtos', life: 3000 });
+                        }
+                    });
+                }
             }
         });
     }
@@ -408,54 +424,14 @@ export class ProductCrud implements OnInit {
             header: 'Confirmar',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                // Buscar o cliente e marca do produto selecionado
-                this.companyService.getClients().pipe(
-                    mergeMap((companies: CompanyResponse[]) => {
-                        const company = companies.find(c => c.st_name === product.st_client);
-                        if (!company) {
-                            throw new Error('Cliente não encontrado');
-                        }
-                        return this.brandService.getBrands(company.id).pipe(
-                            map(brands => {
-                                const brand = brands.find(b => b.st_brand === product.st_brand);
-                                if (!brand) {
-                                    throw new Error('Marca não encontrada');
-                                }
-                                return { clientId: company.id, brandId: brand.id_brand };
-                            })
-                        );
-                    })
-                ).subscribe({
-                    next: ({ clientId, brandId }) => {
-                        this.productService.deleteProduct(clientId, brandId, product.id_product).subscribe({
-                            next: () => {
-                                this.messageService.add({
-                                    severity: 'success',
-                                    summary: 'Sucesso',
-                                    detail: 'Produto Excluído',
-                                    life: 3000
-                                });
-                                this.loadProductData(); // Recarrega a lista de produtos
-                            },
-                            error: (error) => {
-                                this.messageService.add({
-                                    severity: 'error',
-                                    summary: 'Erro',
-                                    detail: 'Erro ao excluir produto',
-                                    life: 3000
-                                });
-                                console.error('Erro ao excluir produto:', error);
-                            }
-                        });
+                this.productService.deleteProduct(product.id_product).subscribe({
+                    next: () => {
+                        this.loadProductData();
+                        this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Produto excluído', life: 3000 });
                     },
                     error: (error) => {
-                        this.messageService.add({
-                            severity: 'error',
-                            summary: 'Erro',
-                            detail: 'Erro ao buscar informações do cliente/marca',
-                            life: 3000
-                        });
-                        console.error('Erro ao buscar informações:', error);
+                        console.error('Erro ao excluir produto:', error);
+                        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao excluir produto', life: 3000 });
                     }
                 });
             }
@@ -482,108 +458,118 @@ export class ProductCrud implements OnInit {
         return id;
     }
 
-    getSeverity(status: string) {
+    getSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' {
         switch (status) {
             case 'ACTIVE':
                 return 'success';
             case 'INACTIVE':
                 return 'danger';
             default:
-                return 'info';
+                return 'warn';
         }
     }
 
-    getStatusLabel(status: string) {
-        switch (status) {
-            case 'ACTIVE':
-                return 'Ativo';
-            case 'INACTIVE':
-                return 'Inativo';
-            default:
-                return status;
-        }
+    getStatusLabel(status: string): string {
+        return status === 'ACTIVE' ? 'ATIVO' : 'INATIVO';
     }
 
     saveProduct() {
         this.submitted = true;
 
-        if (this.product.st_product?.trim() && this.selectedClient && this.product.id_brand && 
-            this.product.id_subcategory && this.product.st_variety && this.vl_floor_price !== undefined) {
-            
-            const productRequest: ProductRequest = {
-                id_brand: this.product.id_brand,
-                id_subcategory: this.product.id_subcategory,
-                st_product: this.product.st_product,
-                st_variety: this.product.st_variety,
-                st_status: this.product.st_status
-            };
-
-            if (this.product.id_product) {
-                // Atualizar produto existente
-                this.productService.putProduct(this.selectedClient, this.product.id_brand, this.product.id_product, productRequest)
-                    .subscribe({
-                        next: (response) => {
-                            this.messageService.add({
-                                severity: 'success',
-                                summary: 'Sucesso',
-                                detail: 'Produto Atualizado',
-                                life: 3000
-                            });
-                            this.loadProductData(); // Recarrega a lista de produtos
-                        },
-                        error: (error) => {
-                            this.messageService.add({
-                                severity: 'error',
-                                summary: 'Erro',
-                                detail: 'Erro ao atualizar produto',
-                                life: 3000
-                            });
-                            console.error('Erro ao atualizar produto:', error);
-                        }
-                    });
-            } else {
-                // Criar novo produto
-                this.productService.postProduct(this.selectedClient, this.product.id_brand, productRequest)
-                    .subscribe({
-                        next: (response) => {
-                            this.messageService.add({
-                                severity: 'success',
-                                summary: 'Sucesso',
-                                detail: 'Produto Criado',
-                                life: 3000
-                            });
-                            this.loadProductData(); // Recarrega a lista de produtos
-                        },
-                        error: (error) => {
-                            this.messageService.add({
-                                severity: 'error',
-                                summary: 'Erro',
-                                detail: 'Erro ao criar produto',
-                                life: 3000
-                            });
-                            console.error('Erro ao criar produto:', error);
-                        }
-                    });
-            }
-
-            this.productDialog = false;
-            this.product = {
-                id_product: '',
-                id_brand: '',
-                id_subcategory: '',
-                st_product: '',
-                st_variety: '',
-                st_status: '',
-                dt_created: new Date().toISOString(),
-                st_created_by: '',
-                dt_modified: null,
-                st_modified_by: null
-            };
-            this.vl_floor_price = 0;
+        if (!this.product.st_product || !this.product.st_status || 
+            !this.product.id_brand || !this.product.id_subcategory) {
+            return;
         }
+
+        // Converter a lista de variedades para JSON string
+        this.product.st_variety = JSON.stringify(this.varietyList);
+
+        const productRequest: ProductRequest = {
+            id_brand: this.product.id_brand,
+            id_subcategory: this.product.id_subcategory,
+            st_product: this.product.st_product,
+            st_variety: this.product.st_variety,
+            st_status: this.product.st_status
+        };
+
+        if (this.product.id_product) {
+            this.productService.putProduct(this.product.id_product, productRequest).subscribe({
+                next: (response) => {
+                    this.loadProductData();
+                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Produto atualizado', life: 3000 });
+                },
+                error: (error) => {
+                    console.error('Erro ao atualizar produto:', error);
+                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao atualizar produto', life: 3000 });
+                }
+            });
+        } else {
+            this.productService.postProduct(productRequest).subscribe({
+                next: (response) => {
+                    this.loadProductData();
+                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Produto criado', life: 3000 });
+                },
+                error: (error) => {
+                    console.error('Erro ao criar produto:', error);
+                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao criar produto', life: 3000 });
+                }
+            });
+        }
+
+        this.productDialog = false;
+        this.product = {} as ProductResponse;
     }
 
     onGlobalFilter(table: Table, event: Event) {
         table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+    }
+
+    // Método para adicionar ou atualizar variedade na lista
+    addVariety() {
+        if (this.currentVariety && this.currentPrice > 0) {
+            if (this.selectedVarietyIndex > -1) {
+                // Atualiza a linha existente
+                this.varietyList[this.selectedVarietyIndex] = {
+                    variety: this.currentVariety,
+                    price: Number(this.currentPrice),
+                    status: 'active'
+                };
+                this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Variedade atualizada', life: 3000 });
+            } else {
+                // Adiciona nova linha
+                this.varietyList.push({
+                    variety: this.currentVariety,
+                    price: Number(this.currentPrice),
+                    status: 'active'
+                });
+                this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Variedade adicionada', life: 3000 });
+            }
+            this.currentVariety = '';
+            this.currentPrice = 0;
+            this.selectedVarietyIndex = -1;
+        } else {
+            this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Preencha a variedade e o preço', life: 3000 });
+        }
+    }
+
+    // Método para remover variedade da lista
+    removeVariety(index: number, event: Event) {
+        event.stopPropagation(); // Evita que o evento de clique da linha seja disparado
+        this.varietyList[index].status = 'deleted';
+        if (this.selectedVarietyIndex === index) {
+            this.currentVariety = '';
+            this.currentPrice = 0;
+            this.selectedVarietyIndex = -1;
+        }
+    }
+
+    // Método para selecionar variedade da lista
+    selectVariety(variety: {variety: string, price: number, status?: string}, index: number) {
+        if (variety.status !== 'deleted') {
+            this.currentVariety = variety.variety;
+            this.currentPrice = variety.price;
+            this.selectedVarietyIndex = index;
+            this.messageService.add({ severity: 'info', summary: 'Selecionado', detail: 'Variedade selecionada para edição', life: 3000 });
+        }
     }
 }

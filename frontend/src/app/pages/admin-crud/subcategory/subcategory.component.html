@@ -38,16 +38,12 @@
             <th style="width: 3rem">
                 <p-tableHeaderCheckbox />
             </th>
-            <th pSortableColumn="id_subcategory" style="min-width: 12rem">
-                ID
-                <p-sortIcon field="id_subcategory" />
-            </th>
             <th pSortableColumn="id_category" style="min-width: 12rem">
                 Categoria
                 <p-sortIcon field="id_category" />
             </th>
             <th pSortableColumn="st_subcategory" style="min-width: 16rem">
-                Descrição
+                Subcategoria
                 <p-sortIcon field="st_subcategory" />
             </th>
             <th pSortableColumn="st_status" style="min-width: 10rem">
@@ -62,7 +58,6 @@
             <td>
                 <p-tableCheckbox [value]="subCategory" />
             </td>
-            <td>{{ subCategory.id_subcategory }}</td>
             <td>{{ getCategoryName(subCategory.id_category) }}</td>
             <td>{{ subCategory.st_subcategory }}</td>
             <td>
