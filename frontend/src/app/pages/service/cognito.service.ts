@@ -40,7 +40,7 @@ export class CognitoService {
     });
   }
 
-  login(username: string, password: string): Promise<CognitoUserSession> {
+  login(username: string, password: string, rememberMe: boolean): Promise<CognitoUserSession> {
     const authenticationDetails = new AuthenticationDetails({
       Username: username,
       Password: password,
@@ -56,7 +56,22 @@ export class CognitoService {
 
     return new Promise((resolve, reject) => {
       cognitoUser.authenticateUser(authenticationDetails, {
-        onSuccess: (session) => resolve(session),
+        onSuccess: (session) => {
+          // Pega os tokens
+          const idToken = session.getIdToken().getJwtToken();
+          const refreshToken = session.getRefreshToken().getToken();
+
+          if (rememberMe) {
+            // Salva no localStorage para lembrar o usuário
+            localStorage.setItem('cognitoIdToken', idToken);
+            localStorage.setItem('cognitoRefreshToken', refreshToken);
+          } else {
+            // Salva no sessionStorage para expirar quando o navegador for fechado
+            sessionStorage.setItem('cognitoIdToken', idToken);
+            sessionStorage.setItem('cognitoRefreshToken', refreshToken);
+          }
+          resolve(session);
+        },
         onFailure: (err) => reject(err),
         mfaRequired: (codeDeliveryDetails) => {
           // Notificar a UI que o MFA é necessário
@@ -67,7 +82,7 @@ export class CognitoService {
     });
   }
 
-  verifyMfaCode(code: string): Promise<CognitoUserSession> {
+  verifyMfaCode(code: string, rememberMe: boolean): Promise<CognitoUserSession> {
     if (!this.currentCognitoUser) {
       return Promise.reject('Nenhum usuário em processo de autenticação.');
     }
@@ -78,7 +93,22 @@ export class CognitoService {
         return;
       }
       this.currentCognitoUser.sendMFACode(code, {
-        onSuccess: (session) => resolve(session),
+        onSuccess: (session) => {
+          // Pega os tokens
+          const idToken = session.getIdToken().getJwtToken();
+          const refreshToken = session.getRefreshToken().getToken();
+
+          if (rememberMe) {
+            // Salva no localStorage para lembrar o usuário
+            localStorage.setItem('cognitoIdToken', idToken);
+            localStorage.setItem('cognitoRefreshToken', refreshToken);
+          } else {
+            // Salva no sessionStorage para expirar quando o navegador for fechado
+            sessionStorage.setItem('cognitoIdToken', idToken);
+            sessionStorage.setItem('cognitoRefreshToken', refreshToken);
+          }
+          resolve(session);
+        },
         onFailure: (err) => reject(err),
       });
     });
@@ -128,6 +158,44 @@ export class CognitoService {
     });
   }
 
+  confirmSignUp(username: string, verificationCode: string, clientAttributes?: ClientMetadata): Promise<any> {
+    const userData = {
+      Username: username,
+      Pool: this.userPool
+    };
+
+    const cognitoUser = new CognitoUser(userData);
+
+    return new Promise((resolve, reject) => {
+      cognitoUser.confirmRegistration(verificationCode, false,
+        (error: any, success: any) => {
+          if (error)
+            reject(error);
+          else
+            resolve(success)
+      }, clientAttributes);
+    });
+  }
+
+  resendCode(username: string, clientAttributes?: ClientMetadata): Promise<any> {
+    const userData = {
+      Username: username,
+      Pool: this.userPool
+    };
+
+    const cognitoUser = new CognitoUser(userData);
+
+    return new Promise((resolve, reject) => {
+      cognitoUser.resendConfirmationCode(
+        (error: any, success: any) => {
+          if (error)
+            reject(error);
+          else
+            resolve(success)
+      }, clientAttributes);
+    });
+  }
+
   refreshSession(): Promise<CognitoUserSession> {
     const cognitoUser = this.userPool.getCurrentUser();
 
@@ -154,10 +222,38 @@ export class CognitoService {
     });
   }
 
+  restoreSession() {
+    return new Promise((resolve, reject) => {
+      const storedRefreshToken = localStorage.getItem('cognitoRefreshToken') || sessionStorage.getItem('cognitoRefreshToken');
+      if (!storedRefreshToken) {
+        return reject('Nenhuma sessão encontrada.');
+      }
+
+      const user = this.userPool.getCurrentUser();
+      if (!user) {
+        return reject('Usuário não encontrado.');
+      }
+
+      user.getSession((err: any, session: any) => {
+        if (err) {
+          console.error('Erro ao restaurar sessão:', err);
+          return reject(err);
+        }
+
+        console.log('Sessão restaurada:', session);
+        resolve(session);
+      });
+    });
+  }
+
   logout(): void {
     const cognitoUser = this.userPool.getCurrentUser();
     if (cognitoUser) {
       cognitoUser.signOut();
+      localStorage.removeItem('cognitoIdToken');
+      localStorage.removeItem('cognitoRefreshToken');
+      sessionStorage.removeItem('cognitoIdToken');
+      sessionStorage.removeItem('cognitoRefreshToken');
     }
   }
 }

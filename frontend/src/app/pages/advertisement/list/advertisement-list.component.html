@@ -39,48 +39,50 @@
             <th style="width: 3rem">
                 <p-tableHeaderCheckbox />
             </th>
-            <th style="min-width: 16rem">Code</th>
-            <th pSortableColumn="name" style="min-width:16rem">
-                Name
-                <p-sortIcon field="name" />
+            <th pSortableColumn="st_plataform" style="min-width: 16rem">
+                Plataforma
+                <p-sortIcon field="st_plataform" />
             </th>
-            <th>Image</th>
-            <th pSortableColumn="price" style="min-width: 8rem">
-                Price
-                <p-sortIcon field="price" />
+            <th pSortableColumn="st_plataform_id" style="min-width:16rem">
+                ID Plataforma
+                <p-sortIcon field="st_plataform_id" />
             </th>
-            <th pSortableColumn="category" style="min-width:10rem">
-                Category
-                <p-sortIcon field="category" />
+            <th pSortableColumn="st_brand" style="min-width: 8rem">
+                Marca
+                <p-sortIcon field="st_brand" />
             </th>
-            <th pSortableColumn="rating" style="min-width: 12rem">
-                Reviews
-                <p-sortIcon field="rating" />
+            <th pSortableColumn="st_product" style="min-width:10rem">
+                Produto
+                <p-sortIcon field="st_product" />
             </th>
-            <th pSortableColumn="inventoryStatus" style="min-width: 12rem">
+            <th pSortableColumn="st_title" style="min-width: 12rem">
+                Título
+                <p-sortIcon field="st_title" />
+            </th>
+            <th pSortableColumn="db_price" style="min-width: 12rem">
+                Preço
+                <p-sortIcon field="db_price" />
+            </th>
+            <th pSortableColumn="st_status" style="min-width: 12rem">
                 Status
-                <p-sortIcon field="inventoryStatus" />
+                <p-sortIcon field="st_status" />
             </th>
             <th style="min-width: 12rem"></th>
         </tr>
     </ng-template>
-    <ng-template #body let-Advertisement>
+    <ng-template #body let-advertisement>
         <tr>
             <td style="width: 3rem">
-                <p-tableCheckbox [value]="Advertisement" />
+                <p-tableCheckbox [value]="advertisement" />
             </td>
-            <td style="min-width: 12rem">{{ Advertisement.code }}</td>
-            <td style="min-width: 16rem">{{ Advertisement.name }}</td>
+            <td style="min-width: 12rem">{{ advertisement.st_plataform }}</td>
+            <td style="min-width: 16rem">{{ advertisement.st_plataform_id }}</td>
+            <td>{{ advertisement.st_brand }}</td>
+            <td>{{ advertisement.st_product }}</td>
+            <td>{{ advertisement.st_title }}</td>
+            <td>{{ advertisement.db_price | currency: 'BRL' }}</td>
             <td>
-                <img [src]="'https://primefaces.org/cdn/primeng/images/demo/Advertisement/' + Advertisement.image" [alt]="Advertisement.name" style="width: 64px" class="rounded" />
-            </td>
-            <td>{{ Advertisement.price | currency: 'USD' }}</td>
-            <td>{{ Advertisement.category }}</td>
-            <td>
-                <p-rating [(ngModel)]="Advertisement.rating" [readonly]="true" />
-            </td>
-            <td>
-                <p-tag [value]="Advertisement.inventoryStatus" />
+                <p-tag [value]="advertisement.st_status" [severity]="getSeverity(advertisement.st_status)"/>
             </td>
             <td>
                 <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" />

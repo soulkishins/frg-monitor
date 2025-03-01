@@ -31,7 +31,8 @@ export class Login {
     login() {
         this.cognitoService.login(
             this.username,
-            this.password
+            this.password,
+            false
         )
         .then((session) => {
             console.log('Login bem-sucedido:', session);
@@ -47,7 +48,7 @@ export class Login {
     }
 
     submitMfaCode() {
-        this.cognitoService.verifyMfaCode(this.mfaCode).then((session) => {
+        this.cognitoService.verifyMfaCode(this.mfaCode, false).then((session) => {
             console.log('Login bem-sucedido com MFA:', session);
             this.mfaRequired = false;
         }).catch((error) => {

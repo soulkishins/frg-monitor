@@ -87,11 +87,11 @@ export class AdvertisementList implements OnInit {
         .subscribe(this.Advertisements.set);
 
         this.statuses = [
-            { label: 'Novo', value: 'NEW' },
-            { label: 'Erro de Leitura', value: 'ERROR' },
-            { label: 'Para Denuciar', value: 'REPORT' },
-            { label: 'Denuciado', value: 'REPORTED' },
-            { label: 'Revisão Manual', value: 'INVALIDATE' },
+            { label: 'Novo', value: 'NEW', color: 'info' },
+            { label: 'Erro de Leitura', value: 'ERROR', color: 'danger' },
+            { label: 'Para Denuciar', value: 'REPORT', color: 'warn' },
+            { label: 'Denuciado', value: 'REPORTED', color: 'secondary' },
+            { label: 'Revisão Manual', value: 'INVALIDATE', color: 'contrast' },
         ];
 
         this.cols = [
@@ -127,5 +127,12 @@ export class AdvertisementList implements OnInit {
                 });
             }
         });
+    }
+
+    getSeverity(status: string): "success" | "info" | "warn" | "danger" | "secondary" | "contrast" | undefined {
+        const st = this.statuses.filter(s => s.label === status)[0];
+        if (st)
+            return st.color;
+        return undefined;
     }
 }
