@@ -5,6 +5,7 @@ class Crud:
     def __init__(self, user, session):
         self._user = user
         self._session = session
+        self._default_page_size = 100
 
     def create(self, indexes, data) -> Audit:
         model = self.to_model(indexes, data)
@@ -60,7 +61,24 @@ class Crud:
                     query = query.outerjoin(join)
         if self.has_filters(indexes, filters):
             query = query.filter(*self.filter_by(indexes, filters))
-        return query.all()
+        
+        total = query.count()
+        
+        query = query.limit(filters['page.limit'] if 'page.limit' in filters else self._default_page_size)
+        if 'page.offset' in filters:
+            query = query.offset(filters['page.offset'])
+        if 'page.sort' in filters:
+            query = query.order_by(self.get_orderby(filters['page.sort']))
+        
+        return {
+            'list': query.all(),
+            'page': {
+                'limit': filters['page.limit'] if 'page.limit' in filters else self._default_page_size,
+                'offset': filters['page.offset'] if 'page.offset' in filters else 0,
+                'sort': filters['page.sort'] if 'page.sort' in filters else 'dt_created.desc',
+                'total': total
+            }
+        }
     
     def set_attr(self, model, data, ignore = []):
         for key, value in data.items():
@@ -118,4 +136,14 @@ class Crud:
     
     def json_transform(self, method):
         return None
+    
+    def get_orderby(self, orderby: str):
+        if not orderby:
+            return self.get_model().dt_created.desc()
+        order = orderby.split('.')
+        if len(order) == 1:
+            return getattr(self.get_model(), order[0]).asc()
+        if order[1] == 'desc':
+            return getattr(self.get_model(), order[0]).desc()
+        return getattr(self.get_model(), order[0]).asc()
 

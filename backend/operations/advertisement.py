@@ -37,6 +37,30 @@ class AdvertisementCrud(Crud):
 
         return where + super().filter_by(indexes, filters)
     
+    def list(self, indexes, filters) -> list:
+        query = self._session.query(Advertisement)
+        if self.has_filters(indexes, filters):
+            query = query.filter(*self.filter_by(indexes, filters))
+
+        total = query.count()
+
+        query = query.limit(filters['page.limit'] if 'page.limit' in filters else self._default_page_size)
+        if 'page.offset' in filters:
+            query = query.offset(filters['page.offset'])
+        if 'page.sort' in filters:
+            query = query.order_by(self.get_orderby(filters['page.sort']))
+
+        list = {
+            'list': query.all(),
+            'page': {
+                'limit': filters['page.limit'] if 'page.limit' in filters else self._default_page_size,
+                'offset': filters['page.offset'] if 'page.offset' in filters else 0,
+                'sort': filters['page.sort'] if 'page.sort' in filters else 'dt_created.desc',
+                'total': total
+            }
+        }
+        return list
+    
     def json_transform(self, method):
         if method == 'read_full':
             return 'to_full_dict'
