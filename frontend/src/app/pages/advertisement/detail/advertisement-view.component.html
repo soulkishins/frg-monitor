@@ -114,7 +114,7 @@
     </ng-template>
     <p-table
         #dt
-        [value]="products"
+        [value]="products || []"
         [rows]="10"
         [tableStyle]="{ 'min-width': '75rem' }"
         [rowHover]="true"
@@ -165,7 +165,7 @@
     </ng-template>
     <p-table
         #dt
-        [value]="products"
+        [value]="products || []"
         [rows]="10"
         [tableStyle]="{ 'min-width': '75rem' }"
         [rowHover]="true"

@@ -69,7 +69,7 @@ registerLocaleData(localePt);
     providers: [MessageService, AdvertisementService, ConfirmationService]
 })
 export class AdvertisementDetail implements OnInit {
-    advertisement?: Advertisement;
+    advertisement: {[prop: string]: any} = {};
     products?: ClientBrandProduct[] = [];
 
     statuses!: any[];
