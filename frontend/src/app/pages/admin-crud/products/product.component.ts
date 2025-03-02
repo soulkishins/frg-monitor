@@ -183,7 +183,7 @@ export class ProductCrud implements OnInit {
         }
         this.brandService.getBrands().subscribe({
             next: (data) => {
-                this.brands = data;
+                // this.brands = data;
             },
             error: (error) => {
                 this.messageService.add({
@@ -233,7 +233,7 @@ export class ProductCrud implements OnInit {
         if (clientId) {
             this.brandService.getBrands().subscribe({
                 next: (brands) => {
-                    this.brands = brands.filter(brand => brand.id_client === clientId);
+                    // this.brands = brands.filter(brand => brand.id_client === clientId);
                 },
                 error: (error) => {
                     console.error('Erro ao carregar marcas:', error);
@@ -360,7 +360,7 @@ export class ProductCrud implements OnInit {
             this.selectedClient = this.product.brand.client.id;
             this.brandService.getBrands().subscribe({
                 next: (brands) => {
-                    this.brands = brands.filter(b => b.id_client === this.product.brand?.client?.id);
+                    // this.brands = brands.filter(b => b.id_client === this.product.brand?.client?.id);
                 },
                 error: (error) => {
                     console.error('Erro ao carregar marcas:', error);

@@ -99,15 +99,12 @@ export class BrandCrud implements OnInit {
                     value: company.id
                 }));
 
-                // Criar um Map de empresas para acesso rápido
-                const companyMap = new Map(companies.list.map((company: CompanyResponse) => [company.id, company]));
-                
                 // Configurar marcas
-                this.brands.set(brands.map((brand: BrandResponse) => ({
+                this.brands.set(brands.list.map((brand) => ({
                     id: brand.id_brand,
                     name: brand.st_brand,
                     status: brand.st_status,
-                    client_name: companyMap.get(brand.id_client)?.st_name || 'Cliente não encontrado'
+                    client_name: brand.client.st_name
                 })));
             },
             error: (error) => {

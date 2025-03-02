@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environment/environment';
-import { BrandResponse, BrandRequest } from '../models/brand.model';
+import { BrandResponse, BrandRequest, BrandsResponse } from '../models/brand.model';
 
 @Injectable({
   providedIn: 'root'
@@ -12,9 +12,9 @@ export class BrandService {
 
   constructor(private http: HttpClient) {}
 
-  getBrands(): Observable<BrandResponse[]> {
+  getBrands(): Observable<BrandsResponse> {
     const url = `${this.baseUrl}`;
-    return this.http.get<BrandResponse[]>(url);
+    return this.http.get<BrandsResponse>(url);
   }
 
   getBrand(id: string): Observable<BrandResponse> {
