@@ -1,3 +1,5 @@
+<p-toast />
+
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
         <p-button label="Denunciar" icon="pi pi-plus" severity="secondary" class="mr-2" [disabled]="!selectedAdvertisements || !selectedAdvertisements.length" />
@@ -10,30 +12,93 @@
     </ng-template>
 </p-toolbar>
 
+
+<p-panel #panel [toggleable]="true" [collapsed]="true">
+    <ng-template #header>
+        <div class="flex items-center gap-2">
+            <i class="pi pi-bookmark-fill"></i>
+            <span class="font-bold">Gestão de Anúncios</span>
+        </div>
+    </ng-template>
+    <ng-template #icons>
+        <p-button icon="pi pi-refresh" severity="primary" rounded text (click)="loadData(undefined)" pTooltip="Atualizar" tooltipPosition="top" />
+        <p-button icon="pi pi-eraser" severity="danger" rounded text (click)="clearFilters(dt)" pTooltip="Limpar Filtros" tooltipPosition="top" />
+        <p-button icon="pi pi-search" severity="info" rounded text (click)="dt.reset()" pTooltip="Aplicar Filtros" tooltipPosition="top" />
+    </ng-template>
+    <p-fluid>
+        <div class="grid grid-cols-4 gap-4">
+            <div>
+                <p-iftalabel>
+                    <p-select [(ngModel)]="filters['st_status']" inputId="st_status" [options]="statuses" optionLabel="label" styleClass="w-full" />
+                    <label for="st_status">Status</label>
+                </p-iftalabel>
+            </div>
+            <div>
+                <p-iftalabel>
+                    <input pInputText id="st_plataform_id" [(ngModel)]="filters['st_plataform_id']" />
+                    <label for="st_plataform_id">Plataforma ID</label>
+                </p-iftalabel>
+            </div>
+            <div>
+                <p-iftalabel>
+                    <p-inputnumber [(ngModel)]="filters['st_price_min']" mode="currency" inputId="st_price_min" currency="BRL" locale="pt-BR" />
+                    <label for="st_price_min">Preço Mínimo</label>
+                </p-iftalabel>
+            </div>
+            <div>
+                <p-iftalabel>
+                    <p-inputnumber [(ngModel)]="filters['st_price_max']" mode="currency" inputId="st_price_max" currency="BRL" locale="pt-BR" />
+                    <label for="st_price_max">Preço Máximo</label>
+                </p-iftalabel>
+            </div>
+
+            <div class="col-span-2">
+                <p-iftalabel>
+                    <input pInputText id="st_name" [(ngModel)]="filters['st_name']" />
+                    <label for="st_name">Cliente</label>
+                </p-iftalabel>
+            </div>
+            <div>
+                <p-iftalabel>
+                    <input pInputText id="st_brand" [(ngModel)]="filters['st_brand']" />
+                    <label for="st_brand">Marca</label>
+                </p-iftalabel>
+            </div>
+            <div>
+                <p-iftalabel>
+                    <input pInputText id="st_product" [(ngModel)]="filters['st_product']" />
+                    <label for="st_product">Produto</label>
+                </p-iftalabel>
+            </div>
+            <div class="col-span-full">
+                <p-iftalabel>
+                    <input pInputText id="st_title" [(ngModel)]="filters['st_title']" />
+                    <label for="st_title">Título do Anúncio</label>
+                </p-iftalabel>
+            </div>
+        </div>
+    </p-fluid>
+</p-panel>
+
 <p-table
     #dt
-    [value]="Advertisements()"
+    [value]="advertisements()"
     [rows]="10"
-    [columns]="cols"
     [paginator]="true"
-    [globalFilterFields]="['name', 'country.name', 'representative.name', 'status']"
+    [lazy]="true"
     [tableStyle]="{ 'min-width': '75rem' }"
     [(selection)]="selectedAdvertisements"
     [rowHover]="true"
-    dataKey="id"
+    [totalRecords]="page.total"
+    dataKey="id_advertisement"
     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Advertisements"
     [showCurrentPageReport]="true"
-    [rowsPerPageOptions]="[10, 20, 30]"
+    [rowsPerPageOptions]="[100, 200, 300]"
+    [loading]="loading"
+    (onLazyLoad)="loadData($event)"
+    [(rows)]="page.limit"
+    [lazyLoadOnInit]="true"
 >
-    <ng-template #caption>
-        <div class="flex items-center justify-between">
-            <h5 class="m-0">Manage Advertisements</h5>
-            <p-iconfield>
-                <p-inputicon styleClass="pi pi-search" />
-                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
-            </p-iconfield>
-        </div>
-    </ng-template>
     <ng-template #header>
         <tr>
             <th style="width: 3rem">
@@ -46,6 +111,10 @@
             <th pSortableColumn="st_plataform_id" style="min-width:16rem">
                 ID Plataforma
                 <p-sortIcon field="st_plataform_id" />
+            </th>
+            <th pSortableColumn="st_name" style="min-width: 8rem">
+                Cliente
+                <p-sortIcon field="st_name" />
             </th>
             <th pSortableColumn="st_brand" style="min-width: 8rem">
                 Marca
@@ -77,12 +146,13 @@
             </td>
             <td style="min-width: 12rem">{{ advertisement.st_plataform }}</td>
             <td style="min-width: 16rem">{{ advertisement.st_plataform_id }}</td>
+            <td>{{ advertisement.st_name }}</td>
             <td>{{ advertisement.st_brand }}</td>
             <td>{{ advertisement.st_product }}</td>
             <td>{{ advertisement.st_title }}</td>
             <td>{{ advertisement.db_price | currency: 'BRL' }}</td>
             <td>
-                <p-tag [value]="advertisement.st_status" [severity]="getSeverity(advertisement.st_status)"/>
+                <p-tag [value]="getStatus(advertisement.st_status)" [severity]="getSeverity(advertisement.st_status)"/>
             </td>
             <td>
                 <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" />

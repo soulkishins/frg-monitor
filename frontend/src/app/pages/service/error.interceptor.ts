@@ -1,5 +1,5 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
-import { throwError } from 'rxjs';
+import { throwError, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
@@ -15,7 +15,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
                 errorMsg = 'Erro interno do servidor!';
             }
 
-            console.error(errorMsg);
+            console.error(errorMsg, error);
             return throwError(() => new Error(errorMsg));
         })
     );

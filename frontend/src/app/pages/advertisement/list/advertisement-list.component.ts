@@ -1,6 +1,6 @@
-import { Component, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { Table, TableModule } from 'primeng/table';
+import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -13,14 +13,19 @@ import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { IftaLabelModule } from 'primeng/iftalabel';
 import { DialogModule } from 'primeng/dialog';
 import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { Column, ExportColumn, omit } from '../../models/global.model';
 import { AdvertisementService } from '../../service/advertisement.service';
 import { AdvertisementListDto } from '../../models/advertisement.model';
+import { PanelModule } from 'primeng/panel';
+import { MenuModule } from 'primeng/menu';
+import { AvatarModule } from 'primeng/avatar';
+import { FluidModule } from 'primeng/fluid';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
     selector: 'app-crud',
@@ -31,7 +36,6 @@ import { AdvertisementListDto } from '../../models/advertisement.model';
         FormsModule,
         ButtonModule,
         RippleModule,
-        ToastModule,
         ToolbarModule,
         RatingModule,
         InputTextModule,
@@ -39,54 +43,51 @@ import { AdvertisementListDto } from '../../models/advertisement.model';
         SelectModule,
         RadioButtonModule,
         InputNumberModule,
-        DialogModule,
+        IftaLabelModule,
+        TooltipModule,
+        FluidModule,
+        MenuModule,
         TagModule,
+        PanelModule,
+        AvatarModule,
         InputIconModule,
         IconFieldModule,
+        DialogModule,
+        ToastModule,
         ConfirmDialogModule
     ],
     templateUrl: './advertisement-list.component.html',
     providers: [MessageService, AdvertisementService, ConfirmationService]
 })
 export class AdvertisementList implements OnInit {
-    AdvertisementDialog: boolean = false;
+    filters: {[prop: string]: any} = {};
+    page: {
+        total: number;
+        limit: number;
+        offset: number;
+        sort?: string;
+    } = {total: 0, limit: 100, offset: 0, sort: 'st_name'};
+    loading: boolean = false;
 
-    Advertisements = signal<AdvertisementListDto[]>([]);
-
-    Advertisement!: AdvertisementListDto;
-
+    advertisements = signal<AdvertisementListDto[]>([]);
     selectedAdvertisements!: AdvertisementListDto[] | null;
-
-    submitted: boolean = false;
-
     statuses!: any[];
 
-    @ViewChild('dt') dt!: Table;
-
-    exportColumns!: ExportColumn[];
-
-    cols!: Column[];
-
     constructor(
-        private AdvertisementService: AdvertisementService,
+        private advertisementService: AdvertisementService,
         private messageService: MessageService,
         private confirmationService: ConfirmationService
     ) {}
 
     exportCSV() {
-        this.dt.exportCSV();
+        console.log('exportCSV');
+        this.messageService.add({ severity: 'success', summary: 'Success Message', detail: 'Message sent' });
     }
 
     ngOnInit() {
-        this.loadData();
-    }
-
-    loadData() {
-        this.AdvertisementService
-        .getAdvertisements()
-        .subscribe(this.Advertisements.set);
 
         this.statuses = [
+            { label: 'Todos', value: 'ALL' },
             { label: 'Novo', value: 'NEW', color: 'info' },
             { label: 'Erro de Leitura', value: 'ERROR', color: 'danger' },
             { label: 'Para Denuciar', value: 'REPORT', color: 'warn' },
@@ -94,21 +95,53 @@ export class AdvertisementList implements OnInit {
             { label: 'Revisão Manual', value: 'INVALIDATE', color: 'contrast' },
         ];
 
-        this.cols = [
-            { field: 'st_plataform', header: 'Plataforma' },
-            { field: 'st_plataform_id', header: 'ID Plataforma' },
-            { field: 'st_brand', header: 'Marca' },
-            { field: 'st_product', header: 'Produto' },
-            { field: 'st_title', header: 'Titulo' },
-            { field: 'db_price', header: 'Preço' },
-            { field: 'st_status', header: 'Status' },
-        ];
+        this.filters['st_status'] = this.statuses[0];
 
-        this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
+        //this.loadData({first: 0, rows: this.pageSize});
     }
 
-    onGlobalFilter(table: Table, event: Event) {
-        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+    loadData(event?: any) {
+        console.log(event);
+
+        if (!event) {
+            event = {first: this.page.offset, rows: this.page.limit};
+        }
+
+        this.loading = true;
+        const {st_status, ...query} = this.filters;
+        if (this.filters['st_status'].value !== 'ALL')
+        query['st_status'] = this.filters['st_status'].value;
+        query['page.limit'] = event.rows;
+        query['page.offset'] = event.first;
+        query['page.sort'] = this.page.sort;
+
+        this.advertisementService
+        .getAdvertisements(query)
+        .subscribe({
+            next: (data) => {
+                this.advertisements.set(data.list);
+                this.page = data.page;
+            },
+            error: (error) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: 'Erro ao carregar anúncios',
+                    life: 3000
+                });
+                console.error('Erro ao carregar anúncios:', error);
+            },
+            complete: () => {
+                this.loading = false;
+            }
+        });
+    }
+
+    clearFilters(dt: any) {
+        this.filters = {
+            st_status: this.statuses[0],
+        };
+        dt.reset();
     }
 
     deleteSelectedAdvertisements() {
@@ -117,7 +150,7 @@ export class AdvertisementList implements OnInit {
             header: 'Confirm',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.Advertisements.set(this.Advertisements().filter((val) => !this.selectedAdvertisements?.includes(val)));
+                this.advertisements.set(this.advertisements().filter((val) => !this.selectedAdvertisements?.includes(val)));
                 this.selectedAdvertisements = null;
                 this.messageService.add({
                     severity: 'success',
@@ -130,9 +163,16 @@ export class AdvertisementList implements OnInit {
     }
 
     getSeverity(status: string): "success" | "info" | "warn" | "danger" | "secondary" | "contrast" | undefined {
-        const st = this.statuses.filter(s => s.label === status)[0];
+        const st = this.statuses.filter(s => s.value === status)[0];
         if (st)
             return st.color;
+        return undefined;
+    }
+
+    getStatus(status: string): string | undefined {
+        const st = this.statuses.filter(s => s.value === status)[0];
+        if (st)
+            return st.label;
         return undefined;
     }
 }

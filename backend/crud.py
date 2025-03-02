@@ -84,10 +84,14 @@ def get_crud_service(operation_name, user, session):
 
 def return_value(status_code, body, *, json_transform = None):
     from db.models import Base
+    from operations.crud_base import Page
     if isinstance(body, Base):
         body = to_dict(body, json_transform)
     if isinstance(body, list) and len(body) > 0 and isinstance(body[0], Base):
         body = [to_dict(obj, json_transform) for obj in body]
+    if isinstance(body, Page):
+        body = body.to_dict()
+        body['list'] = [to_dict(obj, json_transform) for obj in body['list']]
     return {
         "statusCode": status_code,
         "headers": {
@@ -101,9 +105,7 @@ def return_value(status_code, body, *, json_transform = None):
 
 def to_dict(body, json_transform = None):
     if json_transform:
-        _method = getattr(body, json_transform, None)
-        if callable(_method):
-            return _method()
+        return body.to_custom_dict(json_transform)
     return body.to_dict()
     
 def error_object(code, *, message=None, data=None, timestamp=datetime.now(UTC)):

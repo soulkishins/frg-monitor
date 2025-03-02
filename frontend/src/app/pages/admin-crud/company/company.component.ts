@@ -20,7 +20,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { CompanyService } from '../../service/company.service';
 import { Company, CompanyResponse, CompanyRequest } from '../../models/company.model';
-import { Column, ExportColumn } from '../../models/global.model';
+import { Column, ExportColumn, Page } from '../../models/global.model';
 
 @Component({
     selector: 'app-crud',
@@ -100,8 +100,8 @@ export class CompanyCrud implements OnInit {
 
     loadDataAndFields() {
         this.companyService.getClients().subscribe({
-            next: (data: CompanyResponse[]) => {
-                const mappedCompanies: Company[] = data.map(item => ({
+            next: (data: Page<CompanyResponse>) => {
+                const mappedCompanies: Company[] = data.list.map((item: CompanyResponse) => ({
                     id: item.id,
                     name: item.st_name,
                     identification: item.st_document,

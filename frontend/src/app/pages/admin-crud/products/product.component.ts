@@ -167,7 +167,7 @@ export class ProductCrud implements OnInit {
     loadClients() {
         this.companyService.getClients().subscribe({
             next: (clients) => {
-                this.clients = clients;
+                this.clients = clients.list;
             },
             error: (error) => {
                 console.error('Erro ao carregar clientes:', error);

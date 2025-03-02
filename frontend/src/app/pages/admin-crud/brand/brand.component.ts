@@ -19,7 +19,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { BrandService } from '../../service/brand.service';
-import { Brand } from '../../models/brand.model';
+import { Brand, BrandResponse } from '../../models/brand.model';
 import { CompanyService } from '../../service/company.service';
 import { CompanyResponse } from '../../models/company.model';
 import { forkJoin } from 'rxjs';
@@ -83,26 +83,6 @@ export class BrandCrud implements OnInit {
         this.dt.exportCSV();
     }
 
-    loadClients() {
-        this.companyService.getClients().subscribe({
-            next: (companies: CompanyResponse[]) => {
-                this.clients = companies.map(company => ({
-                    label: company.st_name,
-                    value: company.id
-                }));
-            },
-            error: (error) => {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Erro',
-                    detail: 'Erro ao carregar os clientes',
-                    life: 3000
-                });
-                console.error('Erro ao carregar clientes:', error);
-            }
-        });
-    }
-
     ngOnInit() {
         this.loadBrandData();
     }
@@ -114,16 +94,16 @@ export class BrandCrud implements OnInit {
         }).subscribe({
             next: ({ companies, brands }) => {
                 // Configurar clientes para o dropdown
-                this.clients = companies.map(company => ({
+                this.clients = companies.list.map((company: CompanyResponse) => ({
                     label: company.st_name,
                     value: company.id
                 }));
 
                 // Criar um Map de empresas para acesso rápido
-                const companyMap = new Map(companies.map(company => [company.id, company]));
+                const companyMap = new Map(companies.list.map((company: CompanyResponse) => [company.id, company]));
                 
                 // Configurar marcas
-                this.brands.set(brands.map(brand => ({
+                this.brands.set(brands.map((brand: BrandResponse) => ({
                     id: brand.id_brand,
                     name: brand.st_brand,
                     status: brand.st_status,

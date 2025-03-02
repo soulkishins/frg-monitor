@@ -6,7 +6,7 @@ import uuid
 import datetime
 import json
 
-def str_or_dict(obj, *, full=False) -> dict:
+def str_or_dict(obj, *, custom = None) -> dict:
     if not obj:
         return None
 
@@ -14,10 +14,10 @@ def str_or_dict(obj, *, full=False) -> dict:
         return str(obj)
     
     if isinstance(obj, Base):
-        return obj.to_dict() if not full else obj.to_full_dict()
+        return obj.to_dict() if not custom else obj.to_custom_dict(custom)
     
     if isinstance(obj, list):
-        return [o.to_dict() if not full else o.to_full_dict() for o in obj]
+        return [o.to_dict() if not custom else o.to_custom_dict(custom) for o in obj]
 
     return obj
 
@@ -26,8 +26,12 @@ class Base:
     def to_dict(self):
         return {key: str_or_dict(getattr(self, key)) for key in self._json_fields()}
     
-    def to_full_dict(self):
-        return {key: str_or_dict(getattr(self, key), full=True) for key in self._full_json_fields()}
+    def to_custom_dict(self, custom_fields: str):
+        _method = getattr(self, custom_fields, None)
+        if not callable(_method):
+            return self.to_dict()
+        fields = _method()
+        return {key: str_or_dict(getattr(self, key), custom=custom_fields) for key in fields}
     
     def _full_json_fields(self):
         return self._json_fields()
@@ -126,7 +130,6 @@ class ClientBrand(Base, Audit):
 
     def _json_fields(self):
         return ["id_brand", "id_client", "st_brand", "st_status", "client"] + super()._json_fields()
-
 class ClientBrandProduct(Base, Audit):
     __tablename__ = "tb_client_brand_product"
     
@@ -163,6 +166,7 @@ class Advertisement(Base, Audit):
     id_advertisement = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, onupdate=None)
     id_brand = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_client_brand.id_brand"), nullable=False, onupdate=None)
     st_plataform = Column(String, nullable=False)
+    st_plataform_id = Column(String, nullable=False)
     st_url = Column(String, nullable=False)
     st_title = Column(String, nullable=False)
     st_description = Column(String, nullable=False)
@@ -172,23 +176,24 @@ class Advertisement(Base, Audit):
     st_details = Column(String)
     st_status = Column(String, nullable=False)
     
+    brand = relationship("ClientBrand", lazy=True)
     products = relationship("AdvertisementProduct", back_populates="advertisement", lazy=True)
     history = relationship("AdvertisementHistory", back_populates="advertisement", lazy=True)
 
     def _json_fields(self):
         return [
-            "id_advertisement", "id_brand", "st_plataform",
+            "id_advertisement", "id_brand", "st_plataform", "st_plataform_id",
             "st_url", "st_title", "st_description",
             "st_photos", "db_price", "st_vendor",
-            "st_details", "st_status"
+            "st_details", "st_status", "brand", "products"
         ] + super()._json_fields()
 
     def _full_json_fields(self):
         return [
-            "id_advertisement", "id_brand", "st_plataform",
+            "id_advertisement", "id_brand", "st_plataform", "st_plataform_id",
             "st_url", "st_title", "st_description",
             "st_photos", "db_price", "st_vendor",
-            "st_details", "st_status", "products", "history"
+            "st_details", "st_status", "products", "history", "brand"
         ] + super()._json_fields()
 class AdvertisementProduct(Base, Audit):
     __tablename__ = "tb_advertisement_product"
@@ -203,7 +208,7 @@ class AdvertisementProduct(Base, Audit):
 
     def _json_fields(self):
         return ["id_advertisement", "id_product", "st_varity_seq", "st_varity_name"] + super()._json_fields()
-
+    
 class AdvertisementHistory(Base, Audit):
     __tablename__ = "tb_advertisement_history"
     

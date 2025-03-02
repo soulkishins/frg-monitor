@@ -12,3 +12,13 @@ export interface ExportColumn {
 export function omit(obj: any, keys: string[]): any {
     return Object.fromEntries(Object.entries(obj).filter(([key]) => !keys.includes(key)));
 }
+
+export interface Page<T> {
+    list: T[];
+    page: {
+        total: number;
+        limit: number;
+        offset: number;
+        sort: string;
+    }
+}

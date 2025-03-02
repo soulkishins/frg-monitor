@@ -63,22 +63,20 @@ class Crud:
             query = query.filter(*self.filter_by(indexes, filters))
         
         total = query.count()
-        
+        if 'page.sort' in filters:
+            query = query.order_by(self.get_orderby(filters['page.sort']))
+
         query = query.limit(filters['page.limit'] if 'page.limit' in filters else self._default_page_size)
         if 'page.offset' in filters:
             query = query.offset(filters['page.offset'])
-        if 'page.sort' in filters:
-            query = query.order_by(self.get_orderby(filters['page.sort']))
         
-        return {
-            'list': query.all(),
-            'page': {
-                'limit': filters['page.limit'] if 'page.limit' in filters else self._default_page_size,
-                'offset': filters['page.offset'] if 'page.offset' in filters else 0,
-                'sort': filters['page.sort'] if 'page.sort' in filters else 'dt_created.desc',
-                'total': total
-            }
-        }
+        return Page(
+            query.all(),
+            total,
+            filters['page.limit'] if 'page.limit' in filters else self._default_page_size,
+            filters['page.offset'] if 'page.offset' in filters else 0,
+            filters['page.sort'] if 'page.sort' in filters else 'dt_created.desc'
+        )
     
     def set_attr(self, model, data, ignore = []):
         for key, value in data.items():
@@ -146,4 +144,20 @@ class Crud:
         if order[1] == 'desc':
             return getattr(self.get_model(), order[0]).desc()
         return getattr(self.get_model(), order[0]).asc()
+
+class Page:
+    def __init__(self, list: list, total: int, limit: int = 100, offset: int = 0, sort: str = 'dt_created.desc'):
+        self.list = list
+        self.page = {
+            'total': total,
+            'limit': limit,
+            'offset': offset,
+            'sort': sort
+        }
+        
+    def to_dict(self):
+        return {
+            'list': self.list,
+            'page': self.page
+        }
 
