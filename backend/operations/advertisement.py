@@ -8,10 +8,13 @@ class AdvertisementCrud(Crud):
         return Advertisement
     
     def get_joins(self, indexes, filters) -> list:
-        return (Advertisement.products)
+        return (Advertisement.products, AdvertisementProduct.product, Advertisement.brand, ClientBrand.client)
     
     def get_options(self) -> list:
-        return (contains_eager(Advertisement.products))
+        return (
+            contains_eager(Advertisement.products).contains_eager(AdvertisementProduct.product),
+            contains_eager(Advertisement.brand).contains_eager(ClientBrand.client)
+        )
 
     def filter_by_pk(self, indexes) -> list:
         return (Advertisement.id_advertisement == indexes['advertisement'],)

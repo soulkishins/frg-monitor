@@ -2,13 +2,41 @@
 
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
-        <p-button label="Denunciar" icon="pi pi-plus" severity="secondary" class="mr-2" [disabled]="!selectedAdvertisements || !selectedAdvertisements.length" />
-        <p-button label="Invalidar" icon="pi pi-trash" severity="secondary" outlined [disabled]="!selectedAdvertisements || !selectedAdvertisements.length" />
+        <p-button 
+            label="Denunciar"
+            icon="pi pi-thumbs-down"
+            severity="primary"
+            outlined
+            class="mr-2"
+            [disabled]="!selectedAdvertisements || !selectedAdvertisements.length"
+            (onClick)="reportAdvertisements()"
+        />
+        <p-button
+            label="Revisão Manual"
+            icon="pi pi-tag"
+            severity="info"
+            outlined
+            [disabled]="!selectedAdvertisements || !selectedAdvertisements.length"
+            (onClick)="invalidateAdvertisements()"
+        />
     </ng-template>
 
     <ng-template #end>
-        <p-button label="Exportar Denunciados" icon="pi pi-upload" severity="secondary" class="mr-2" (onClick)="exportCSV()" />
-        <p-button label="Exportar Selecionados" icon="pi pi-upload" severity="secondary" outlined (onClick)="exportCSV()" />
+        <p-button
+            label="Denunciados"
+            icon="pi pi-file-export"
+            severity="danger"
+            class="mr-2"
+            (onClick)="exportReported()"
+        />
+        <p-button
+            label="Selecionados"
+            icon="pi pi-file-export"
+            severity="help"
+            outlined
+            [disabled]="!selectedAdvertisements || !selectedAdvertisements.length"
+            (onClick)="exportSelected()"
+        />
     </ng-template>
 </p-toolbar>
 
@@ -16,7 +44,7 @@
 <p-panel #panel [toggleable]="true" [collapsed]="true">
     <ng-template #header>
         <div class="flex items-center gap-2">
-            <i class="pi pi-bookmark-fill"></i>
+            <i class="pi pi-shop"></i>
             <span class="font-bold">Gestão de Anúncios</span>
         </div>
     </ng-template>
@@ -91,9 +119,9 @@
     [rowHover]="true"
     [totalRecords]="page.total"
     dataKey="id_advertisement"
-    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Advertisements"
+    currentPageReportTemplate="Exibindo do {first} ao {last} de {totalRecords} Registros Advertisements"
     [showCurrentPageReport]="true"
-    [rowsPerPageOptions]="[100, 200, 300]"
+    [rowsPerPageOptions]="[50, 100, 200, 300]"
     [loading]="loading"
     (onLazyLoad)="loadData($event)"
     [(rows)]="page.limit"
@@ -104,39 +132,39 @@
             <th style="width: 3rem">
                 <p-tableHeaderCheckbox />
             </th>
-            <th pSortableColumn="st_plataform" style="min-width: 16rem">
+            <th pSortableColumn="st_plataform" style="min-width: 10rem">
                 Plataforma
                 <p-sortIcon field="st_plataform" />
             </th>
-            <th pSortableColumn="st_plataform_id" style="min-width:16rem">
+            <th pSortableColumn="st_plataform_id" style="min-width:10rem">
                 ID Plataforma
                 <p-sortIcon field="st_plataform_id" />
             </th>
-            <th pSortableColumn="st_name" style="min-width: 8rem">
+            <th pSortableColumn="st_name" style="min-width: 20rem">
                 Cliente
                 <p-sortIcon field="st_name" />
             </th>
-            <th pSortableColumn="st_brand" style="min-width: 8rem">
+            <th pSortableColumn="st_brand" style="min-width: 20rem">
                 Marca
                 <p-sortIcon field="st_brand" />
             </th>
-            <th pSortableColumn="st_product" style="min-width:10rem">
+            <th pSortableColumn="st_product" style="min-width:20rem">
                 Produto
                 <p-sortIcon field="st_product" />
             </th>
-            <th pSortableColumn="st_title" style="min-width: 12rem">
+            <th pSortableColumn="st_title" style="min-width: 30rem">
                 Título
                 <p-sortIcon field="st_title" />
             </th>
-            <th pSortableColumn="db_price" style="min-width: 12rem">
+            <th pSortableColumn="db_price" style="min-width: 9rem">
                 Preço
                 <p-sortIcon field="db_price" />
             </th>
-            <th pSortableColumn="st_status" style="min-width: 12rem">
+            <th pSortableColumn="st_status" style="min-width: 8.8rem">
                 Status
                 <p-sortIcon field="st_status" />
             </th>
-            <th style="min-width: 12rem"></th>
+            <th style="min-width: 4rem"></th>
         </tr>
     </ng-template>
     <ng-template #body let-advertisement>
@@ -150,13 +178,12 @@
             <td>{{ advertisement.st_brand }}</td>
             <td>{{ advertisement.st_product }}</td>
             <td>{{ advertisement.st_title }}</td>
-            <td>{{ advertisement.db_price | currency: 'BRL' }}</td>
+            <td>{{ advertisement.db_price | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}</td>
             <td>
                 <p-tag [value]="getStatus(advertisement.st_status)" [severity]="getSeverity(advertisement.st_status)"/>
             </td>
             <td>
-                <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" />
-                <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" />
+                <p-button icon="pi pi-eye" class="mr-2" [rounded]="true" [outlined]="true" (onClick)="viewAdvertisement(advertisement)" />
             </td>
         </tr>
     </ng-template>

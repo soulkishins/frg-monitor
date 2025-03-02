@@ -77,7 +77,7 @@ interface ExportColumn {
             [(selection)]="selectedProducts"
             [rowHover]="true"
             dataKey="id"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+            currentPageReportTemplate="Exibindo do {first} ao {last} de {totalRecords} Registros products"
             [showCurrentPageReport]="true"
             [rowsPerPageOptions]="[10, 20, 30]"
         >

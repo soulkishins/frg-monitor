@@ -207,7 +207,7 @@ class AdvertisementProduct(Base, Audit):
     product = relationship("ClientBrandProduct", lazy=True)
 
     def _json_fields(self):
-        return ["id_advertisement", "id_product", "st_varity_seq", "st_varity_name"] + super()._json_fields()
+        return ["id_advertisement", "id_product", "st_varity_seq", "st_varity_name", "product"] + super()._json_fields()
     
 class AdvertisementHistory(Base, Audit):
     __tablename__ = "tb_advertisement_history"

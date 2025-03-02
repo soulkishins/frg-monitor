@@ -26,6 +26,11 @@ import { MenuModule } from 'primeng/menu';
 import { AvatarModule } from 'primeng/avatar';
 import { FluidModule } from 'primeng/fluid';
 import { TooltipModule } from 'primeng/tooltip';
+import { registerLocaleData } from '@angular/common';
+import localePt from '@angular/common/locales/pt';
+import { Router } from '@angular/router';
+
+registerLocaleData(localePt);
 
 @Component({
     selector: 'app-crud',
@@ -66,17 +71,18 @@ export class AdvertisementList implements OnInit {
         limit: number;
         offset: number;
         sort?: string;
-    } = {total: 0, limit: 100, offset: 0, sort: 'st_name'};
+    } = {total: 0, limit: 50, offset: 0, sort: 'st_name'};
     loading: boolean = false;
 
     advertisements = signal<AdvertisementListDto[]>([]);
-    selectedAdvertisements!: AdvertisementListDto[] | null;
+    selectedAdvertisements: AdvertisementListDto[] = [];
     statuses!: any[];
 
     constructor(
         private advertisementService: AdvertisementService,
         private messageService: MessageService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private router: Router
     ) {}
 
     exportCSV() {
@@ -86,18 +92,8 @@ export class AdvertisementList implements OnInit {
 
     ngOnInit() {
 
-        this.statuses = [
-            { label: 'Todos', value: 'ALL' },
-            { label: 'Novo', value: 'NEW', color: 'info' },
-            { label: 'Erro de Leitura', value: 'ERROR', color: 'danger' },
-            { label: 'Para Denuciar', value: 'REPORT', color: 'warn' },
-            { label: 'Denuciado', value: 'REPORTED', color: 'secondary' },
-            { label: 'Revisão Manual', value: 'INVALIDATE', color: 'contrast' },
-        ];
-
+        this.statuses = this.advertisementService.getStatuses(true);
         this.filters['st_status'] = this.statuses[0];
-
-        //this.loadData({first: 0, rows: this.pageSize});
     }
 
     loadData(event?: any) {
@@ -113,7 +109,7 @@ export class AdvertisementList implements OnInit {
         query['st_status'] = this.filters['st_status'].value;
         query['page.limit'] = event.rows;
         query['page.offset'] = event.first;
-        query['page.sort'] = this.page.sort;
+        query['page.sort'] = `${event.sortField || this.page.sort}${event.sortOrder !== -1 ? '.asc' : '.desc'}`;
 
         this.advertisementService
         .getAdvertisements(query)
@@ -144,19 +140,131 @@ export class AdvertisementList implements OnInit {
         dt.reset();
     }
 
-    deleteSelectedAdvertisements() {
+    viewAdvertisement(advertisement: AdvertisementListDto) {
+        this.router.navigate(['/anuncio', 'detalhe', advertisement.id_advertisement]);
+    }
+
+    reportAdvertisements() {
         this.confirmationService.confirm({
-            message: 'Are you sure you want to delete the selected Advertisements?',
-            header: 'Confirm',
+            message: 'Confirmar a denúncia dos anúncios selecionados?',
+            header: 'Confirmar Denúncia',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-                this.advertisements.set(this.advertisements().filter((val) => !this.selectedAdvertisements?.includes(val)));
-                this.selectedAdvertisements = null;
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Advertisements Deleted',
-                    life: 3000
+                this.advertisementService
+                .reportAdvertisements(this.selectedAdvertisements.map(ad => ad.id_advertisement), 'REPORT')
+                .subscribe({
+                    next: () => {
+                        this.selectedAdvertisements = [];
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Denúncia Confirmada',
+                            detail: 'Anúncios atualizados com sucesso!',
+                            life: 3000
+                        });
+                    },
+                    error: (error: any) => {
+                        console.error('Erro ao denunciar os anúncios:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao atualizar o status dos anúncios para Marcado para Denúncia',
+                            life: 3000
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    invalidateAdvertisements() {
+        this.confirmationService.confirm({
+            message: 'Confirmar a invalidação dos anúncios selecionados?',
+            header: 'Confirmar Invalidação',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+                this.advertisementService
+                .reportAdvertisements(this.selectedAdvertisements.map(ad => ad.id_advertisement), 'INVALIDATE')
+                .subscribe({
+                    next: () => {
+                        this.selectedAdvertisements = [];
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Revisão Manual Confirmada',
+                            detail: 'Anúncios atualizados com sucesso!',
+                            life: 3000
+                        });
+                    },
+                    error: (error: any) => {
+                        console.error('Erro ao invalidar os anúncios:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao atualizar o status dos anúncios para Revisão Manual',
+                            life: 3000
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    exportReported() {
+        this.confirmationService.confirm({
+            message: 'Confirmar a exportação dos anúncios denunciados?',
+            header: 'Confirmar Exportação',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+                this.advertisementService
+                .exportAdvertisements()
+                .subscribe({
+                    next: () => {
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Exportação em andamento',
+                            detail: 'Exportação em andamento, aguarde alguns instantes...',
+                            life: 3000
+                        });
+                    },
+                    error: (error: any) => {
+                        console.error('Erro ao exportar os anúncios:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao exportar os anúncios denunciados',
+                            life: 3000
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    exportSelected() {
+        this.confirmationService.confirm({
+            message: 'Confirmar a exportação dos anúncios selecionados?',
+            header: 'Confirmar Exportação',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+                this.advertisementService
+                .exportAdvertisements(this.selectedAdvertisements.map(ad => ad.id_advertisement))
+                .subscribe({
+                    next: () => {
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Exportação em andamento',
+                            detail: 'Exportação em andamento, aguarde alguns instantes...',
+                            life: 3000
+                        });
+                    },
+                    error: (error: any) => {
+                        console.error('Erro ao exportar os anúncios:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao exportar os anúncios selecionados',
+                            life: 3000
+                        });
+                    }
                 });
             }
         });
