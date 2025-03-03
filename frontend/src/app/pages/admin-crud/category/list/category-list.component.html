@@ -12,7 +12,7 @@
 <p-table
     #dt
     [value]="categories()"
-    [rows]="10"
+    [rows]="50"
     [columns]="cols"
     [paginator]="true"
     [globalFilterFields]="['id_category', 'st_category', 'st_status']"
@@ -22,7 +22,7 @@
     dataKey="id_category"
     currentPageReportTemplate="Mostrando {first} até {last} de {totalRecords} categorias"
     [showCurrentPageReport]="true"
-    [rowsPerPageOptions]="[10, 20, 30]"
+    [rowsPerPageOptions]="[50, 100, 200, 300]"
 >
     <ng-template #caption>
         <div class="flex items-center justify-between">
@@ -55,7 +55,10 @@
                 <p-tableCheckbox [value]="category" />
             </td>
             <td>{{ category.st_category }}</td>
-            <td>{{ category.st_status }}</td>
+            <td>
+                <p-tag [value]="category.st_status === 'active' ? 'Ativo' : 'Inativo'"
+                       [severity]="category.st_status === 'active' ? 'success' : 'danger'" />
+            </td>
             <td>
                 <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editCategory(category)" />
                 <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteCategory(category)" />
@@ -63,39 +66,5 @@
         </tr>
     </ng-template>
 </p-table>
-
-<p-dialog [(visible)]="categoryDialog" [style]="{ width: '450px' }" header="Detalhes da Categoria" [modal]="true">
-    <ng-template #content>
-        <div class="flex flex-col gap-6">
-
-            <div>
-                <label for="status" class="block font-bold mb-3">Status</label>
-                <p-dropdown 
-                    id="status" 
-                    [options]="statusOptions" 
-                    [(ngModel)]="category.st_status" 
-                    optionLabel="label" 
-                    optionValue="value"
-                    [style]="{'width': '100%'}"
-                    placeholder="Selecione um status"
-                    required
-                ></p-dropdown>
-                <small class="text-red-500" *ngIf="submitted && !category.st_status">Campo obrigatório</small>
-            </div>
-
-            <div>
-                <label for="description" class="block font-bold mb-3">Descrição</label>
-                <input type="text" pInputText id="description" [(ngModel)]="category.st_category" required autofocus fluid />
-                <small class="text-red-500" *ngIf="submitted && !category.st_category">Campo obrigatório</small>
-            </div>
-                        
-        </div>
-    </ng-template>
-
-    <ng-template #footer>
-        <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
-        <p-button label="Salvar" icon="pi pi-check" (click)="saveCategory()" />
-    </ng-template>
-</p-dialog>
 
 <p-confirmdialog [style]="{ width: '450px' }" />

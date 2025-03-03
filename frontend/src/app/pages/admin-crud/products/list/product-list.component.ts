@@ -20,27 +20,28 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ProductService } from '../../service/product.service';
-import { ProductResponse, Brand, Subcategory, Category, Client } from '../../models/product.model';
-import { CompanyService } from '../../service/company.service';
-import { BrandService } from '../../service/brand.service';
-import { CompanyResponse } from '../../models/company.model';
-import { BrandResponse } from '../../models/brand.model';
-import { CategoryService } from '../../service/category.service';
-import { SubCategoryService } from '../../service/sub-category.service';
-import { CategoryResponse } from '../../models/category.model';
-import { SubCategoryResponse } from '../../models/sub-category.model';
+import { Router } from '@angular/router';
+import { ProductService } from '../../../service/product.service';
+import { ProductResponse, Brand, Subcategory, Category, Client } from '../../../models/product.model';
+import { CompanyService } from '../../../service/company.service';
+import { BrandService } from '../../../service/brand.service';
+import { CompanyResponse } from '../../../models/company.model';
+import { BrandResponse } from '../../../models/brand.model';
+import { CategoryService } from '../../../service/category.service';
+import { SubCategoryService } from '../../../service/sub-category.service';
+import { CategoryResponse } from '../../../models/category.model';
+import { SubCategoryResponse } from '../../../models/sub-category.model';
 import { forkJoin } from 'rxjs';
 import { mergeMap, map } from 'rxjs/operators';
-import { ProductRequest } from '../../models/product.model';
-import { Column, ExportColumn } from '../../models/global.model';
+import { ProductRequest } from '../../../models/product.model';
+import { Column, ExportColumn } from '../../../models/global.model';
 import { LOCALE_ID } from '@angular/core';
 
 // Registrar o locale
 registerLocaleData(localePt);
 
 @Component({
-    selector: 'app-crud',
+    selector: 'app-product-list',
     standalone: true,
     imports: [
         CommonModule,
@@ -62,7 +63,7 @@ registerLocaleData(localePt);
         IconFieldModule,
         ConfirmDialogModule
     ],
-    templateUrl: './product.component.html',
+    templateUrl: './product-list.component.html',
     providers: [
         MessageService, 
         ProductService, 
@@ -74,7 +75,7 @@ registerLocaleData(localePt);
         { provide: LOCALE_ID, useValue: 'pt-BR' }
     ]
 })
-export class ProductCrud implements OnInit {
+export class ProductList implements OnInit {
     productDialog: boolean = false;
 
     products = signal<ProductResponse[]>([]);
@@ -122,7 +123,8 @@ export class ProductCrud implements OnInit {
         private categoryService: CategoryService,
         private subCategoryService: SubCategoryService,
         private messageService: MessageService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private router: Router
     ) {}
 
     exportCSV() {
@@ -131,12 +133,10 @@ export class ProductCrud implements OnInit {
 
     ngOnInit() {
         this.loadProductData();
-        this.loadClients();
-        this.loadCategories();
 
         this.statuses = [
-            { label: 'ATIVO', value: 'ACTIVE' },
-            { label: 'INATIVO', value: 'INACTIVE' }
+            { label: 'Ativo', value: 'ACTIVE' },
+            { label: 'Inativo', value: 'INACTIVE' }
         ];
 
         this.cols = [
@@ -153,25 +153,13 @@ export class ProductCrud implements OnInit {
 
     loadProductData() {
         this.productService.getProducts().subscribe({
-            next: (products) => {
-                this.products.set(products);
+            next: (response) => {
+                this.products.set(response.list);
                 this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Produtos carregados', life: 3000 });
             },
             error: (error) => {
                 console.error('Erro ao carregar produtos:', error);
                 this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar produtos', life: 3000 });
-            }
-        });
-    }
-
-    loadClients() {
-        this.companyService.getClients().subscribe({
-            next: (clients) => {
-                this.clients = clients.list;
-            },
-            error: (error) => {
-                console.error('Erro ao carregar clientes:', error);
-                this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar clientes', life: 3000 });
             }
         });
     }
@@ -183,7 +171,7 @@ export class ProductCrud implements OnInit {
         }
         this.brandService.getBrands().subscribe({
             next: (data) => {
-                this.brands = data;
+                this.brands = data.list.filter(b => b.id_client === clientId);
             },
             error: (error) => {
                 this.messageService.add({
@@ -196,18 +184,6 @@ export class ProductCrud implements OnInit {
         });
     }
 
-    loadCategories() {
-        this.categoryService.getCategories().subscribe({
-            next: (categories) => {
-                this.categories = categories;
-            },
-            error: (error) => {
-                console.error('Erro ao carregar categorias:', error);
-                this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar categorias', life: 3000 });
-            }
-        });
-    }
-
     loadSubcategories(categoryId: string) {
         if (!categoryId) {
             this.subcategories = [];
@@ -215,7 +191,7 @@ export class ProductCrud implements OnInit {
         }
         this.subCategoryService.getSubCategories().subscribe({
             next: (data) => {
-                this.subcategories = data.filter(sc => sc.id_category === categoryId);
+                this.subcategories = data.list.filter(sc => sc.id_category === categoryId);
             },
             error: (error) => {
                 this.messageService.add({
@@ -233,7 +209,7 @@ export class ProductCrud implements OnInit {
         if (clientId) {
             this.brandService.getBrands().subscribe({
                 next: (brands) => {
-                    this.brands = brands.filter(brand => brand.id_client === clientId);
+                    this.brands = brands.list.filter(brand => brand.id_client === clientId);
                 },
                 error: (error) => {
                     console.error('Erro ao carregar marcas:', error);
@@ -251,7 +227,7 @@ export class ProductCrud implements OnInit {
         if (categoryId) {
             this.subCategoryService.getSubCategories().subscribe({
                 next: (subcategories) => {
-                    this.subcategories = subcategories.filter(subcategory => subcategory.id_category === categoryId);
+                    this.subcategories = subcategories.list.filter(subcategory => subcategory.id_category === categoryId);
                 },
                 error: (error) => {
                     console.error('Erro ao carregar subcategorias:', error);
@@ -265,125 +241,11 @@ export class ProductCrud implements OnInit {
     }
 
     openNew() {
-        const emptyCategory: Category = {
-            id_category: '',
-            st_category: '',
-            st_status: '',
-            dt_created: '',
-            st_created_by: '',
-            dt_modified: '',
-            st_modified_by: ''
-        };
-
-        const emptyClient: Client = {
-            id: '',
-            st_name: '',
-            st_document: '',
-            st_status: '',
-            dt_created: '',
-            st_created_by: '',
-            dt_modified: '',
-            st_modified_by: ''
-        };
-
-        const emptyBrand: Brand = {
-            id_brand: '',
-            id_client: '',
-            st_brand: '',
-            st_status: '',
-            client: emptyClient,
-            dt_created: '',
-            st_created_by: '',
-            dt_modified: '',
-            st_modified_by: ''
-        };
-
-        const emptySubcategory: Subcategory = {
-            id_subcategory: '',
-            id_category: '',
-            st_subcategory: '',
-            st_status: '',
-            category: emptyCategory,
-            dt_created: '',
-            st_created_by: '',
-            dt_modified: '',
-            st_modified_by: ''
-        };
-
-        this.product = {
-            id_product: '',
-            id_brand: '',
-            id_subcategory: '',
-            st_product: '',
-            st_variety: '',
-            st_status: 'ACTIVE',
-            dt_created: new Date().toISOString(),
-            st_created_by: '',
-            dt_modified: '',
-            st_modified_by: '',
-            subcategory: emptySubcategory,
-            brand: emptyBrand
-        };
-        this.selectedClient = '';
-        this.selectedBrand = '';
-        this.selectedCategory = '';
-        this.brands = [];
-        this.subcategories = [];
-        this.loadClients();
-        this.loadCategories();
-        this.submitted = false;
-        this.productDialog = true;
-        this.varietyList = [];
-        this.currentVariety = '';
-        this.currentPrice = 0;
-        this.selectedVarietyIndex = -1;
+        this.router.navigate(['/cadastro/produto/detalhe', 'novo']);
     }
 
     editProduct(product: ProductResponse) {
-        this.product = { ...product };
-        
-        // Carregar lista de variedades do JSON
-        try {
-            const parsedVarieties = product.st_variety ? JSON.parse(product.st_variety) : [];
-            // Filtrar apenas variedades não deletadas ou manter o status existente
-            this.varietyList = parsedVarieties.map((v: any) => ({
-                ...v,
-                status: v.status || 'active'
-            }));
-        } catch (error) {
-            console.error('Erro ao parsear variedades:', error);
-            this.varietyList = [];
-        }
-        
-        // Carregar cliente e marca
-        if (this.product.brand?.client) {
-            this.selectedClient = this.product.brand.client.id;
-            this.brandService.getBrands().subscribe({
-                next: (brands) => {
-                    this.brands = brands.filter(b => b.id_client === this.product.brand?.client?.id);
-                },
-                error: (error) => {
-                    console.error('Erro ao carregar marcas:', error);
-                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar marcas', life: 3000 });
-                }
-            });
-        }
-
-        // Carregar categoria e subcategoria
-        if (this.product.subcategory?.category) {
-            this.selectedCategory = this.product.subcategory.category.id_category;
-            this.subCategoryService.getSubCategories().subscribe({
-                next: (subcategories) => {
-                    this.subcategories = subcategories.filter(sc => sc.id_category === this.product.subcategory?.category?.id_category);
-                },
-                error: (error) => {
-                    console.error('Erro ao carregar subcategorias:', error);
-                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar subcategorias', life: 3000 });
-                }
-            });
-        }
-
-        this.productDialog = true;
+        this.router.navigate(['/cadastro/produto/detalhe', product.id_product]);
     }
 
     deleteSelectedProducts() {
@@ -458,19 +320,26 @@ export class ProductCrud implements OnInit {
         return id;
     }
 
-    getSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' {
+    getSeverity(status: string) {
         switch (status) {
             case 'ACTIVE':
                 return 'success';
             case 'INACTIVE':
                 return 'danger';
             default:
-                return 'warn';
+                return 'info';
         }
     }
 
-    getStatusLabel(status: string): string {
-        return status === 'ACTIVE' ? 'ATIVO' : 'INATIVO';
+    getStatusLabel(status: string) {
+        switch (status) {
+            case 'ACTIVE':
+                return 'Ativo';
+            case 'INACTIVE':
+                return 'Inativo';
+            default:
+                return status;
+        }
     }
 
     saveProduct() {

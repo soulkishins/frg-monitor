@@ -1,0 +1,43 @@
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+        <h2>{{ isEditing ? 'Editar Cliente' : 'Novo Cliente' }}</h2>
+    </ng-template>
+</p-toolbar>
+
+<div class="card">
+    <form [formGroup]="companyForm" (ngSubmit)="saveCompany()">
+        <div class="flex flex-col gap-6 p-4">
+            <div>
+                <label for="status" class="block font-bold mb-3">Status</label>
+                <p-select formControlName="status" inputId="status" [options]="statuses" optionLabel="label" optionValue="value" placeholder="Selecione o Status" [style]="{'width':'100%'}" />
+            </div>
+
+            <div>
+                <label for="name" class="block font-bold mb-3">Nome</label>
+                <input type="text" pInputText id="name" formControlName="name" required autofocus [style]="{'width':'100%'}" />
+                <small class="text-red-500" *ngIf="companyForm.get('name')?.errors?.['required'] && companyForm.get('name')?.touched">
+                    Nome é obrigatório.
+                </small>
+            </div>
+
+            <div>
+                <label for="identication" class="block font-bold mb-3">CNPJ</label>
+                <input type="text" pInputText id="identication" formControlName="identification" (input)="validateCompanyIdentification()" [readonly]="isEditing" required [style]="{'width':'100%'}" />
+                <small class="text-red-500" *ngIf="companyForm.get('identification')?.errors?.['required'] && companyForm.get('identification')?.touched">
+                    CNPJ é obrigatório
+                </small>
+                <small class="text-red-500" *ngIf="companyForm.get('identification')?.errors?.['invalidCnpj'] && companyForm.get('identification')?.touched">
+                    CNPJ inválido
+                </small>
+                <small class="text-red-500" *ngIf="companyForm.get('identification')?.errors?.['duplicated'] && companyForm.get('identification')?.touched">
+                    CNPJ já cadastrado
+                </small>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-2 p-4 border-t-1">
+            <p-button type="button" label="Voltar" icon="pi pi-arrow-left" text (click)="goBack()" />
+            <p-button type="submit" label="Salvar" icon="pi pi-check" [disabled]="!companyForm.valid" />
+        </div>
+    </form>
+</div>

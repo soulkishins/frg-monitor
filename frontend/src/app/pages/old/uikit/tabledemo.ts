@@ -50,7 +50,7 @@ interface expandedRows {
                 #dt1
                 [value]="customers1"
                 dataKey="id"
-                [rows]="10"
+                [rows]="50"
                 [loading]="loading"
                 [rowHover]="true"
                 [showGridlines]="true"

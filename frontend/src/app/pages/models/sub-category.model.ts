@@ -3,6 +3,15 @@ export interface SubCategoryResponse {
     id_category: string;
     st_subcategory: string;
     st_status: string;
+    category: {
+        id_category: string;
+        st_category: string;
+        st_status: string;
+        dt_created: string;
+        st_created_by: string;
+        dt_modified: string | null;
+        st_modified_by: string | null;        
+    };
     dt_created: string;
     st_created_by: string;
     dt_modified: string | null;

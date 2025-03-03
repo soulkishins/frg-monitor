@@ -1,0 +1,34 @@
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+        <h2>{{ isEditing ? 'Editar Marca' : 'Nova Marca' }}</h2>
+    </ng-template>
+</p-toolbar>
+
+<div class="card">
+    <form (ngSubmit)="saveBrand()">
+        <div class="flex flex-col gap-6 p-4">
+            <div>
+                <label for="client" class="block font-bold mb-3">Cliente</label>
+                <p-select [(ngModel)]="brand.client_id" name="client_id" inputId="client" [options]="clients" optionLabel="label" optionValue="value" placeholder="Selecione um Cliente" [style]="{'width': '100%'}" required />
+                <small class="text-red-500" *ngIf="submitted && !brand.client_id">Cliente é obrigatório</small>
+            </div>
+
+            <div>
+                <label for="status" class="block font-bold mb-3">Status</label>
+                <p-select [(ngModel)]="brand.status" name="status" inputId="status" [options]="statuses" optionLabel="label" optionValue="value" placeholder="Selecione um Status" [style]="{'width': '100%'}" required />
+                <small class="text-red-500" *ngIf="submitted && !brand.status">Status é obrigatório</small>
+            </div>
+
+            <div>
+                <label for="name" class="block font-bold mb-3">Nome</label>
+                <input type="text" pInputText id="name" name="name" [(ngModel)]="brand.name" required autofocus [style]="{'width': '100%'}" />
+                <small class="text-red-500" *ngIf="submitted && !brand.name">Nome é obrigatório</small>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-2 p-4 border-t-1">
+            <p-button type="button" label="Voltar" icon="pi pi-arrow-left" text (click)="hideDialog()" />
+            <p-button type="submit" label="Salvar" icon="pi pi-check" />
+        </div>
+    </form>
+</div>
