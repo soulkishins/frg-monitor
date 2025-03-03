@@ -68,34 +68,4 @@
     </ng-template>
 </p-table>
 
-<p-dialog [(visible)]="companyDialog" [style]="{ width: '450px' }" header="Detalhes do Cliente" [modal]="true">
-    <ng-template #content>
-        <div class="flex flex-col gap-6">
-            <div>
-                <label for="status" class="block font-bold mb-3">Status</label>
-                <p-select [(ngModel)]="company.status" inputId="status" [options]="statuses" optionLabel="label" optionValue="value" placeholder="Selecione o Status" fluid />
-            </div>
-
-            <div>
-                <label for="name" class="block font-bold mb-3">Nome</label>
-                <input type="text" pInputText id="name" [(ngModel)]="company.name" required autofocus fluid />
-                <small class="text-red-500" *ngIf="submitted && !company.name">Nome é obrigatório.</small>
-            </div>
-
-            <div>
-                <label for="identication" class="block font-bold mb-3">CNPJ</label>
-                <input type="text" pInputText id="identication" [(ngModel)]="company.identification" (ngModelChange)="validateCompanyIdentification()" [disabled]="isEditing" required autofocus fluid />
-                <small class="text-red-500" *ngIf="submitted && !company.identification">CNPJ é obrigatório</small>
-                <small class="text-red-500" *ngIf="submitted && company.identification && !isValidCNPJ">CNPJ inválido</small>
-                <small class="text-red-500" *ngIf="submitted && company.identification && isValidCNPJ && isDuplicatedCNPJ">CNPJ já cadastrado</small>
-            </div>
-        </div>
-    </ng-template>
-
-    <ng-template #footer>
-        <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
-        <p-button label="Salvar" icon="pi pi-check" (click)="saveCompany()" />
-    </ng-template>
-</p-dialog>
-
 <p-confirmdialog [style]="{ width: '450px' }" />

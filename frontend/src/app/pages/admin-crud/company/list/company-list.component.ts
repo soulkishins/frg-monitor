@@ -18,9 +18,10 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { CompanyService } from '../../service/company.service';
-import { Company, CompanyResponse, CompanyRequest } from '../../models/company.model';
-import { Column, ExportColumn, Page } from '../../models/global.model';
+import { CompanyService } from '../../../service/company.service';
+import { Company, CompanyResponse, CompanyRequest } from '../../../models/company.model';
+import { Column, ExportColumn, Page } from '../../../models/global.model';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-crud',
@@ -45,10 +46,10 @@ import { Column, ExportColumn, Page } from '../../models/global.model';
         IconFieldModule,
         ConfirmDialogModule
     ],
-    templateUrl: './company.component.html',
+    templateUrl: './company-list.component.html',
     providers: [MessageService, ConfirmationService]
 })
-export class CompanyCrud implements OnInit {
+export class CompanyList implements OnInit {
     companyDialog: boolean = false;
 
     companies = signal<Company[]>([]);
@@ -87,7 +88,8 @@ export class CompanyCrud implements OnInit {
     constructor(
         private messageService: MessageService,
         private confirmationService: ConfirmationService,
-        private companyService: CompanyService
+        private companyService: CompanyService,
+        private router: Router
     ) {}
 
     exportCSV() {
@@ -137,25 +139,11 @@ export class CompanyCrud implements OnInit {
     }
 
     openNew() {
-        this.company = {
-            status: 'ACTIVE'
-        };
-        this.submitted = false;
-        this.isValidCNPJ = true;
-        this.isDuplicatedCNPJ = false;
-        this.isEditing = false;
-        this.statuses = this.createStatuses;
-        this.companyDialog = true;
+        this.router.navigate(['/cadastro/cliente/detalhe', 'novo']);
     }
 
     editCompany(company: Company) {
-        this.company = { ...company };
-        this.isValidCNPJ = true;
-        this.isDuplicatedCNPJ = false;
-        this.submitted = false;
-        this.isEditing = true;
-        this.statuses = this.editStatuses;
-        this.companyDialog = true;
+        this.router.navigate(['/cadastro/cliente/detalhe', company.id]);
     }
 
     deleteSelectedCompanies() {
