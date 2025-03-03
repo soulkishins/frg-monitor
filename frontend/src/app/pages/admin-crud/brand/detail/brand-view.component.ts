@@ -14,7 +14,7 @@ import { CompanyResponse } from '../../../../pages/models/company.model';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
-    selector: 'app-crud',
+    selector: 'app-brand-view',
     standalone: true,
     imports: [
         CommonModule,

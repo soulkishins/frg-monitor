@@ -24,7 +24,7 @@ import { Column, ExportColumn } from '../../../../pages/models/global.model';
 import { Router } from '@angular/router';
 
 @Component({
-    selector: 'app-crud',
+    selector: 'app-brand-list',
     standalone: true,
     imports: [
         CommonModule,

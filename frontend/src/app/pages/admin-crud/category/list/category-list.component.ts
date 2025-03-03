@@ -19,15 +19,17 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DropdownModule } from 'primeng/dropdown';
-import { CategoryService } from '../../service/category.service';
-import { CategoryResponse } from '../../models/category.model';
-import { Column, ExportColumn, Page } from '../../models/global.model';
+import { CategoryService } from '../../../../pages/service/category.service';
+import { CategoryResponse } from '../../../../pages/models/category.model';
+import { Column, ExportColumn, Page } from '../../../../pages/models/global.model';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
-    selector: 'app-crud',
+    selector: 'app-category-list',
     standalone: true,
     imports: [
         CommonModule,
+        RouterModule,
         TableModule,
         FormsModule,
         ButtonModule,
@@ -47,10 +49,10 @@ import { Column, ExportColumn, Page } from '../../models/global.model';
         ConfirmDialogModule,
         DropdownModule
     ],
-    templateUrl: './category.component.html',
+    templateUrl: './category-list.component.html',
     providers: [MessageService, CategoryService, ConfirmationService]
 })
-export class CategoryCrud implements OnInit {
+export class CategoryList implements OnInit {
     categoryDialog: boolean = false;
 
     categories = signal<CategoryResponse[]>([]);
@@ -75,7 +77,8 @@ export class CategoryCrud implements OnInit {
     constructor(
         private categoryService: CategoryService,
         private messageService: MessageService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private router: Router
     ) {}
 
     exportCSV() {
@@ -116,14 +119,11 @@ export class CategoryCrud implements OnInit {
     }
 
     openNew() {
-        this.category = {} as CategoryResponse;
-        this.submitted = false;
-        this.categoryDialog = true;
+        this.router.navigate(['/cadastro/categoria/detalhe', 'novo']);
     }
 
     editCategory(category: CategoryResponse) {
-        this.category = { ...category };
-        this.categoryDialog = true;
+        this.router.navigate(['/cadastro/categoria/detalhe', category.id_category]);
     }
 
     deleteSelectedCategories() {
@@ -216,6 +216,10 @@ export class CategoryCrud implements OnInit {
             id += chars.charAt(Math.floor(Math.random() * chars.length));
         }
         return id;
+    }
+
+    navigateToCategories() {
+        this.router.navigate(['/cadastro/categoria/lista']);
     }
 
     saveCategory() {

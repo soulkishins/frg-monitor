@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { canMatchGuard } from '../service/auth.guard';
 
 export default [
-    { path: 'categoria', loadComponent: () => import('./category/category.component').then(c => c.CategoryCrud), canMatch: [canMatchGuard] },
+    { path: 'categoria', loadChildren: () => import('./category/category.routes'), canMatch: [canMatchGuard] },
     { path: 'subcategoria', loadComponent: () => import('./subcategory/subcategory.component').then(c => c.SubCategoryCrud), canMatch: [canMatchGuard] },
     { path: 'cliente', loadChildren: () => import('./company/company.routes'), canMatch: [canMatchGuard] },
     { path: 'marca', loadChildren: () => import('./brand/brand.routes'), canMatch: [canMatchGuard] },
