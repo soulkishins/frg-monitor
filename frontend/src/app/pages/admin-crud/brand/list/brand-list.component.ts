@@ -18,12 +18,10 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { BrandService } from '../../service/brand.service';
-import { Brand, BrandResponse } from '../../models/brand.model';
-import { CompanyService } from '../../service/company.service';
-import { CompanyResponse } from '../../models/company.model';
-import { forkJoin } from 'rxjs';
-import { Column, ExportColumn } from '../../models/global.model';
+import { BrandService } from '../../../../pages/service/brand.service';
+import { Brand } from '../../../../pages/models/brand.model';
+import { Column, ExportColumn } from '../../../../pages/models/global.model';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-crud',
@@ -48,10 +46,10 @@ import { Column, ExportColumn } from '../../models/global.model';
         IconFieldModule,
         ConfirmDialogModule
     ],
-    templateUrl: './brand.component.html',
-    providers: [MessageService, BrandService, CompanyService, ConfirmationService]
+    templateUrl: './brand-list.component.html',
+    providers: [MessageService, BrandService, ConfirmationService]
 })
-export class BrandCrud implements OnInit {
+export class BrandList implements OnInit {
     brandDialog: boolean = false;
 
     brands = signal<Brand[]>([]);
@@ -64,8 +62,6 @@ export class BrandCrud implements OnInit {
 
     statuses!: any[];
 
-    clients: any[] = [];
-
     @ViewChild('dt') dt!: Table;
 
     exportColumns!: ExportColumn[];
@@ -74,9 +70,9 @@ export class BrandCrud implements OnInit {
 
     constructor(
         private brandService: BrandService,
-        private companyService: CompanyService,
         private messageService: MessageService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private router: Router
     ) {}
 
     exportCSV() {
@@ -88,19 +84,9 @@ export class BrandCrud implements OnInit {
     }
 
     loadBrandData() {
-        forkJoin({
-            companies: this.companyService.getClients(),
-            brands: this.brandService.getBrands()
-        }).subscribe({
-            next: ({ companies, brands }) => {
-                // Configurar clientes para o dropdown
-                this.clients = companies.list.map((company: CompanyResponse) => ({
-                    label: company.st_name,
-                    value: company.id
-                }));
-
-                // Configurar marcas
-                this.brands.set(brands.list.map((brand) => ({
+        this.brandService.getBrands().subscribe({
+            next: (response) => {
+                this.brands.set(response.list.map((brand) => ({
                     id: brand.id_brand,
                     name: brand.st_brand,
                     status: brand.st_status,
@@ -137,9 +123,7 @@ export class BrandCrud implements OnInit {
     }
 
     openNew() {
-        this.brand = {};
-        this.submitted = false;
-        this.brandDialog = true;
+        this.router.navigate(['/cadastro/marca/detalhe','novo']);
     }
 
     deleteSelectedBrands() {
@@ -161,13 +145,7 @@ export class BrandCrud implements OnInit {
     }
 
     editBrand(brand: Brand) {
-        this.brand = { ...brand };
-        // Encontrar o ID do cliente baseado no client_name
-        const client = this.clients.find(c => c.label === brand.client_name);
-        if (client) {
-            this.brand.client_id = client.value;
-        }
-        this.brandDialog = true;
+        this.router.navigate(['/cadastro/marca/detalhe', brand.id]);
     }
 
     deleteBrand(brand: Brand) {

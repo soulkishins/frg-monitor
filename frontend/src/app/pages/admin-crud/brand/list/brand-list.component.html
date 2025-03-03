@@ -71,34 +71,4 @@
     </ng-template>
 </p-table>
 
-<p-dialog [(visible)]="brandDialog" [style]="{ width: '450px' }" header="Detalhes da Marca" [modal]="true">
-    <ng-template #content>
-        <div class="flex flex-col gap-6">
-            <div>
-                <label for="client" class="block font-bold mb-3">Cliente</label>
-                <p-select [(ngModel)]="brand.client_id" inputId="client" [options]="clients" optionLabel="label" optionValue="value" placeholder="Selecione um Cliente" fluid required />
-                <small class="text-red-500" *ngIf="submitted && !brand.client_id">Campo obrigatório</small>
-            </div>
-
-            <div>
-                <label for="status" class="block font-bold mb-3">Status</label>
-                <p-select [(ngModel)]="brand.status" inputId="status" [options]="statuses" optionLabel="label" optionValue="value" placeholder="Selecione um Status" fluid required />
-                <small class="text-red-500" *ngIf="submitted && !brand.status">Campo obrigatório</small>
-            </div>
-
-            <div>
-                <label for="name" class="block font-bold mb-3">Nome</label>
-                <input type="text" pInputText id="name" [(ngModel)]="brand.name" required autofocus fluid />
-                <small class="text-red-500" *ngIf="submitted && !brand.name">Campo obrigatório</small>
-            </div>
-
-        </div>
-    </ng-template>
-
-    <ng-template #footer>
-        <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
-        <p-button label="Salvar" icon="pi pi-check" (click)="saveBrand()" />
-    </ng-template>
-</p-dialog>
-
 <p-confirmdialog [style]="{ width: '450px' }" />
