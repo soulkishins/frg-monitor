@@ -135,8 +135,8 @@ export class ProductCrud implements OnInit {
         this.loadCategories();
 
         this.statuses = [
-            { label: 'ATIVO', value: 'ACTIVE' },
-            { label: 'INATIVO', value: 'INACTIVE' }
+            { label: 'Ativo', value: 'ACTIVE' },
+            { label: 'Inativo', value: 'INACTIVE' }
         ];
 
         this.cols = [
@@ -215,7 +215,7 @@ export class ProductCrud implements OnInit {
         }
         this.subCategoryService.getSubCategories().subscribe({
             next: (data) => {
-                this.subcategories = data.filter(sc => sc.id_category === categoryId);
+                // this.subcategories = data.filter(sc => sc.id_category === categoryId);
             },
             error: (error) => {
                 this.messageService.add({
@@ -251,7 +251,7 @@ export class ProductCrud implements OnInit {
         if (categoryId) {
             this.subCategoryService.getSubCategories().subscribe({
                 next: (subcategories) => {
-                    this.subcategories = subcategories.filter(subcategory => subcategory.id_category === categoryId);
+                    // this.subcategories = subcategories.filter(subcategory => subcategory.id_category === categoryId);
                 },
                 error: (error) => {
                     console.error('Erro ao carregar subcategorias:', error);
@@ -374,7 +374,7 @@ export class ProductCrud implements OnInit {
             this.selectedCategory = this.product.subcategory.category.id_category;
             this.subCategoryService.getSubCategories().subscribe({
                 next: (subcategories) => {
-                    this.subcategories = subcategories.filter(sc => sc.id_category === this.product.subcategory?.category?.id_category);
+                    // this.subcategories = subcategories.filter(sc => sc.id_category === this.product.subcategory?.category?.id_category);
                 },
                 error: (error) => {
                     console.error('Erro ao carregar subcategorias:', error);
@@ -458,19 +458,26 @@ export class ProductCrud implements OnInit {
         return id;
     }
 
-    getSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' {
+    getSeverity(status: string) {
         switch (status) {
             case 'ACTIVE':
                 return 'success';
             case 'INACTIVE':
                 return 'danger';
             default:
-                return 'warn';
+                return 'info';
         }
     }
 
-    getStatusLabel(status: string): string {
-        return status === 'ACTIVE' ? 'ATIVO' : 'INATIVO';
+    getStatusLabel(status: string) {
+        switch (status) {
+            case 'ACTIVE':
+                return 'Ativo';
+            case 'INACTIVE':
+                return 'Inativo';
+            default:
+                return status;
+        }
     }
 
     saveProduct() {

@@ -1,3 +1,5 @@
+import { Page } from "./page.model";
+
 export interface BrandResponse {
     id_brand: string;
     id_client: string;
@@ -32,13 +34,6 @@ export interface Client {
     st_created_by: string;
     dt_modified: string | null;
     st_modified_by: string | null;
-}
-
-export interface Page {
-    total: number;
-    limit: number;
-    offset: number;
-    sort: string;
 }
 
 export interface BrandResponseWithClient extends BrandResponse {

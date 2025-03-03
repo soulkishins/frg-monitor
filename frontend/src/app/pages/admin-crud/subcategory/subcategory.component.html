@@ -61,7 +61,7 @@
             <td>{{ getCategoryName(subCategory.id_category) }}</td>
             <td>{{ subCategory.st_subcategory }}</td>
             <td>
-                <p-tag [value]="subCategory.st_status" [severity]="getSeverity(subCategory.st_status)" />
+                <p-tag [value]="getStatusLabel(subCategory.st_status)" [severity]="getSeverity(subCategory.st_status)" />
             </td>
             <td>
                 <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editSubCategory(subCategory)" />

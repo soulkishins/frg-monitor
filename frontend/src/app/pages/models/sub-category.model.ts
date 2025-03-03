@@ -1,8 +1,12 @@
+import { Page } from "./page.model";
+import { CategoryResponse } from "./category.model";
+
 export interface SubCategoryResponse {
     id_subcategory: string;
     id_category: string;
     st_subcategory: string;
     st_status: string;
+    category: CategoryResponse;
     dt_created: string;
     st_created_by: string;
     dt_modified: string | null;
@@ -20,4 +24,9 @@ export interface SubCategoryRequest {
     id_category: string;
     st_subcategory: string;
     st_status: string;
+}
+
+export interface SubCategoriesResponse {
+    list: SubCategoryResponse[];
+    page: Page; 
 }

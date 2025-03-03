@@ -63,8 +63,8 @@ export class SubCategoryCrud implements OnInit {
 
     submitted: boolean = false;
     statuses: any[] = [
-        { label: 'ATIVO', value: 'ATIVO' },
-        { label: 'INATIVO', value: 'INATIVO' }
+        { label: 'Ativo', value: 'ACTIVE' },
+        { label: 'Inativo', value: 'INACTIVE' }
     ];
 
     @ViewChild('dt') dt!: Table;
@@ -91,7 +91,7 @@ export class SubCategoryCrud implements OnInit {
     loadSubCategoryData() {
         this.categoryService.getCategories().subscribe(
             (data) => {
-                // this.categories.set(data);
+                this.categories.set(data.list);
             },
             (error) => {
                 this.messageService.add({
@@ -104,8 +104,8 @@ export class SubCategoryCrud implements OnInit {
         );
 
         this.subCategoryService.getSubCategories().subscribe(
-            (subCategories) => {
-                this.subCategories.set(subCategories);
+            (response) => {
+                this.subCategories.set(response.list);
             },
             (error) => {
                 this.messageService.add({
@@ -149,12 +149,23 @@ export class SubCategoryCrud implements OnInit {
 
     getSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined {
         switch (status) {
-            case 'ATIVO':
+            case 'ACTIVE':
                 return 'success';
-            case 'INATIVO':
+            case 'INACTIVE':
                 return 'danger';
             default:
                 return 'info';
+        }
+    }
+
+    getStatusLabel(status: string): string {
+        switch (status) {
+            case 'ACTIVE':
+                return 'Ativo';
+            case 'INACTIVE':
+                return 'Inativo';
+            default:
+                return status;
         }
     }
 
