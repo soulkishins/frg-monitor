@@ -1,3 +1,5 @@
+import { Page } from "./page.model";
+
 export interface ProductResponse {
     id_product: string;
     id_brand: string;
@@ -73,4 +75,15 @@ export interface Brand {
     st_created_by: string;
     dt_modified: string;
     st_modified_by: string;
+}
+
+export interface ProductsResponse {
+    list: ProductResponse[];
+    page: Page;
+}
+
+export interface Variety {
+    variety: string;
+    price: number;
+    status: string;
 }

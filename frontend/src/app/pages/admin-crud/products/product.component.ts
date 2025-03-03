@@ -153,8 +153,8 @@ export class ProductCrud implements OnInit {
 
     loadProductData() {
         this.productService.getProducts().subscribe({
-            next: (products) => {
-                this.products.set(products);
+            next: (response) => {
+                this.products.set(response.list);
                 this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Produtos carregados', life: 3000 });
             },
             error: (error) => {
@@ -183,7 +183,7 @@ export class ProductCrud implements OnInit {
         }
         this.brandService.getBrands().subscribe({
             next: (data) => {
-                // this.brands = data;
+                this.brands = data.list.filter(b => b.id_client === clientId);
             },
             error: (error) => {
                 this.messageService.add({
@@ -199,7 +199,7 @@ export class ProductCrud implements OnInit {
     loadCategories() {
         this.categoryService.getCategories().subscribe({
             next: (categories) => {
-                // this.categories = categories;
+                this.categories = categories.list;
             },
             error: (error) => {
                 console.error('Erro ao carregar categorias:', error);
@@ -215,7 +215,7 @@ export class ProductCrud implements OnInit {
         }
         this.subCategoryService.getSubCategories().subscribe({
             next: (data) => {
-                // this.subcategories = data.filter(sc => sc.id_category === categoryId);
+                this.subcategories = data.list.filter(sc => sc.id_category === categoryId);
             },
             error: (error) => {
                 this.messageService.add({
@@ -233,7 +233,7 @@ export class ProductCrud implements OnInit {
         if (clientId) {
             this.brandService.getBrands().subscribe({
                 next: (brands) => {
-                    // this.brands = brands.filter(brand => brand.id_client === clientId);
+                    this.brands = brands.list.filter(brand => brand.id_client === clientId);
                 },
                 error: (error) => {
                     console.error('Erro ao carregar marcas:', error);
@@ -251,7 +251,7 @@ export class ProductCrud implements OnInit {
         if (categoryId) {
             this.subCategoryService.getSubCategories().subscribe({
                 next: (subcategories) => {
-                    // this.subcategories = subcategories.filter(subcategory => subcategory.id_category === categoryId);
+                    this.subcategories = subcategories.list.filter(subcategory => subcategory.id_category === categoryId);
                 },
                 error: (error) => {
                     console.error('Erro ao carregar subcategorias:', error);
