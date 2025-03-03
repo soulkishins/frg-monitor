@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environment/environment';
-import { ProductResponse, ProductRequest, ProductsResponse } from '../models/product.model';
+import { ProductResponse, ProductRequest } from '../models/product.model';
+import { Page } from '../models/global.model';
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +13,8 @@ export class ProductService {
 
   constructor(private http: HttpClient) { }
 
-  getProducts(): Observable<ProductsResponse> {
-    return this.http.get<ProductsResponse>(this.baseUrl);
+  getProducts(): Observable<Page<ProductResponse>> {
+    return this.http.get<Page<ProductResponse>>(this.baseUrl);
   }
 
   getProduct(id: string): Observable<ProductResponse> {

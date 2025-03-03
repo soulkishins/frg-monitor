@@ -1,4 +1,3 @@
-import { Page } from "./page.model";
 import { CategoryResponse } from "./category.model";
 
 export interface SubCategoryResponse {
@@ -24,9 +23,4 @@ export interface SubCategoryRequest {
     id_category: string;
     st_subcategory: string;
     st_status: string;
-}
-
-export interface SubCategoriesResponse {
-    list: SubCategoryResponse[];
-    page: Page; 
 }

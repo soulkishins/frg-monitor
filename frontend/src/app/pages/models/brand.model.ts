@@ -1,5 +1,3 @@
-import { Page } from "./page.model";
-
 export interface BrandResponse {
     id_brand: string;
     id_client: string;
@@ -9,6 +7,9 @@ export interface BrandResponse {
     st_created_by: string;
     dt_modified: string | null;
     st_modified_by: string | null;
+    client: {
+        st_name: string;
+    };
 }
 
 export interface Brand {
@@ -23,24 +24,4 @@ export interface BrandRequest {
     id_client: string;
     st_brand: string;
     st_status: string;
-}
-
-export interface Client {
-    id: string;
-    st_name: string;
-    st_document: string;
-    st_status: string;
-    dt_created: string;
-    st_created_by: string;
-    dt_modified: string | null;
-    st_modified_by: string | null;
-}
-
-export interface BrandResponseWithClient extends BrandResponse {
-    client: Client;
-}
-
-export interface BrandsResponse {
-    list: BrandResponseWithClient[];
-    page: Page;
 }

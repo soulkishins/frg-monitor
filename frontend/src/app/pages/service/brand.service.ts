@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environment/environment';
-import { BrandResponse, BrandRequest, BrandsResponse } from '../models/brand.model';
-
+import { BrandResponse, BrandRequest } from '../models/brand.model';
+import { Page } from '../models/global.model';
 @Injectable({
   providedIn: 'root'
 })
@@ -12,9 +12,9 @@ export class BrandService {
 
   constructor(private http: HttpClient) {}
 
-  getBrands(): Observable<BrandsResponse> {
+  getBrands(): Observable<Page<BrandResponse>> {
     const url = `${this.baseUrl}`;
-    return this.http.get<BrandsResponse>(url);
+    return this.http.get<Page<BrandResponse>>(url);
   }
 
   getBrand(id: string): Observable<BrandResponse> {
