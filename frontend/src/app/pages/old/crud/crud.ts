@@ -69,7 +69,7 @@ interface ExportColumn {
         <p-table
             #dt
             [value]="products()"
-            [rows]="10"
+            [rows]="50"
             [columns]="cols"
             [paginator]="true"
             [globalFilterFields]="['name', 'country.name', 'representative.name', 'status']"
@@ -79,7 +79,7 @@ interface ExportColumn {
             dataKey="id"
             currentPageReportTemplate="Exibindo do {first} ao {last} de {totalRecords} Registros products"
             [showCurrentPageReport]="true"
-            [rowsPerPageOptions]="[10, 20, 30]"
+            [rowsPerPageOptions]="[50, 100, 200, 300]"
         >
             <ng-template #caption>
                 <div class="flex items-center justify-between">
