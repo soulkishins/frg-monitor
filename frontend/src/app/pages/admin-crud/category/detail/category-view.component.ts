@@ -9,7 +9,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { DropdownModule } from 'primeng/dropdown';
 import { CategoryService } from '../../../../pages/service/category.service';
 import { CategoryResponse } from '../../../../pages/models/category.model';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
     selector: 'app-category-view',
@@ -39,7 +39,8 @@ export class CategoryView implements OnInit {
     constructor(
         private categoryService: CategoryService,
         private messageService: MessageService,
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
+        private router: Router
     ) {}
 
     ngOnInit() {
@@ -74,9 +75,9 @@ export class CategoryView implements OnInit {
         );
     }
 
-    hideDialog() {
+    goBack() {
         // Redirecionar para a lista de categorias
-        window.history.back();
+        this.router.navigate(['/cadastro/categoria/lista']);
     }
 
     saveCategory() {
@@ -98,7 +99,7 @@ export class CategoryView implements OnInit {
                             detail: 'Categoria Atualizada',
                             life: 3000
                         });
-                        window.history.back();
+                        this.goBack();
                     },
                     (error) => {
                         this.messageService.add({
@@ -119,7 +120,7 @@ export class CategoryView implements OnInit {
                             detail: 'Categoria Criada',
                             life: 3000
                         });
-                        window.history.back();
+                        this.goBack();
                     },
                     (error) => {
                         this.messageService.add({

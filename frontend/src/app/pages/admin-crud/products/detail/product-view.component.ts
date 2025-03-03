@@ -400,8 +400,8 @@ export class ProductView implements OnInit {
         });
     }
 
-    hideDialog() {
-        this.router.navigate(['../'], { relativeTo: this.route });
+    goBack() {
+        this.router.navigate(['/cadastro/produto/lista']);
     }
 
     deleteProduct(product: ProductResponse) {

@@ -144,7 +144,7 @@ export class SubCategoryView implements OnInit {
         this.isEditing = false;
     }
 
-    hideDialog() {
+    goBack() {
         this.router.navigate(['/cadastro/subcategoria/lista']);
     }
 

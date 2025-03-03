@@ -146,7 +146,7 @@ export class BrandView implements OnInit {
         });
     }
 
-    hideDialog() {
+    goBack() {
         this.router.navigate(['/cadastro/marca/lista']);
     }
 
