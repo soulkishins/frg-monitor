@@ -199,7 +199,7 @@ export class ProductCrud implements OnInit {
     loadCategories() {
         this.categoryService.getCategories().subscribe({
             next: (categories) => {
-                this.categories = categories;
+                // this.categories = categories;
             },
             error: (error) => {
                 console.error('Erro ao carregar categorias:', error);

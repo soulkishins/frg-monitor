@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environment/environment';
-import { CategoryResponse, CategoryRequest } from '../models/category.model';
+import { CategoryResponse, CategoryRequest, CategoriesResponse } from '../models/category.model';
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +12,8 @@ export class CategoryService {
 
   constructor(private http: HttpClient) { }
 
-  getCategories(): Observable<CategoryResponse[]> {
-    return this.http.get<CategoryResponse[]>(this.baseUrl);
+  getCategories(): Observable<CategoriesResponse> {
+    return this.http.get<CategoriesResponse>(this.baseUrl);
   }
 
   getCategory(id: string): Observable<CategoryResponse> {

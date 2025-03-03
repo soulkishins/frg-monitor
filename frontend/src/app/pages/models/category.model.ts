@@ -19,3 +19,15 @@ export interface CategoryRequest {
     st_category: string;
     st_status: string;
 }
+
+export interface Page {
+    total: number;
+    limit: number;
+    offset: number;
+    sort: string;
+}
+
+export interface CategoriesResponse {
+    list: CategoryResponse[];
+    page: Page;
+}

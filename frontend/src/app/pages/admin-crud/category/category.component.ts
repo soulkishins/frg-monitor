@@ -20,7 +20,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DropdownModule } from 'primeng/dropdown';
 import { CategoryService } from '../../service/category.service';
-import { CategoryResponse } from '../../models/category.model';
+import { CategoryResponse, CategoriesResponse } from '../../models/category.model';
 import { Column, ExportColumn } from '../../models/global.model';
 
 @Component({
@@ -88,8 +88,8 @@ export class CategoryCrud implements OnInit {
 
     loadCategoryData() {
         this.categoryService.getCategories().subscribe(
-            (data) => {
-                this.categories.set(data);
+            (data: CategoriesResponse) => {
+                this.categories.set(data.list);
             },
             (error) => {
                 this.messageService.add({

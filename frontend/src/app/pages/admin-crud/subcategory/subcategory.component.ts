@@ -91,7 +91,7 @@ export class SubCategoryCrud implements OnInit {
     loadSubCategoryData() {
         this.categoryService.getCategories().subscribe(
             (data) => {
-                this.categories.set(data);
+                // this.categories.set(data);
             },
             (error) => {
                 this.messageService.add({
