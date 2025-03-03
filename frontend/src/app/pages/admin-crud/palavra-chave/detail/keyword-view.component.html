@@ -1,0 +1,51 @@
+<p-toolbar styleClass="mb-6">
+    <ng-template pTemplate="start">
+        <h2>{{ isEditing ? 'Editar Palavra-chave' : 'Nova Palavra-chave' }}</h2>
+    </ng-template>
+</p-toolbar>
+
+<div class="card">
+    <p-toast></p-toast>
+    <form (ngSubmit)="saveKeyword()">
+        <div class="flex flex-col gap-6 p-4">
+            <div>
+                <label for="status" class="block font-bold mb-3">Status *</label>
+                <p-dropdown [options]="statusOptions" [(ngModel)]="keyword.st_status" name="st_status"
+                    optionLabel="label" optionValue="value" [style]="{'width': '100%'}"
+                    [ngClass]="{ 'ng-invalid ng-dirty': submitted && !keyword.st_status }">
+                </p-dropdown>
+                <small class="text-red-500" *ngIf="submitted && !keyword.st_status">Status é obrigatório.</small>
+            </div>
+
+            <div>
+                <label for="keyword" class="block font-bold mb-3">Palavra-chave *</label>
+                <input pInputText id="keyword" [(ngModel)]="keyword.st_keyword" name="st_keyword"
+                    [ngClass]="{ 'ng-invalid ng-dirty': submitted && !keyword.st_keyword }"
+                    [style]="{'width': '100%'}" />
+                <small class="text-red-500" *ngIf="submitted && !keyword.st_keyword">Palavra-chave é obrigatória.</small>
+            </div>
+
+            <div class="flex gap-4">
+                <div class="flex-1">
+                    <label for="client" class="block font-bold mb-3">Cliente</label>
+                    <p-dropdown [options]="clients" [(ngModel)]="selectedClient" name="selectedClient"
+                        optionLabel="st_name" optionValue="id" placeholder="Selecione um cliente"
+                        (onChange)="onClientChange($event)" [style]="{'width': '100%'}">
+                    </p-dropdown>
+                </div>
+                <div class="flex-1">
+                    <label for="brand" class="block font-bold mb-3">Marca</label>
+                    <p-dropdown [options]="brands" [(ngModel)]="keyword.id_brand" name="id_brand"
+                        optionLabel="st_brand" optionValue="id_brand" placeholder="Selecione uma marca"
+                        [disabled]="!selectedClient" [style]="{'width': '100%'}">
+                    </p-dropdown>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-2 p-4 border-t-1">
+            <p-button type="button" label="Voltar" icon="pi pi-arrow-left" text (click)="goBack()" />
+            <p-button type="submit" label="Salvar" icon="pi pi-check" />
+        </div>
+    </form>
+</div>

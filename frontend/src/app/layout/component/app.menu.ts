@@ -27,6 +27,7 @@ export class AppMenu {
                     { label: 'Categoria', icon: 'pi pi-fw pi-table', routerLink: ['/cadastro/categoria'] },
                     { label: 'Sub Categoria', icon: 'pi pi-fw pi-table', routerLink: ['/cadastro/subcategoria'] },
                     { label: 'Produto', icon: 'pi pi-fw pi-table', routerLink: ['/cadastro/produto'] },
+                    { label: 'Palavra-chave', icon: 'pi pi-fw pi-table', routerLink: ['/cadastro/palavra-chave'] },
                 ]
             },
             {

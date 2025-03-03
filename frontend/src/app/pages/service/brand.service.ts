@@ -12,8 +12,10 @@ export class BrandService {
 
   constructor(private http: HttpClient) {}
 
-  getBrands(): Observable<Page<BrandResponse>> {
-    const url = `${this.baseUrl}`;
+  getBrands(clientId?: string): Observable<Page<BrandResponse>> {
+    const url = clientId 
+      ? `${this.baseUrl}?clientId=${clientId}`
+      : `${this.baseUrl}`;
     return this.http.get<Page<BrandResponse>>(url);
   }
 

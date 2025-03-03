@@ -142,17 +142,31 @@ export class ProductView implements OnInit {
             { label: 'Inativo', value: 'INACTIVE' }
         ];
 
-        // Verificar se estamos em modo de edição
+        this.loadProductData();
+
+        this.cols = [
+            { field: 'brand.client.st_name', header: 'Cliente' },
+            { field: 'brand.st_brand', header: 'Marca' },
+            { field: 'subcategory.category.st_category', header: 'Categoria' },
+            { field: 'subcategory.st_subcategory', header: 'Subcategoria' },
+            { field: 'st_product', header: 'Produto' },
+            { field: 'st_status', header: 'Status' }
+        ];
+
+        this.exportColumns = this.cols.map(col => ({ title: col.header, dataKey: col.field }));
+    }
+
+    loadProductData() {
         const productId = this.route.snapshot.params['id'];
         if (productId && productId !== 'novo') {
             this.isEditing = true;
             this.productService.getProduct(productId).subscribe({
-                next: (product) => {
-                    this.product = product;
+                next: (response) => {
+                    this.product = response;
                     
                     // Carregar lista de variedades do JSON
                     try {
-                        const parsedVarieties = product.st_variety ? JSON.parse(product.st_variety) : [];
+                        const parsedVarieties = response.st_variety ? JSON.parse(response.st_variety) : [];
                         this.varietyList = parsedVarieties.map((v: any) => ({
                             ...v,
                             status: v.status || 'active'
@@ -173,6 +187,8 @@ export class ProductView implements OnInit {
                         this.selectedCategory = this.product.subcategory.category.id_category;
                         this.loadSubcategories(this.selectedCategory);
                     }
+                    
+                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Produto carregado', life: 3000 });
                 },
                 error: (error) => {
                     console.error('Erro ao carregar produto:', error);
@@ -181,36 +197,12 @@ export class ProductView implements OnInit {
                 }
             });
         } else {
-            // Inicializar produto vazio para novo cadastro
+            // Inicializa um novo produto
             this.isEditing = false;
             this.product = {} as ProductResponse;
             this.product.st_status = 'ACTIVE';
             this.varietyList = [];
         }
-
-        this.cols = [
-            { field: 'brand.client.st_name', header: 'Cliente' },
-            { field: 'brand.st_brand', header: 'Marca' },
-            { field: 'subcategory.category.st_category', header: 'Categoria' },
-            { field: 'subcategory.st_subcategory', header: 'Subcategoria' },
-            { field: 'st_product', header: 'Produto' },
-            { field: 'st_status', header: 'Status' }
-        ];
-
-        this.exportColumns = this.cols.map(col => ({ title: col.header, dataKey: col.field }));
-    }
-
-    loadProductData() {
-        this.productService.getProducts().subscribe({
-            next: (response) => {
-                this.products.set(response.list);
-                this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Produtos carregados', life: 3000 });
-            },
-            error: (error) => {
-                console.error('Erro ao carregar produtos:', error);
-                this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar produtos', life: 3000 });
-            }
-        });
     }
 
     loadClients() {

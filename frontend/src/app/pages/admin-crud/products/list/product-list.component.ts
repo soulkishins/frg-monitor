@@ -36,6 +36,10 @@ import { mergeMap, map } from 'rxjs/operators';
 import { ProductRequest } from '../../../models/product.model';
 import { Column, ExportColumn } from '../../../models/global.model';
 import { LOCALE_ID } from '@angular/core';
+import { PanelModule } from 'primeng/panel';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { FluidModule } from 'primeng/fluid';
+import { TooltipModule } from 'primeng/tooltip';
 
 // Registrar o locale
 registerLocaleData(localePt);
@@ -61,7 +65,11 @@ registerLocaleData(localePt);
         TagModule,
         InputIconModule,
         IconFieldModule,
-        ConfirmDialogModule
+        ConfirmDialogModule,
+        PanelModule,
+        IftaLabelModule,
+        FluidModule,
+        TooltipModule
     ],
     templateUrl: './product-list.component.html',
     providers: [
@@ -116,6 +124,15 @@ export class ProductList implements OnInit {
 
     vl_floor_price: number = 0;
 
+    filters: {[prop: string]: any} = {};
+    page: {
+        total: number;
+        limit: number;
+        offset: number;
+        sort?: string;
+    } = {total: 0, limit: 50, offset: 0, sort: 'st_product'};
+    loading: boolean = false;
+
     constructor(
         private productService: ProductService,
         private companyService: CompanyService,
@@ -132,8 +149,6 @@ export class ProductList implements OnInit {
     }
 
     ngOnInit() {
-        this.loadProductData();
-
         this.statuses = [
             { label: 'Ativo', value: 'ACTIVE' },
             { label: 'Inativo', value: 'INACTIVE' }
@@ -149,19 +164,8 @@ export class ProductList implements OnInit {
         ];
 
         this.exportColumns = this.cols.map(col => ({ title: col.header, dataKey: col.field }));
-    }
 
-    loadProductData() {
-        this.productService.getProducts().subscribe({
-            next: (response) => {
-                this.products.set(response.list);
-                this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Produtos carregados', life: 3000 });
-            },
-            error: (error) => {
-                console.error('Erro ao carregar produtos:', error);
-                this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar produtos', life: 3000 });
-            }
-        });
+        this.filters['st_status'] = this.statuses[0];
     }
 
     loadBrands(clientId: string) {
@@ -261,7 +265,7 @@ export class ProductList implements OnInit {
 
                     forkJoin(deleteRequests).subscribe({
                         next: () => {
-                            this.loadProductData();
+                            this.loadData();
                             this.selectedProducts = null;
                             this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Produtos excluídos', life: 3000 });
                         },
@@ -288,7 +292,7 @@ export class ProductList implements OnInit {
             accept: () => {
                 this.productService.deleteProduct(product.id_product).subscribe({
                     next: () => {
-                        this.loadProductData();
+                        this.loadData();
                         this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Produto excluído', life: 3000 });
                     },
                     error: (error) => {
@@ -364,7 +368,7 @@ export class ProductList implements OnInit {
         if (this.product.id_product) {
             this.productService.putProduct(this.product.id_product, productRequest).subscribe({
                 next: (response) => {
-                    this.loadProductData();
+                    this.loadData();
                     this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Produto atualizado', life: 3000 });
                 },
                 error: (error) => {
@@ -375,7 +379,7 @@ export class ProductList implements OnInit {
         } else {
             this.productService.postProduct(productRequest).subscribe({
                 next: (response) => {
-                    this.loadProductData();
+                    this.loadData();
                     this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Produto criado', life: 3000 });
                 },
                 error: (error) => {
@@ -440,5 +444,47 @@ export class ProductList implements OnInit {
             this.selectedVarietyIndex = index;
             this.messageService.add({ severity: 'info', summary: 'Selecionado', detail: 'Variedade selecionada para edição', life: 3000 });
         }
+    }
+
+    loadData(event?: any) {
+        if (!event) {
+            event = {first: this.page.offset, rows: this.page.limit};
+        }
+
+        this.loading = true;
+        const {st_status, ...query} = this.filters;
+        if (this.filters['st_status'].value !== 'ALL')
+            query['st_status'] = this.filters['st_status'].value;
+        query['page.limit'] = event.rows;
+        query['page.offset'] = event.first;
+        query['page.sort'] = `${event.sortField || this.page.sort}${event.sortOrder !== -1 ? '.asc' : '.desc'}`;
+
+        this.productService
+            .getProducts(query)
+            .subscribe({
+                next: (data) => {
+                    this.products.set(data.list);
+                    this.page = data.page;
+                },
+                error: (error) => {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Erro',
+                        detail: 'Erro ao carregar produtos',
+                        life: 3000
+                    });
+                    console.error('Erro ao carregar produtos:', error);
+                },
+                complete: () => {
+                    this.loading = false;
+                }
+            });
+    }
+
+    clearFilters(dt: any) {
+        this.filters = {
+            st_status: this.statuses[0],
+        };
+        dt.reset();
     }
 }
