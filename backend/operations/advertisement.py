@@ -88,7 +88,40 @@ class AdvertisementCrud(Crud):
         if 'advertisement' in indexes:
             query = query.filter(AdvertisementHistory.id_advertisement == indexes['advertisement'])
         query = query.order_by(AdvertisementHistory.dt_created.desc())
-        return (200, query.all())
+        return (200, query.limit(20).all())
+    
+    def upd_status(self, indexes, filters, body) -> list:
+        from sqlalchemy import update, insert, func
+        stmt = (
+            update(Advertisement)
+            .where(Advertisement.id_advertisement.in_(body['ids']))
+            .values(
+                st_status = body['status'],
+                dt_modified = func.current_timestamp(),
+                st_modified_by = self._user
+            )
+        )
+        # Executa a atualização
+        result = self._session.execute(stmt)
+        ads = (
+            self._session
+            .query(Advertisement)
+            .filter(Advertisement.id_advertisement.in_(body['ids']))
+            .all()
+        )
+            
+        self._session.add_all(
+            [AdvertisementHistory(
+                id_advertisement = ad.id_advertisement,
+                dt_history = func.current_timestamp(),
+                st_status = body['status'],
+                st_action = f'USER_{body["status"]}',
+                st_history = str(ad)
+            ) for ad in ads]
+        )
+        
+        self._session.commit()
+        return (200, f"Registros atualizados: {result.rowcount}")
     
     def json_transform(self, method):
         if method == 'read':

@@ -10,7 +10,7 @@
     </ng-template>
 
     <ng-template #end>
-        <p-button label="Voltar" icon="pi pi-history" severity="secondary" />
+        <p-button label="Voltar" icon="pi pi-history" severity="secondary" (click)="goBack()" />
     </ng-template>
 </p-toolbar>
 
@@ -22,56 +22,56 @@
         </div>
     </ng-template>
     <ng-template #icons>
-        <p-button icon="pi pi-thumbs-down" severity="primary" rounded text pTooltip="Denunciar" tooltipPosition="top" />
-        <p-button icon="pi pi-tag" severity="info" rounded text pTooltip="Revisão Manual" tooltipPosition="top" />
+        <p-button icon="pi pi-thumbs-down" severity="danger" rounded text pTooltip="Denunciar" tooltipPosition="top" (onClick)="reportAdvertisement()" />
+        <p-button icon="pi pi-tag" severity="info" rounded text pTooltip="Revisão Manual" tooltipPosition="top" (onClick)="invalidateAdvertisement()" />
     </ng-template>
     <p-fluid>
         <div class="grid grid-cols-4 gap-4">
             <div>
                 <p-iftalabel>
-                    <p-select [(ngModel)]="advertisement.st_status" inputId="st_status" [options]="statuses" optionLabel="label" styleClass="w-full" />
+                    <p-select [(ngModel)]="advertisement.st_status" inputId="st_status" [options]="statuses" optionLabel="label" styleClass="w-full" readonly="true"/>
                     <label for="st_status">Status</label>
                 </p-iftalabel>
             </div>
             <div>
                 <p-iftalabel>
-                    <input pInputText id="st_plataform" [(ngModel)]="advertisement.st_plataform" />
+                    <input pInputText id="st_plataform" [(ngModel)]="advertisement.st_plataform"  readonly="true"/>
                     <label for="st_plataform">Plataforma</label>
                 </p-iftalabel>
             </div>
             <div>
                 <p-iftalabel>
-                    <input pInputText id="st_plataform_id" [(ngModel)]="advertisement.st_plataform_id" />
+                    <input pInputText id="st_plataform_id" [(ngModel)]="advertisement.st_plataform_id" readonly="true"/>
                     <label for="st_plataform_id">Plataforma ID</label>
                 </p-iftalabel>
             </div>
             <div>
                 <p-iftalabel>
-                    <p-inputnumber [(ngModel)]="advertisement.db_price" mode="currency" inputId="db_price" currency="BRL" locale="pt-BR" (onBlur)="printPrice()" />
+                    <p-inputnumber [(ngModel)]="advertisement.db_price" mode="currency" inputId="db_price" currency="BRL" locale="pt-BR" readonly="true"/>
                     <label for="db_price">Preço</label>
                 </p-iftalabel>
             </div>
 
             <div class="col-span-2">
                 <p-iftalabel>
-                    <input pInputText id="st_name" [(ngModel)]="client.st_name" />
+                    <input pInputText id="st_name" [(ngModel)]="client.st_name"  readonly="true"/>
                     <label for="st_name">Cliente</label>
                 </p-iftalabel>
             </div>
             <div>
                 <p-iftalabel>
-                    <input pInputText id="st_brand" [(ngModel)]="brand.st_brand" />
+                    <input pInputText id="st_brand" [(ngModel)]="brand.st_brand"  readonly="true"/>
                     <label for="st_brand">Marca</label>
                 </p-iftalabel>
             </div>
             <div>
                 <p-iftalabel>
-                    <input pInputText id="st_vendor" [(ngModel)]="advertisement.st_vendor" />
+                    <input pInputText id="st_vendor" [(ngModel)]="advertisement.st_vendor"  readonly="true"/>
                     <label for="st_vendor">Vendedor</label>
                 </p-iftalabel>
             </div>
             <div class="col-span-full">
-                <p-galleria [value]="advertisement.st_photos?.split(',')" indicatorsPosition="left" [showIndicators]="true" [showThumbnails]="false" showIndicatorsOnItem="true" [containerStyle]="{ 'margin-top': '2em' }" >
+                <p-galleria [value]="advertisement.st_photos?.split(',')" indicatorsPosition="left" [showIndicators]="true" [showThumbnails]="false" showIndicatorsOnItem="false" [containerStyle]="{ 'margin-top': '2em' }" >
                     <ng-template pTemplate="item" let-item>
                         <img [src]="advertisementService.getPhotoUrl(advertisement.st_plataform!, advertisement.st_plataform_id!, item)" style="width: 100%; max-width: 640px; max-height: 640px; display: block;" />
                     </ng-template>
@@ -79,19 +79,24 @@
             </div>
             <div class="col-span-full">
                 <p-iftalabel>
-                    <input pInputText id="st_title" [(ngModel)]="advertisement.st_title" />
+                    <input pInputText id="st_title" [(ngModel)]="advertisement.st_title" readonly="true" />
                     <label for="st_title">Título do Anúncio</label>
                 </p-iftalabel>
             </div>
             <div class="col-span-full">
-                <p-iftalabel>
-                    <input pInputText id="st_url" [(ngModel)]="advertisement.st_url" />
-                    <label for="st_url">URL</label>
-                </p-iftalabel>
+                <p-inputgroup>
+                    <p-iftalabel>
+                        <input pInputText id="st_url" [(ngModel)]="advertisement.st_url"  readonly="true"/>
+                        <label for="st_url">URL</label>
+                    </p-iftalabel>
+                    <p-inputgroup-addon>
+                        <p-button icon="pi pi-external-link" severity="contrast" outlined="true" [ngStyle]="{'height': '100%'}" (onClick)="openUrl()" />
+                    </p-inputgroup-addon>
+                </p-inputgroup>
             </div>
             <div class="col-span-full">
                 <p-iftalabel>
-                    <textarea pTextarea id="st_description" [(ngModel)]="advertisement.st_description" rows="20" cols="30" style="resize: none"></textarea>
+                    <textarea pTextarea id="st_description" [(ngModel)]="advertisement.st_description" rows="20" cols="30" style="resize: none" readonly="true"></textarea>
                     <label for="st_description">Descrição</label>
                 </p-iftalabel>
             </div>
@@ -158,37 +163,39 @@
     </ng-template>
     <p-table
         #dt
-        [value]="products || []"
+        [value]="history || []"
         [rows]="50"
         [tableStyle]="{ 'min-width': '75rem' }"
         [rowHover]="true"
     >
         <ng-template #header>
             <tr>
-                <th pSortableColumn="dt_history" style="min-width: 20rem">
+                <th pSortableColumn="dt_history" style="min-width: 10rem">
                     Data
                     <p-sortIcon field="dt_history" />
                 </th>
-                <th pSortableColumn="st_status" style="min-width: 20rem">
+                <th pSortableColumn="st_action" style="min-width:15rem">
+                    Processo
+                    <p-sortIcon field="st_action" />
+                </th>
+                <th pSortableColumn="st_created_by" style="min-width:25rem">
+                    Executado por
+                    <p-sortIcon field="st_created_by" />
+                </th>
+                <th pSortableColumn="st_status" style="min-width: 10rem">
                     Status
                     <p-sortIcon field="st_status" />
                 </th>
-                <th pSortableColumn="st_action" style="min-width:20rem">
-                    Ação
-                    <p-sortIcon field="st_action" />
-                </th>
-                <th pSortableColumn="st_history" style="min-width:20rem">
-                    Histórico
-                    <p-sortIcon field="st_history" />
-                </th>
+                <!--th style="min-width:4rem"></th-->
             </tr>
         </ng-template>
         <ng-template #body let-advertisement>
             <tr>
                 <td>{{ advertisement.dt_history | date:'dd/MM/yyyy HH:mm:ss' }}</td>
-                <td>{{ advertisement.st_status }}</td>
-                <td>{{ advertisement.st_action }}</td>
-                <td>{{ advertisement.st_history }}</td>
+                <td>{{ getAction(advertisement.st_action) }}</td>
+                <td>{{ advertisement.st_created_by }}</td>
+                <td>{{ getStatus(advertisement.st_status) }}</td>
+                <!--td><p-button icon="pi pi-eye" class="mr-2" [rounded]="true" [outlined]="true" (onClick)="viewHistory(advertisement)" /></td-->
             </tr>
         </ng-template>
     </p-table>

@@ -25,7 +25,7 @@ export class AdvertisementService {
     return this.http.get<AdvertisementHistory[]>(`${this.baseUrl}/${id}/historico`);
   }
 
-  reportAdvertisements(ids: string[], status: string): Observable<void> {
+  updateStatusAdvertisements(ids: string[], status: string): Observable<void> {
     return this.http.patch<void>(`${this.baseUrl}`, { ids, status });
   }
 
@@ -51,6 +51,17 @@ export class AdvertisementService {
       ];
     }
     return statuses;
+  }
+
+  getActions(): { label: string, value: string }[] {
+    return [
+      { label: 'Anúncio Localizado', value: 'CRAWLER_CREATED' },
+      { label: 'Anúncio Atualizado', value: 'CRAWLER_UPDATED' },
+      { label: 'Marcado para Denúncia', value: 'USER_REPORT' },
+      { label: 'Denúncia Exportada', value: 'USER_REPORTED' },
+      { label: 'Denúncia Exportada Manual', value: 'USER_EXPORT' },
+      { label: 'Revisão Manual', value: 'USER_INVALIDATE' },
+    ];
   }
 
   getPhotoUrl(platform: string, platformID: string, photo: string): string {

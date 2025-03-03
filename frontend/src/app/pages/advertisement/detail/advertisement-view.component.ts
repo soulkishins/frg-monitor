@@ -31,6 +31,8 @@ import { Advertisement, AdvertisementHistory, ClientBrand, ClientBrandProduct, C
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { GalleriaModule } from 'primeng/galleria';
 import { ActivatedRoute, Router } from '@angular/router';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { InputGroupModule } from 'primeng/inputgroup';
 
 registerLocaleData(localePt);
 
@@ -63,7 +65,9 @@ registerLocaleData(localePt);
         GalleriaModule,
         DialogModule,
         ToastModule,
-        ConfirmDialogModule
+        ConfirmDialogModule,
+        InputGroupModule,
+        InputGroupAddonModule
     ],
     templateUrl: './advertisement-view.component.html',
     providers: [MessageService, AdvertisementService, ConfirmationService]
@@ -76,6 +80,7 @@ export class AdvertisementDetail implements OnInit {
     history: AdvertisementHistory[] = [];
 
     statuses!: any[];
+    actions!: any[];
 
     constructor(
         public advertisementService: AdvertisementService,
@@ -87,6 +92,7 @@ export class AdvertisementDetail implements OnInit {
 
     ngOnInit() {
         this.statuses = this.advertisementService.getStatuses();
+        this.actions = this.advertisementService.getActions();
 
         this.route.paramMap.subscribe({
             next: (params: any) => {
@@ -98,6 +104,8 @@ export class AdvertisementDetail implements OnInit {
                     .subscribe({
                         next: (advertisement: Advertisement) => {
                             this.advertisement = advertisement;
+                            this.advertisement.st_status = this.statuses.find((status: any) => status.value === this.advertisement.st_status);
+                            this.advertisement.db_price = this.advertisement.db_price?.toString().replace(".", ",");
                             this.brand = advertisement.brand;
                             this.client = advertisement.brand?.client;
                             this.products = advertisement.products.map(
@@ -132,7 +140,93 @@ export class AdvertisementDetail implements OnInit {
         });
     }
 
-    printPrice() {
-        console.log(this.advertisement['db_price']);
+    viewHistory(advertisement: Advertisement) {
+        //this.router.navigate(['/advertisement', advertisement.id]);
+    }
+
+    getStatus(status: string): string | undefined {
+        const st = this.statuses.filter(s => s.value === status)[0];
+        if (st)
+            return st.label;
+        return undefined;
+    }
+
+    getAction(action: string): string | undefined {
+        const ac = this.actions.filter(a => a.value === action)[0];
+        if (ac)
+            return ac.label;
+        return undefined;
+    }
+
+    openUrl() {
+        window.open(this.advertisement.st_url, '_blank');
+    }
+
+    goBack() {
+        this.router.navigate(['/anuncio', 'lista']);
+    }
+
+    reportAdvertisement() {
+        this.confirmationService.confirm({
+            message: 'Confirmar a denúncia do anúncio?',
+            header: 'Confirmar Denúncia',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+                this.advertisementService
+                .updateStatusAdvertisements([this.advertisement.id_advertisement!], 'REPORT')
+                .subscribe({
+                    next: () => {
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Denúncia Confirmada',
+                            detail: 'Anúncio atualizado com sucesso!',
+                            life: 3000
+                        });
+                        this.advertisement.st_status = this.statuses.find((status: any) => status.value === 'REPORT');
+                    },
+                    error: (error: any) => {
+                        console.error('Erro ao denunciar o anúncio:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao atualizar o status do anúncio para Marcado para Denúncia',
+                            life: 3000
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    invalidateAdvertisement() {
+        this.confirmationService.confirm({
+            message: 'Confirmar a revisão manual do anúncio?',
+            header: 'Confirmar Revisão Manual',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+                this.advertisementService
+                .updateStatusAdvertisements([this.advertisement.id_advertisement!], 'INVALIDATE')
+                .subscribe({
+                    next: () => {
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Revisão Manual Confirmada',
+                            detail: 'Anúncio atualizado com sucesso!',
+                            life: 3000
+                        });
+                        this.advertisement.st_status = this.statuses.find((status: any) => status.value === 'INVALIDATE');
+                    },
+                    error: (error: any) => {
+                        console.error('Erro ao invalidar o anúncio:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao atualizar o status do anúncio para Revisão Manual',
+                            life: 3000
+                        });
+                    }
+                });
+            }
+        });
     }
 }

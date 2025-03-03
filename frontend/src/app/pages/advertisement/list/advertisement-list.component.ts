@@ -151,7 +151,7 @@ export class AdvertisementList implements OnInit {
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
                 this.advertisementService
-                .reportAdvertisements(this.selectedAdvertisements.map(ad => ad.id_advertisement), 'REPORT')
+                .updateStatusAdvertisements(this.selectedAdvertisements.map(ad => ad.id_advertisement), 'REPORT')
                 .subscribe({
                     next: () => {
                         this.selectedAdvertisements = [];
@@ -178,12 +178,12 @@ export class AdvertisementList implements OnInit {
 
     invalidateAdvertisements() {
         this.confirmationService.confirm({
-            message: 'Confirmar a invalidação dos anúncios selecionados?',
-            header: 'Confirmar Invalidação',
+            message: 'Confirmar a revisão manual dos anúncios selecionados?',
+            header: 'Confirmar Revisão Manual',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
                 this.advertisementService
-                .reportAdvertisements(this.selectedAdvertisements.map(ad => ad.id_advertisement), 'INVALIDATE')
+                .updateStatusAdvertisements(this.selectedAdvertisements.map(ad => ad.id_advertisement), 'INVALIDATE')
                 .subscribe({
                     next: () => {
                         this.selectedAdvertisements = [];
@@ -282,5 +282,9 @@ export class AdvertisementList implements OnInit {
         if (st)
             return st.label;
         return undefined;
+    }
+
+    openUrl(advertisement: AdvertisementListDto) {
+        window.open(advertisement.st_url, '_blank');
     }
 }

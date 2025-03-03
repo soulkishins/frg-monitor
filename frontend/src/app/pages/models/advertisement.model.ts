@@ -77,7 +77,7 @@ export interface Advertisement {
     st_title: string;
     st_description: string;
     st_photos: string;
-    db_price: number;
+    db_price: number | string;
     st_vendor: string;
     st_details: string | {
         seller: SellerDetails;

@@ -160,11 +160,11 @@
                 Preço
                 <p-sortIcon field="db_price" />
             </th>
-            <th pSortableColumn="st_status" style="min-width: 8.8rem">
+            <th pSortableColumn="st_status" style="min-width: 10rem">
                 Status
                 <p-sortIcon field="st_status" />
             </th>
-            <th style="min-width: 4rem"></th>
+            <th style="min-width: 8rem"></th>
         </tr>
     </ng-template>
     <ng-template #body let-advertisement>
@@ -183,7 +183,8 @@
                 <p-tag [value]="getStatus(advertisement.st_status)" [severity]="getSeverity(advertisement.st_status)"/>
             </td>
             <td>
-                <p-button icon="pi pi-eye" class="mr-2" [rounded]="true" [outlined]="true" (onClick)="viewAdvertisement(advertisement)" />
+                <p-button icon="pi pi-eye"           class="mr-2" [rounded]="true" [outlined]="true" severity="info" (onClick)="viewAdvertisement(advertisement)" />
+                <p-button icon="pi pi-external-link" class="mr-2" [rounded]="true" [outlined]="true" severity="help" (onClick)="openUrl(advertisement)" />
             </td>
         </tr>
     </ng-template>
