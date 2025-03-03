@@ -105,7 +105,11 @@ export class SubCategoryCrud implements OnInit {
 
         this.subCategoryService.getSubCategories().subscribe(
             (response) => {
-                this.subCategories.set(response.list);
+                const subCategoriesWithNames = response.list.map(subCategory => ({
+                    ...subCategory,
+                    categoryName: this.getCategoryName(subCategory.id_category)
+                }));
+                this.subCategories.set(subCategoriesWithNames);
             },
             (error) => {
                 this.messageService.add({
