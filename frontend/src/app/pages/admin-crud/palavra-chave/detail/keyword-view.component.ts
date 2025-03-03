@@ -7,6 +7,7 @@ import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { InputTextModule } from 'primeng/inputtext';
 import { DropdownModule } from 'primeng/dropdown';
+import { TableModule } from 'primeng/table';
 import { KeywordService } from '../../../service/keyword.service';
 import { CompanyService } from '../../../service/company.service';
 import { BrandService } from '../../../service/brand.service';
@@ -25,7 +26,8 @@ import { ActivatedRoute, Router } from '@angular/router';
         ToastModule,
         ToolbarModule,
         InputTextModule,
-        DropdownModule
+        DropdownModule,
+        TableModule
     ],
     templateUrl: './keyword-view.component.html',
     providers: [MessageService, KeywordService, CompanyService, BrandService]
@@ -37,6 +39,7 @@ export class KeywordView implements OnInit {
     clients: CompanyResponse[] = [];
     brands: BrandResponse[] = [];
     selectedClient: string = '';
+    produtos: any[] = [];
 
     statusOptions = [
         { label: 'Ativo', value: 'active' },
@@ -59,6 +62,7 @@ export class KeywordView implements OnInit {
         } as KeywordResponse;
         
         this.loadClients();
+        this.loadProdutos();
         
         // Obter o ID da rota
         this.route.params.subscribe(params => {
@@ -151,6 +155,16 @@ export class KeywordView implements OnInit {
                 });
             }
         });
+    }
+
+    loadProdutos() {
+        // Aqui você deve implementar a chamada ao serviço que carrega os produtos
+        // Por enquanto vou usar dados de exemplo
+        this.produtos = [
+            { flagCadastro: true, nomeProduto: 'Produto 1', nomeVariedade: 'Variedade 1', preco: 10.50 },
+            { flagCadastro: false, nomeProduto: 'Produto 2', nomeVariedade: 'Variedade 2', preco: 15.75 },
+            { flagCadastro: true, nomeProduto: 'Produto 3', nomeVariedade: 'Variedade 3', preco: 20.00 }
+        ];
     }
 
     goBack() {
