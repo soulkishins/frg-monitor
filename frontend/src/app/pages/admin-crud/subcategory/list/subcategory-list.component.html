@@ -15,7 +15,7 @@
     [rows]="50"
     [columns]="cols"
     [paginator]="true"
-    [globalFilterFields]="['id_subcategory', 'categoryName', 'st_subcategory', 'st_status']"
+    [globalFilterFields]="['id_subcategory', 'category.st_category', 'st_subcategory', 'st_status']"
     [tableStyle]="{ 'min-width': '75rem' }"
     [(selection)]="selectedSubCategories"
     [rowHover]="true"
@@ -38,9 +38,9 @@
             <th style="width: 3rem">
                 <p-tableHeaderCheckbox />
             </th>
-            <th pSortableColumn="id_category" style="min-width: 12rem">
+            <th pSortableColumn="category.st_category" style="min-width: 12rem">
                 Categoria
-                <p-sortIcon field="id_category" />
+                <p-sortIcon field="category.st_category" />
             </th>
             <th pSortableColumn="st_subcategory" style="min-width: 16rem">
                 Subcategoria
@@ -58,7 +58,7 @@
             <td>
                 <p-tableCheckbox [value]="subCategory" />
             </td>
-            <td>{{ getCategoryName(subCategory.id_category) }}</td>
+            <td>{{ subCategory.category.st_category }}</td>            
             <td>{{ subCategory.st_subcategory }}</td>
             <td>
                 <p-tag [value]="getStatusLabel(subCategory.st_status)" [severity]="getSeverity(subCategory.st_status)" />
@@ -70,32 +70,5 @@
         </tr>
     </ng-template>
 </p-table>
-
-<p-dialog [(visible)]="subCategoryDialog" [style]="{ width: '450px' }" header="Detalhes da Subcategoria" [modal]="true">
-    <ng-template #content>
-        <div class="flex flex-col gap-6">
-            <div>
-                <label for="category" class="block font-bold mb-3">Categoria</label>
-                <p-select [(ngModel)]="subCategory.id_category" inputId="category" [options]="categories()" optionLabel="st_category" optionValue="id_category" placeholder="Selecione uma Categoria" [required]="true" fluid />
-                <small class="text-red-500" *ngIf="submitted && !subCategory.id_category">Categoria é obrigatória.</small>
-            </div>
-            <div>
-                <label for="status" class="block font-bold mb-3">Status</label>
-                <p-select [(ngModel)]="subCategory.st_status" inputId="status" [options]="statuses" optionLabel="label" optionValue="value" placeholder="Selecione um Status" [required]="true" fluid />
-                <small class="text-red-500" *ngIf="submitted && !subCategory.st_status">Status é obrigatório.</small>
-            </div>            
-            <div>
-                <label for="description" class="block font-bold mb-3">Descrição</label>
-                <input type="text" pInputText id="description" [(ngModel)]="subCategory.st_subcategory" required autofocus fluid />
-                <small class="text-red-500" *ngIf="submitted && !subCategory.st_subcategory">Descrição é obrigatória.</small>
-            </div>
-        </div>
-    </ng-template>
-
-    <ng-template #footer>
-        <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
-        <p-button label="Salvar" icon="pi pi-check" (click)="saveSubCategory()" />
-    </ng-template>
-</p-dialog>
 
 <p-confirmdialog [style]="{ width: '450px' }" />

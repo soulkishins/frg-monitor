@@ -1,4 +1,5 @@
 import { Component, OnInit, signal, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Table, TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
@@ -18,16 +19,14 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { CategoryService } from '../../service/category.service';
-import { CategoryResponse } from '../../models/category.model';
-import { SubCategoryService } from '../../service/sub-category.service';
-import { SubCategoryResponse } from '../../models/sub-category.model';
+import { SubCategoryService } from '../../../../pages/service/sub-category.service';
+import { SubCategoryResponse } from '../../../../pages/models/sub-category.model';
 import { forkJoin } from 'rxjs';
-import { SubCategoryRequest } from '../../models/sub-category.model';
-import { Column, ExportColumn } from '../../models/global.model';
+import { SubCategoryRequest } from '../../../../pages/models/sub-category.model';
+import { Column, ExportColumn } from '../../../../pages/models/global.model';
 
 @Component({
-    selector: 'app-crud',
+    selector: 'app-subcategory-list',
     standalone: true,
     imports: [
         CommonModule,
@@ -49,13 +48,12 @@ import { Column, ExportColumn } from '../../models/global.model';
         IconFieldModule,
         ConfirmDialogModule
     ],
-    templateUrl: './subcategory.component.html',
-    providers: [MessageService, ConfirmationService, CategoryService, SubCategoryService]
+    templateUrl: './subcategory-list.component.html',
+    providers: [MessageService, ConfirmationService, SubCategoryService]
 })
-export class SubCategoryCrud implements OnInit {
+export class SubCategoryList implements OnInit {
     subCategoryDialog: boolean = false;
 
-    categories = signal<CategoryResponse[]>([]);
     subCategories = signal<SubCategoryResponse[]>([]);
     selectedSubCategories!: SubCategoryResponse[] | null;
 
@@ -74,10 +72,10 @@ export class SubCategoryCrud implements OnInit {
     cols!: Column[];
 
     constructor(
-        private categoryService: CategoryService,
         private subCategoryService: SubCategoryService,
         private messageService: MessageService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private router: Router
     ) {}
 
     exportCSV() {
@@ -89,29 +87,11 @@ export class SubCategoryCrud implements OnInit {
     }
 
     loadSubCategoryData() {
-        this.categoryService.getCategories().subscribe(
-            (data) => {
-                this.categories.set(data.list);
-            },
-            (error) => {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Erro',
-                    detail: 'Erro ao carregar categorias',
-                    life: 3000
-                });
-            }
-        );
-
         this.subCategoryService.getSubCategories().subscribe(
             (response) => {
-                const subCategoriesWithNames = response.list.map(subCategory => ({
-                    ...subCategory,
-                    categoryName: this.getCategoryName(subCategory.id_category)
-                }));
-                this.subCategories.set(subCategoriesWithNames);
+                this.subCategories.set(response.list);
             },
-            (error) => {
+            (error: any) => {
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Erro',
@@ -123,9 +103,11 @@ export class SubCategoryCrud implements OnInit {
 
         this.cols = [
             { field: 'id_subcategory', header: 'ID' },
-            { field: 'id_category', header: 'Categoria' },
-            { field: 'st_subcategory', header: 'Descrição' },
-            { field: 'st_status', header: 'Status' }
+            { field: 'st_subcategory', header: 'Subcategoria' },
+            { field: 'category.st_category', header: 'Categoria' },
+            { field: 'st_status', header: 'Status' },
+            { field: 'st_created_by', header: 'Criado por' },
+            { field: 'dt_created', header: 'Data Criação' }
         ];
 
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
@@ -136,19 +118,12 @@ export class SubCategoryCrud implements OnInit {
     }
 
     openNew() {
-        this.subCategory = {} as SubCategoryResponse;
-        this.submitted = false;
-        this.subCategoryDialog = true;
+        this.router.navigate(['/cadastro/subcategoria/detalhe']);
     }
 
     hideDialog() {
         this.subCategoryDialog = false;
         this.submitted = false;
-    }
-
-    getCategoryName(categoryId: string): string {
-        const category = this.categories().find(cat => cat.id_category === categoryId);
-        return category ? category.st_category : categoryId;
     }
 
     getSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined {
@@ -174,8 +149,7 @@ export class SubCategoryCrud implements OnInit {
     }
 
     editSubCategory(subCategory: SubCategoryResponse) {
-        this.subCategory = { ...subCategory };
-        this.subCategoryDialog = true;
+        this.router.navigate(['/cadastro/subcategoria/detalhe', subCategory.id_subcategory]);
     }
 
     deleteSubCategory(subCategory: SubCategoryResponse) {
@@ -194,7 +168,7 @@ export class SubCategoryCrud implements OnInit {
                             life: 3000
                         });
                     },
-                    (error) => {
+                    (error: any) => {
                         this.messageService.add({
                             severity: 'error',
                             summary: 'Erro',
@@ -218,7 +192,6 @@ export class SubCategoryCrud implements OnInit {
                         this.subCategoryService.deleteSubCategory(subCategory.id_subcategory)
                     );
 
-                    // Executar todas as exclusões em paralelo
                     forkJoin(deletePromises).subscribe(
                         () => {
                             this.subCategories.set(
@@ -236,7 +209,7 @@ export class SubCategoryCrud implements OnInit {
                                 life: 3000
                             });
                         },
-                        (error) => {
+                        (error: any) => {
                             this.messageService.add({
                                 severity: 'error',
                                 summary: 'Erro',
@@ -281,7 +254,7 @@ export class SubCategoryCrud implements OnInit {
                         this.subCategoryDialog = false;
                         this.subCategory = {} as SubCategoryResponse;
                     },
-                    (error) => {
+                    (error: any) => {
                         this.messageService.add({
                             severity: 'error',
                             summary: 'Erro',
@@ -291,7 +264,6 @@ export class SubCategoryCrud implements OnInit {
                     }
                 );
             } else {
-                // Criar nova subcategoria
                 this.subCategoryService.postSubCategory(subCategoryRequest).subscribe(
                     (response) => {
                         this.subCategories.set([...this.subCategories(), response]);
@@ -304,7 +276,7 @@ export class SubCategoryCrud implements OnInit {
                         this.subCategoryDialog = false;
                         this.subCategory = {} as SubCategoryResponse;
                     },
-                    (error) => {
+                    (error: any) => {
                         this.messageService.add({
                             severity: 'error',
                             summary: 'Erro',
