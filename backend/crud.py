@@ -140,26 +140,32 @@ def decode_jwt(token):
 def extract_email_from_token(event):
     """ Extrai o e-mail do usuário a partir do token JWT enviado no cabeçalho Authorization. """
     try:
-        authorization_header = event["headers"].get("Authorization", "")
+        authorization_header = event["headers"].get("Authorization", None)
+        if not authorization_header:
+            authorization_header = event["headers"].get("authorization", None)
+        if not authorization_header:
+            return None, None
         token = authorization_header.replace("Bearer ", "")
 
         decoded_payload = decode_jwt(token)
         return (decoded_payload.get("email"), decoded_payload.get("sub")) if decoded_payload else None
     except Exception as e:
         print(f"Erro ao extrair email do token: {e}")
-        return None
+        return None, None
 
 def lambda_handler(event, context):
     from db.db import DB, set_current_user
     from db.models import UserAttr
 
     try:
-        db = DB()
         # Obter o usuario logado pelo token JWT do Cognito no header
         username, sub = extract_email_from_token(event)
+        if not username or not sub:
+            return return_value(401, error_object(401, message='Unauthorized'))
+
+        db = DB()
         # Setar o usuário na Audit
         set_current_user(username)
-
         with db:
             session = db.session
             try:
@@ -236,7 +242,7 @@ if __name__ == "__main__":
         {
             "headers": {"Authorization": "e.eyJzdWIiOiJjMzVjNmE1YS0zMDAxLTcwMjQtNjdkMC1kNWZiYzI4YzE2NmIiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLnNhLWVhc3QtMS5hbWF6b25hd3MuY29tXC9zYS1lYXN0LTFfM1FBM3NoZDBmIiwicGhvbmVfbnVtYmVyX3ZlcmlmaWVkIjpmYWxzZSwiY29nbml0bzp1c2VybmFtZSI6ImMzNWM2YTVhLTMwMDEtNzAyNC02N2QwLWQ1ZmJjMjhjMTY2YiIsIm9yaWdpbl9qdGkiOiJhNjQ0OTI4My1mMzdkLTRlZDMtYmY2YS04NzNlOTBhODhhNDEiLCJhdWQiOiI0dmJmYW82NzFiNHZyamxwbzdsOHU0N2xiYyIsImV2ZW50X2lkIjoiNTQyZjU0YjMtN2U4NC00YTZiLWFkZjgtZmI1N2RhNTQ3NTE0IiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE3MzkyMzMyOTgsIm5hbWUiOiJCcnVubyBBbnR1bmVzIiwicGhvbmVfbnVtYmVyIjoiKzU1MTE5MzMzMzQ1NjciLCJleHAiOjE3MzkyMzY4OTgsImlhdCI6MTczOTIzMzI5OCwianRpIjoiNGFhM2NkMmYtM2JmMy00YjdiLThmMzctYjVhNDEyNmE2ZmRkIiwiZW1haWwiOiJicnVuby5iYWNzQGdtYWlsLmNvbSJ9.u"},
             "httpMethod": "GET",
-            "requestContext": {"operationName": "advertisement.read"},
+            "requestContext": {"operationName": "advertisement.history"},
             "pathParameters": {
                 "advertisement": "60fbafb5-cd88-4511-afec-b17881f22d5d"
             },

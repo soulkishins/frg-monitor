@@ -27,7 +27,7 @@ import { FluidModule } from 'primeng/fluid';
 import { TooltipModule } from 'primeng/tooltip';
 import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
-import { Advertisement, ClientBrandProduct } from '../../models/advertisement.model';
+import { Advertisement, AdvertisementHistory, ClientBrand, ClientBrandProduct, Client, Variety } from '../../models/advertisement.model';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { GalleriaModule } from 'primeng/galleria';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -69,14 +69,16 @@ registerLocaleData(localePt);
     providers: [MessageService, AdvertisementService, ConfirmationService]
 })
 export class AdvertisementDetail implements OnInit {
-    advertisement: {[prop: string]: any} = {};
-    products?: ClientBrandProduct[] = [];
+    advertisement: Partial<Advertisement> = {};
+    brand: Partial<ClientBrand> = {};
+    client: Partial<Client> = {};
+    products: ClientBrandProduct[] = [];
+    history: AdvertisementHistory[] = [];
 
     statuses!: any[];
 
-
     constructor(
-        private advertisementService: AdvertisementService,
+        public advertisementService: AdvertisementService,
         private messageService: MessageService,
         private confirmationService: ConfirmationService,
         private router: Router,
@@ -96,6 +98,27 @@ export class AdvertisementDetail implements OnInit {
                     .subscribe({
                         next: (advertisement: Advertisement) => {
                             this.advertisement = advertisement;
+                            this.brand = advertisement.brand;
+                            this.client = advertisement.brand?.client;
+                            this.products = advertisement.products.map(
+                                product => {
+                                    product.product.st_variety = JSON.parse(product.product.st_variety as string);
+                                    const varieties = product.product.st_variety as Variety[];
+                                    product.product.st_variety_name = varieties.find((v: Variety) => v.seq === product.st_varity_seq)?.variety;
+                                    product.product.db_price = varieties.find((v: Variety) => v.seq === product.st_varity_seq)?.price;
+                                    return product.product;
+                                }
+                            );
+                        },
+                        error: (error: any) => {
+                            console.log(error);
+                        }
+                    });
+                    this.advertisementService
+                    .getAdvertisementHistory(id)
+                    .subscribe({
+                        next: (history: AdvertisementHistory[]) => {
+                            this.history = history;
                         },
                         error: (error: any) => {
                             console.log(error);
@@ -107,5 +130,9 @@ export class AdvertisementDetail implements OnInit {
                 console.log(error);
             }
         });
+    }
+
+    printPrice() {
+        console.log(this.advertisement['db_price']);
     }
 }

@@ -12,8 +12,8 @@ export class MLParser {
         const st_plataform = 'MERCADOLIVRE';
 
         try {
-            const cleanUrl = this.removeUrlHash(url.link);
-            const response = await this.requestData(cleanUrl);
+            //const cleanUrl = this.removeUrlHash(url.link);
+            const response = await this.requestData(url.link);
             
             if (response.status > 299) {
                 url.link = response.url
@@ -61,6 +61,7 @@ export class MLParser {
                 status: response.status
             };
         } catch (error: any) {
+            console.log('requestData', url, error);
             if (error.response) {
                 return {
                     html: error.response.data,

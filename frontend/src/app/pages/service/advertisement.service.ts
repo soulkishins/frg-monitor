@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environment/environment';
-import { AdvertisementListDto, Advertisement, AdvertisementExport } from '../models/advertisement.model';
+import { AdvertisementListDto, Advertisement, AdvertisementExport, AdvertisementHistory } from '../models/advertisement.model';
 import { Page } from '../models/global.model';
 
 @Injectable({
@@ -19,6 +19,10 @@ export class AdvertisementService {
 
   getAdvertisement(id: string): Observable<Advertisement> {
     return this.http.get<Advertisement>(`${this.baseUrl}/${id}`);
+  }
+
+  getAdvertisementHistory(id: string): Observable<AdvertisementHistory[]> {
+    return this.http.get<AdvertisementHistory[]>(`${this.baseUrl}/${id}/historico`);
   }
 
   reportAdvertisements(ids: string[], status: string): Observable<void> {
@@ -47,6 +51,10 @@ export class AdvertisementService {
       ];
     }
     return statuses;
+  }
+
+  getPhotoUrl(platform: string, platformID: string, photo: string): string {
+    return `${environment.api_url}/anuncio/imagem?plataform=${platform}&plataform_id=${platformID}&file=${photo}`;
   }
 
 }

@@ -2,15 +2,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { ServiceError } from "../errors";
 import { AdvertisementManager } from "../aws/rds";
 import { IAdvertisement, IClientBrandProduct, IMLAdvertisement, IMLPage } from "../base/types";
-import { MLParser } from "./ml-parser";
 import { MLScraper } from "./ml-scraper";
-import { S3Uploader } from "./s3-uploader";
 
 export class AdvertisementService {
     constructor(
         private readonly scraper: MLScraper,
-        private readonly parser: MLParser,
-        private readonly uploader: S3Uploader,
         private readonly adManager: AdvertisementManager
     ) {}
 
@@ -94,6 +90,7 @@ export class AdvertisementService {
         status: string
     ): Promise<void> {
         const ml_json = advertisement.ml_json || {};
+        delete advertisement.ml_json;
         await this.adManager.addHistory({
             id_advertisement: adId,
             st_status: status || 'NEW',

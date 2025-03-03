@@ -1,5 +1,5 @@
 from operations.crud_base import Crud, Page
-from db.models import Advertisement, ClientBrand, AdvertisementProduct
+from db.models import Advertisement, ClientBrand, ClientBrandProduct, AdvertisementProduct, Subcategory, AdvertisementHistory
 from db.views import VW_Advertisement
 from sqlalchemy.orm import contains_eager
 
@@ -8,11 +8,21 @@ class AdvertisementCrud(Crud):
         return Advertisement
     
     def get_joins(self, indexes, filters) -> list:
-        return (Advertisement.products, AdvertisementProduct.product, Advertisement.brand, ClientBrand.client)
+        return (
+            Advertisement.products,
+            AdvertisementProduct.product,
+            ClientBrandProduct.subcategory,
+            Subcategory.category,
+            Advertisement.brand,
+            ClientBrand.client
+        )
     
     def get_options(self) -> list:
         return (
-            contains_eager(Advertisement.products).contains_eager(AdvertisementProduct.product),
+            contains_eager(Advertisement.products)
+            .contains_eager(AdvertisementProduct.product)
+            .contains_eager(ClientBrandProduct.subcategory)
+            .contains_eager(Subcategory.category),
             contains_eager(Advertisement.brand).contains_eager(ClientBrand.client)
         )
 
@@ -73,9 +83,18 @@ class AdvertisementCrud(Crud):
             filters['page.sort'] if 'page.sort' in filters else 'dt_created.desc'
         )
     
+    def history(self, indexes, filters, body) -> list:
+        query = self._session.query(AdvertisementHistory)
+        if 'advertisement' in indexes:
+            query = query.filter(AdvertisementHistory.id_advertisement == indexes['advertisement'])
+        query = query.order_by(AdvertisementHistory.dt_created.desc())
+        return (200, query.all())
+    
     def json_transform(self, method):
-        if method == 'read_full':
-            return '_full_json_fields'
+        if method == 'read':
+            return '_json_fields_advertisement'
+        if method == 'history':
+            return '_json_fields_advertisement'
         return None
     
     def get_orderby(self, orderby: str):

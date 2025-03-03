@@ -3,6 +3,7 @@ import * as cheerio from 'cheerio';
 import { ScrapingError } from "../errors";
 import { IMLPage, IMLAdvertisementUrl, IPagination, IMLAdvertisement } from "../base/types";
 import { MLParser } from "./ml-parser";
+import { exit } from "process";
 
 export class MLScraper {
     constructor(private readonly parser: MLParser) {}
@@ -11,6 +12,8 @@ export class MLScraper {
         try {
             const searchUrl = `https://lista.mercadolivre.com.br/${encodeURIComponent(keyword)}`;
             const response = await axios.get(searchUrl, {timeout: 5000});
+
+            //console.log('searchAdvertisements', response.data);
             const $ = cheerio.load(response.data);
             
             return {
@@ -24,12 +27,26 @@ export class MLScraper {
 
     private extractAdvertisementsFromPage($: cheerio.CheerioAPI): IMLAdvertisementUrl[] {
         const advertisements: IMLAdvertisementUrl[] = [];
+        const advertisementsJson = $('script[type=application/ld+json]').text();
+        const advertisementsJsonParsed = JSON.parse(advertisementsJson);
+
+        /*
         $('.ui-search-result__wrapper').each((i, elem) => {
             const title = $(elem).find('.poly-component__title').text().trim();
             const price = $(elem).find('.poly-component__price').text().trim();
             const link = $(elem).find('.poly-component__title').attr('href') || '';
             advertisements.push({ title, price, link });
         });
+        */
+
+        const page = advertisementsJsonParsed['@graph'].find((item: any) => item['@type'] === 'SearchResultsPage');
+        advertisementsJsonParsed['@graph'].forEach((item: any) => {
+            if (item['@type'] === 'Product') {
+                advertisements.push({ title: item.name, price: item.offers.price, link: item.offers.url });
+            }
+        });
+        console.log('Page', page, advertisements);
+
         return advertisements;
     }
 
@@ -56,6 +73,7 @@ export class MLScraper {
             }
 
             const response = await axios.get(nextPageUrl, {timeout: 5000});
+            //console.log('nextPage', response.data);
             const $ = cheerio.load(response.data);
             
             return {

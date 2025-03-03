@@ -29,77 +29,71 @@
         <div class="grid grid-cols-4 gap-4">
             <div>
                 <p-iftalabel>
-                    <p-select [(ngModel)]="advertisement['st_status']" inputId="st_status" [options]="statuses" optionLabel="label" styleClass="w-full" />
+                    <p-select [(ngModel)]="advertisement.st_status" inputId="st_status" [options]="statuses" optionLabel="label" styleClass="w-full" />
                     <label for="st_status">Status</label>
                 </p-iftalabel>
             </div>
             <div>
                 <p-iftalabel>
-                    <input pInputText id="st_plataform" [(ngModel)]="advertisement['st_plataform']" />
+                    <input pInputText id="st_plataform" [(ngModel)]="advertisement.st_plataform" />
                     <label for="st_plataform">Plataforma</label>
                 </p-iftalabel>
             </div>
             <div>
                 <p-iftalabel>
-                    <input pInputText id="st_plataform_id" [(ngModel)]="advertisement['st_plataform_id']" />
+                    <input pInputText id="st_plataform_id" [(ngModel)]="advertisement.st_plataform_id" />
                     <label for="st_plataform_id">Plataforma ID</label>
                 </p-iftalabel>
             </div>
             <div>
                 <p-iftalabel>
-                    <p-inputnumber [(ngModel)]="advertisement['db_price']" mode="currency" inputId="db_price" currency="BRL" locale="pt-BR" />
+                    <p-inputnumber [(ngModel)]="advertisement.db_price" mode="currency" inputId="db_price" currency="BRL" locale="pt-BR" (onBlur)="printPrice()" />
                     <label for="db_price">Preço</label>
                 </p-iftalabel>
             </div>
 
             <div class="col-span-2">
                 <p-iftalabel>
-                    <input pInputText id="st_name" [(ngModel)]="advertisement['st_name']" />
+                    <input pInputText id="st_name" [(ngModel)]="client.st_name" />
                     <label for="st_name">Cliente</label>
                 </p-iftalabel>
             </div>
             <div>
                 <p-iftalabel>
-                    <input pInputText id="st_brand" [(ngModel)]="advertisement['st_brand']" />
+                    <input pInputText id="st_brand" [(ngModel)]="brand.st_brand" />
                     <label for="st_brand">Marca</label>
                 </p-iftalabel>
             </div>
             <div>
                 <p-iftalabel>
-                    <input pInputText id="st_product" [(ngModel)]="advertisement['st_product']" />
-                    <label for="st_product">Produto</label>
-                </p-iftalabel>
-            </div>
-            <div>
-                <p-iftalabel>
-                    <input pInputText id="st_vendor" [(ngModel)]="advertisement['st_vendor']" />
+                    <input pInputText id="st_vendor" [(ngModel)]="advertisement.st_vendor" />
                     <label for="st_vendor">Vendedor</label>
                 </p-iftalabel>
             </div>
             <div class="col-span-full">
+                <p-galleria [value]="advertisement.st_photos?.split(',')" indicatorsPosition="left" [showIndicators]="true" [showThumbnails]="false" showIndicatorsOnItem="true" [containerStyle]="{ 'margin-top': '2em' }" >
+                    <ng-template pTemplate="item" let-item>
+                        <img [src]="advertisementService.getPhotoUrl(advertisement.st_plataform!, advertisement.st_plataform_id!, item)" style="width: 100%; max-width: 640px; max-height: 640px; display: block;" />
+                    </ng-template>
+                </p-galleria>
+            </div>
+            <div class="col-span-full">
                 <p-iftalabel>
-                    <input pInputText id="st_title" [(ngModel)]="advertisement['st_title']" />
+                    <input pInputText id="st_title" [(ngModel)]="advertisement.st_title" />
                     <label for="st_title">Título do Anúncio</label>
                 </p-iftalabel>
             </div>
             <div class="col-span-full">
                 <p-iftalabel>
-                    <input pInputText id="st_description" [(ngModel)]="advertisement['st_description']" />
-                    <label for="st_description">Descrição</label>
-                </p-iftalabel>
-            </div>
-            <div class="col-span-full">
-                <p-iftalabel>
-                    <input pInputText id="st_url" [(ngModel)]="advertisement['st_url']" />
+                    <input pInputText id="st_url" [(ngModel)]="advertisement.st_url" />
                     <label for="st_url">URL</label>
                 </p-iftalabel>
             </div>
             <div class="col-span-full">
-                <p-galleria [value]="advertisement['st_photos']?.split(',')" indicatorsPosition="left" [showIndicators]="true" [showThumbnails]="false" showIndicatorsOnItem="true" [containerStyle]="{ 'max-width': '640px', 'margin-top': '2em' }" >
-                    <ng-template pTemplate="item" let-item>
-                        <img [src]="item.itemImageSrc" style="width: 100%; display: block;" />
-                    </ng-template>
-                </p-galleria>
+                <p-iftalabel>
+                    <textarea pTextarea id="st_description" [(ngModel)]="advertisement.st_description" rows="20" cols="30" style="resize: none"></textarea>
+                    <label for="st_description">Descrição</label>
+                </p-iftalabel>
             </div>
         </div>
     </p-fluid>
@@ -118,39 +112,38 @@
         [rows]="10"
         [tableStyle]="{ 'min-width': '75rem' }"
         [rowHover]="true"
-        dataKey="id_product"
     >
         <ng-template #header>
             <tr>
-                <th pSortableColumn="st_name" style="min-width: 20rem">
-                    Cliente
+                <th pSortableColumn="st_name" style="min-width: 10rem">
+                    Categoria
                     <p-sortIcon field="st_name" />
                 </th>
-                <th pSortableColumn="st_brand" style="min-width: 20rem">
-                    Marca
+                <th pSortableColumn="st_brand" style="min-width: 10rem">
+                    Subcategoria
                     <p-sortIcon field="st_brand" />
                 </th>
-                <th pSortableColumn="st_product" style="min-width:20rem">
+                <th pSortableColumn="st_product" style="min-width: 10rem">
                     Produto
                     <p-sortIcon field="st_product" />
                 </th>
-                <th pSortableColumn="st_variety" style="min-width:20rem">
+                <th pSortableColumn="st_variety" style="min-width: 8rem">
                     Variedade
                     <p-sortIcon field="st_variety" />
                 </th>
-                <th pSortableColumn="db_price" style="min-width: 9rem">
+                <th pSortableColumn="db_price" style="min-width: 6rem">
                     Preço Base
                     <p-sortIcon field="db_price" />
                 </th>
             </tr>
         </ng-template>
-        <ng-template #body let-advertisement>
+        <ng-template #body let-product>
             <tr>
-                <td>{{ advertisement.st_name }}</td>
-                <td>{{ advertisement.st_brand }}</td>
-                <td>{{ advertisement.st_product }}</td>
-                <td>{{ advertisement.st_variety }}</td>
-                <td>{{ advertisement.db_price | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}</td>
+                <td>{{ product.subcategory.category.st_category }}</td>
+                <td>{{ product.subcategory.st_subcategory }}</td>
+                <td>{{ product.st_product }}</td>
+                <td>{{ product.st_variety_name }}</td>
+                <td>{{ product.db_price | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}</td>
             </tr>
         </ng-template>
     </p-table>
@@ -165,11 +158,10 @@
     </ng-template>
     <p-table
         #dt
-        [value]="products || []"
+        [value]="history || []"
         [rows]="10"
         [tableStyle]="{ 'min-width': '75rem' }"
         [rowHover]="true"
-        dataKey="id_product"
     >
         <ng-template #header>
             <tr>

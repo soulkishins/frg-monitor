@@ -15,37 +15,43 @@ export interface AdvertisementListDto {
 }
 
 export interface Client {
-    id: string;
     st_name: string;
     st_document: string;
-    st_status: string;
-    dt_created: string;
-    st_created_by: string;
-    dt_modified: string;
-    st_modified_by: string;
 }
 
 export interface ClientBrand {
-    id_brand: string;
-    id_client: string;
     st_brand: string;
-    st_status: string;
     client: Client;
-    dt_created: string;
-    st_created_by: string;
-    dt_modified: string;
-    st_modified_by: string;
+}
+
+export interface Category {
+    st_category: string;
+}
+
+export interface Subcategory {
+    st_subcategory: string;
+    category: Category;
+}
+
+export interface Variety {
+    seq: string;
+    variety: string;
+    price: number;
+    status: string;
 }
 
 export interface ClientBrandProduct {
-    id_advertisement: string;
-    id_product: string;
+    st_product: string;
+    st_variety: string | Variety[];
+    subcategory: Subcategory;
+    db_price?: number;
+    st_variety_name?: string;
+}
+
+export interface AdvertisementProduct {
     st_varity_seq: string;
     st_varity_name: string;
-    dt_created: string;
-    st_created_by: string;
-    dt_modified: string | null;
-    st_modified_by: string | null;
+    product: ClientBrandProduct;
 }
 
 export interface SellerDetails {
@@ -54,10 +60,12 @@ export interface SellerDetails {
     reputation_rank: number;
 }
 
-export interface ProductDetails {
-    sold: number | null;
+export interface ProductExtraDetails {
+    originalPrice: number;
+    sold: number;
     stock: number;
     new: boolean;
+    relatedSearches: string[];
 }
 
 export interface Advertisement {
@@ -71,17 +79,25 @@ export interface Advertisement {
     st_photos: string;
     db_price: number;
     st_vendor: string;
-    st_details: {
+    st_details: string | {
         seller: SellerDetails;
-        details: ProductDetails;
+        details: ProductExtraDetails;
     };
     st_status: string;
     brand: ClientBrand;
-    products: ClientBrandProduct[];
+    products: AdvertisementProduct[];
     dt_created: string;
     st_created_by: string;
     dt_modified: string;
     st_modified_by: string;
+}
+
+export interface AdvertisementHistory {
+    dt_history: string;
+    st_status: string;
+    st_action: string;
+    st_history: string;
+    st_created_by: string;
 }
 
 export interface AdvertisementExport {

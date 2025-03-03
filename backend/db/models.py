@@ -93,6 +93,9 @@ class Category(Base, Audit):
     
     def _json_fields(self):
         return ["id_category", "st_category", "st_status"] + super()._json_fields()
+    
+    def _json_fields_advertisement(self):
+        return ["st_category"]
 
 class Subcategory(Base, Audit):
     __tablename__ = "tb_subcategory"
@@ -106,6 +109,9 @@ class Subcategory(Base, Audit):
 
     def _json_fields(self):
         return ["id_subcategory", "id_category", "st_subcategory", "st_status", "category"] + super()._json_fields()
+    
+    def _json_fields_advertisement(self):
+        return ["st_subcategory", "category"]
 
 class Client(Base, Audit):
     __tablename__ = "tb_client"
@@ -117,6 +123,9 @@ class Client(Base, Audit):
 
     def _json_fields(self):
         return ["id", "st_name", "st_document", "st_status"] + super()._json_fields()
+    
+    def _json_fields_advertisement(self):
+        return ["st_name", "st_document"]
 
 class ClientBrand(Base, Audit):
     __tablename__ = "tb_client_brand"
@@ -130,6 +139,10 @@ class ClientBrand(Base, Audit):
 
     def _json_fields(self):
         return ["id_brand", "id_client", "st_brand", "st_status", "client"] + super()._json_fields()
+    
+    def _json_fields_advertisement(self):
+        return ["st_brand", "client"]
+
 class ClientBrandProduct(Base, Audit):
     __tablename__ = "tb_client_brand_product"
     
@@ -145,6 +158,9 @@ class ClientBrandProduct(Base, Audit):
 
     def _json_fields(self):
         return ["id_product", "id_brand", "id_subcategory", "st_product", "st_variety", "st_status", "subcategory", "brand"] + super()._json_fields()
+    
+    def _json_fields_advertisement(self):
+        return ["st_product", "st_variety", "subcategory"]
 
 class Keyword(Base, Audit):
     __tablename__ = "tb_keyword"
@@ -188,13 +204,14 @@ class Advertisement(Base, Audit):
             "st_details", "st_status", "brand", "products"
         ] + super()._json_fields()
 
-    def _full_json_fields(self):
+    def _json_fields_advertisement(self):
         return [
             "id_advertisement", "id_brand", "st_plataform", "st_plataform_id",
             "st_url", "st_title", "st_description",
             "st_photos", "db_price", "st_vendor",
-            "st_details", "st_status", "products", "history", "brand"
+            "st_details", "st_status", "products", "brand"
         ] + super()._json_fields()
+
 class AdvertisementProduct(Base, Audit):
     __tablename__ = "tb_advertisement_product"
     
@@ -208,7 +225,10 @@ class AdvertisementProduct(Base, Audit):
 
     def _json_fields(self):
         return ["id_advertisement", "id_product", "st_varity_seq", "st_varity_name", "product"] + super()._json_fields()
-    
+
+    def _json_fields_advertisement(self):
+        return ["st_varity_seq", "st_varity_name", "product"]
+
 class AdvertisementHistory(Base, Audit):
     __tablename__ = "tb_advertisement_history"
     
@@ -217,12 +237,11 @@ class AdvertisementHistory(Base, Audit):
     st_status = Column(String, nullable=False)
     st_action = Column(String, nullable=False)
     st_history = Column(String, nullable=False)
-    st_ml_json = Column(String, nullable=False)
 
     advertisement = relationship("Advertisement", lazy=True)
 
     def _json_fields(self):
         return ["id_advertisement", "dt_history", "st_status", "st_action", "st_history"] + super()._json_fields()
 
-    def _full_json_fields(self):
-        return ["id_advertisement", "dt_history", "st_status", "st_action", "st_history", "st_ml_json"]
+    def _json_fields_advertisement(self):
+        return ["dt_history", "st_status", "st_action", "st_history", "st_created_by"]

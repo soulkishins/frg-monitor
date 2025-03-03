@@ -29,8 +29,6 @@ export const handler = async (event: any) => {
             
             const adService = new AdvertisementService(
                 scraper,
-                parser,
-                uploader,
                 adManager
             );
             console.log('Serviços iniciados com sucesso.');
