@@ -96,7 +96,6 @@ export class AdvertisementDetail implements OnInit {
 
         this.route.paramMap.subscribe({
             next: (params: any) => {
-                console.log(params);
                 const id = params.get('id');
                 if (id) {
                     this.advertisementService
@@ -112,8 +111,8 @@ export class AdvertisementDetail implements OnInit {
                                 product => {
                                     product.product.st_variety = JSON.parse(product.product.st_variety as string);
                                     const varieties = product.product.st_variety as Variety[];
-                                    product.product.st_variety_name = varieties.find((v: Variety) => v.seq === product.st_varity_seq)?.variety;
-                                    product.product.db_price = varieties.find((v: Variety) => v.seq === product.st_varity_seq)?.price;
+                                    product.product.st_variety_name = varieties.find((v: Variety) => v.seq == product.st_varity_seq)?.variety;
+                                    product.product.db_price = varieties.find((v: Variety) => v.seq == product.st_varity_seq)?.price;
                                     return product.product;
                                 }
                             );

@@ -223,4 +223,32 @@ export class KeywordList implements OnInit {
     navigateToKeywords() {
         this.router.navigate(['/cadastro/palavra-chave/lista']);
     }
+
+    startCrawler(keyword: KeywordResponse) {
+        this.keywordService.startCrawler(
+            {
+                id_keyword: keyword.id_keyword,
+                idBrand: keyword.id_brand,
+                keyword: keyword.st_keyword,
+                brandProducts: JSON.parse(keyword.st_product)
+            }
+        ).subscribe({
+            next: (response) => {
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Sucesso',
+                    detail: 'Crawler iniciado com sucesso',
+                    life: 3000
+                });
+            },
+            error: (error) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: 'Erro ao iniciar crawler',
+                    life: 3000
+                });
+            }
+        });
+    }
 }

@@ -217,7 +217,7 @@ class AdvertisementProduct(Base, Audit):
     
     id_advertisement = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_advertisement.id_advertisement"), primary_key=True, onupdate=None)
     id_product = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_client_brand_product.id_product"), primary_key=True, onupdate=None)
-    st_varity_seq = Column(String, nullable=False, onupdate=None)
+    st_varity_seq = Column(String, nullable=False, primary_key=True, onupdate=None)
     st_varity_name = Column(String, nullable=False, onupdate=None)
 
     advertisement = relationship("Advertisement", lazy=True)
