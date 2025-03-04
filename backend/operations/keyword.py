@@ -131,6 +131,9 @@ class KeywordCrud(Crud):
         # Inicializa o cliente do EventBridge Schedule
         client = boto3.client('scheduler', region_name='sa-east-1')
         # Exclui o schedule
-        client.delete_schedule(Name=indexes['keyword'])
+        try:
+            client.delete_schedule(Name=indexes['keyword'])
+        except Exception as e:
+            print(f"Schedule não encontrado: {e}")
         # Retorna o status 200
         return 200, None
