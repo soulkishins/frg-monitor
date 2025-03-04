@@ -56,6 +56,7 @@ export class KeywordView implements OnInit {
     selectedClient: string = '';
     produtos: ProcessedProduct[] = [];
     produtosFiltrados: ProcessedProduct[] = [];
+    selectedProducts: ProcessedProduct[] = [];
 
     statusOptions = [
         { label: 'Ativo', value: 'active' },
@@ -115,6 +116,7 @@ export class KeywordView implements OnInit {
             this.brandService.getBrands().subscribe({
                 next: (brands) => {
                     this.brands = brands.list.filter(brand => brand.id_client === clientId);
+                    this.keyword.brand = null as any;
                     this.filtrarProdutos();
                 },
                 error: (error) => {
@@ -129,8 +131,21 @@ export class KeywordView implements OnInit {
             });
         } else {
             this.brands = [];
+            this.keyword.brand = null as any;
         }
         this.keyword.id_brand = '';
+        this.filtrarProdutos();
+    }
+
+    onBrandChange(event: any) {
+        const selectedBrand = this.brands.find(brand => brand.id_brand === event.value);
+        const selectedClient = this.clients.find(client => client.id === selectedBrand?.id_client);
+        if (selectedBrand && selectedClient) {
+            this.keyword.brand = {
+                ...selectedBrand,
+                client: selectedClient
+            };
+        }
         this.filtrarProdutos();
     }
 
@@ -239,9 +254,30 @@ export class KeywordView implements OnInit {
         this.submitted = true;
         
         if (this.keyword.st_keyword?.trim() && this.keyword.st_status) {
+            const selectedProductsFormatted = this.selectedProducts.map(produto => {
+                let variedades;
+                try {
+                    variedades = JSON.parse(produto.st_variety || '[]');
+                } catch (e) {
+                    variedades = [];
+                }
+                
+                const variedadeEncontrada = variedades.find((v: any) => v.variety === produto.variety);
+                
+                return {
+                    id_product: produto.id_product,
+                    st_varity_seq: variedadeEncontrada?.seq || '',
+                    st_varity_name: produto.variety,
+                    db_price: produto.price
+                };
+            });
+
             const keywordRequest: KeywordRequest = {
                 st_keyword: this.keyword.st_keyword,
-                st_status: this.keyword.st_status
+                st_status: this.keyword.st_status,
+                id_brand: this.keyword.id_brand,
+                st_product: JSON.stringify(selectedProductsFormatted),
+                brand: this.keyword.brand
             };
 
             if (this.keyword.id_keyword) {
