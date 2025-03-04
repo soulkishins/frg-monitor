@@ -13,6 +13,7 @@ export interface UserRequest {
     st_name: string;
     st_email: string;
     st_phone?: string;
+    st_password?: string;
 }
 
 export interface User {
