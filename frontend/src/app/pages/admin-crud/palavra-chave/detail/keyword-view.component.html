@@ -45,7 +45,7 @@
                     <p-dropdown [options]="brands" [(ngModel)]="keyword.id_brand" name="id_brand"
                         optionLabel="st_brand" optionValue="id_brand" placeholder="Selecione uma marca"
                         [disabled]="!selectedClient" [style]="{'width': '100%'}"
-                        (onChange)="filtrarProdutos()">
+                        (onChange)="onBrandChange($event)">
                     </p-dropdown>
                 </div>
             </div>
