@@ -11,6 +11,7 @@ class KeywordCrud(Crud):
     def create(self, indexes, data) -> Keyword:
         created = super().create(indexes, data)
         if created:
+            self._session.commit()
             self.create_schedule(indexes, {}, created)
         return created
     
@@ -20,8 +21,8 @@ class KeywordCrud(Crud):
             self.create_schedule(indexes, {}, updated)
         return updated
     
-    def delete(self, indexes, filters, body) -> tuple[int, dict]:
-        deleted = super().delete(indexes, filters, body)
+    def delete(self, indexes) -> tuple[int, dict]:
+        deleted = super().delete(indexes)
         if deleted:
             self.delete_schedule(indexes)
         return deleted
@@ -62,16 +63,20 @@ class KeywordCrud(Crud):
         
         # Inicializa o cliente do EventBridge Schedule
         client = boto3.client('scheduler', region_name='sa-east-1')
-        
+           
         # Busca Schedule
-        response = client.get_schedule(Name=indexes['keyword'])
+        try:
+            response = client.get_schedule(Name=str(record.id_keyword))
+        except Exception as e:
+            response = None
+        
         if not response:
             # Cria Schedule
             response = client.create_schedule(
                     ActionAfterCompletion = "NONE",
                     Description = f'{record.st_keyword} - {record.st_product}',
                     FlexibleTimeWindow = { "Mode": "OFF" },
-                    Name = indexes['keyword'],
+                    Name = str(record.id_keyword),
                     ScheduleExpression = "cron(10 20-23 * * ? *)",
                     ScheduleExpressionTimezone = "America/Sao_Paulo",
                     State = "ENABLED",
@@ -98,7 +103,7 @@ class KeywordCrud(Crud):
                     ActionAfterCompletion = "NONE",
                     Description = f'{record.st_keyword} - {record.st_product}',
                     FlexibleTimeWindow = { "Mode": "OFF" },
-                    Name = indexes['keyword'],
+                    Name = str(record.id_keyword),
                     ScheduleExpression = "cron(10 20-23 * * ? *)",
                     ScheduleExpressionTimezone = "America/Sao_Paulo",
                     State = "ENABLED",
