@@ -1,6 +1,13 @@
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
-        <h2>{{ isEditing ? 'Editar Usuário' : 'Novo Usuário' }}</h2>
+        <div class="flex items-center gap-2">
+            <i class="pi pi-user"></i>
+            <span class="font-bold">Gestão de Usuários - {{ isEditing ? 'Editar Usuário' : 'Novo Usuário' }}</span>
+        </div>
+    </ng-template>
+
+    <ng-template #end>
+        <p-button label="Voltar" icon="pi pi-arrow-left" severity="secondary" (click)="goBack()" />
     </ng-template>
 </p-toolbar>
 

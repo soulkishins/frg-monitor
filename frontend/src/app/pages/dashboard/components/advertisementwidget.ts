@@ -2,61 +2,98 @@ import { Component } from '@angular/core';
 import { ChartModule } from 'primeng/chart';
 import { debounceTime, Subscription } from 'rxjs';
 import { LayoutService } from '../../../layout/service/layout.service';
+import { DashboardService } from '../../service/dashboard.service';
 
 @Component({
     standalone: true,
-    selector: 'app-revenue-stream-widget',
+    selector: 'app-advertisement-widget',
     imports: [ChartModule],
     template: `<div class="card !mb-8">
-        <div class="font-semibold text-xl mb-4">Revenue Stream</div>
+        <div class="font-semibold text-xl mb-4">Estatisticas do Crawler</div>
         <p-chart type="bar" [data]="chartData" [options]="chartOptions" class="h-80" />
     </div>`
 })
-export class RevenueStreamWidget {
+export class AdvertisementWidget {
     chartData: any;
-
     chartOptions: any;
-
     subscription!: Subscription;
+    loadData = {
+        labels: ['-7', '-6', '-5', '-4', '-3', '-2', '-1', 'Hoje'],
+        news: [0, 0, 0, 0, 0, 0, 0, 0],
+        upds: [0, 0, 0, 0, 0, 0, 0, 0],
+        rpts: [0, 0, 0, 0, 0, 0, 0, 0]
+    }
 
-    constructor(public layoutService: LayoutService) {
+    constructor(
+        public layoutService: LayoutService,
+        private dashboardService: DashboardService
+    ) {
         this.subscription = this.layoutService.configUpdate$.pipe(debounceTime(25)).subscribe(() => {
-            this.initChart();
+            this.initChart(
+                this.loadData.labels,
+                this.loadData.news,
+                this.loadData.upds,
+                this.loadData.rpts
+            );
+        });
+
+        this.dashboardService.getAdsReport().subscribe(data => {
+            const labels = data.map(item => `${item.date.substring(8, 10)}/${item.date.substring(5, 7)}`);
+            const news = data.map(item => item.news);
+            const upds = data.map(item => item.upds);
+            const rpts = data.map(item => item.rpts);
+            
+            this.loadData.labels = labels;
+            this.loadData.news = news;
+            this.loadData.upds = upds;
+            this.loadData.rpts = rpts;
+
+            this.initChart(
+                this.loadData.labels,
+                this.loadData.news,
+                this.loadData.upds,
+                this.loadData.rpts
+            );
         });
     }
 
     ngOnInit() {
-        this.initChart();
+        this.initChart(
+            this.loadData.labels,
+            this.loadData.news,
+            this.loadData.upds,
+            this.loadData.rpts
+        );
     }
 
-    initChart() {
+    initChart(labels: string[], news: number[], upds: number[], rpts: number[]) {
         const documentStyle = getComputedStyle(document.documentElement);
         const textColor = documentStyle.getPropertyValue('--text-color');
         const borderColor = documentStyle.getPropertyValue('--surface-border');
         const textMutedColor = documentStyle.getPropertyValue('--text-color-secondary');
 
         this.chartData = {
-            labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+            labels: labels,
             datasets: [
                 {
                     type: 'bar',
-                    label: 'Subscriptions',
-                    backgroundColor: documentStyle.getPropertyValue('--p-primary-400'),
-                    data: [4000, 10000, 15000, 4000],
+                    label: 'Anúncios Novos',
+                    backgroundColor: documentStyle.getPropertyValue('--p-info-400'),
+                    data: news,
                     barThickness: 32
                 },
                 {
                     type: 'bar',
-                    label: 'Advertising',
-                    backgroundColor: documentStyle.getPropertyValue('--p-primary-300'),
-                    data: [2100, 8400, 2400, 7500],
+                    label: 'Anúncios Atualizados',
+                    backgroundColor: documentStyle.getPropertyValue('--p-info-300'),
+                    data: upds,
                     barThickness: 32
                 },
                 {
                     type: 'bar',
-                    label: 'Affiliate',
-                    backgroundColor: documentStyle.getPropertyValue('--p-primary-200'),
-                    data: [4100, 5200, 3400, 7400],
+                    label: 'Anúncios Denunciados',
+                    backgroundColor: documentStyle.getPropertyValue('--p-info-200'),
+                    data: rpts,
                     borderRadius: {
                         topLeft: 8,
                         topRight: 8,

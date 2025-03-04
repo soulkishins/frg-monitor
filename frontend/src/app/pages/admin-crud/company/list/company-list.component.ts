@@ -415,25 +415,4 @@ export class CompanyList implements OnInit {
         this.company = {};
     }
 
-    generateRandomClients(): Company[] {
-        const statuses = ["active", "inactive", "lead"];
-        const clients: Company[] = [];
-
-        for (let i = 0; i < 30; i++) {
-            const id = `${i + 1}`;
-            const name = `Client ${id}`;
-            const identification = this.generateRandomCNPJ();
-            const status = statuses[Math.floor(Math.random() * statuses.length)];
-
-            clients.push({ id, name, identification, status });
-        }
-
-        return clients;
-    }
-
-    generateRandomCNPJ() {
-        const getRandomDigit = () => Math.floor(Math.random() * 10);
-        const cnpj = Array.from({ length: 14 }, getRandomDigit).join("");
-        return cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
-    }
 }
