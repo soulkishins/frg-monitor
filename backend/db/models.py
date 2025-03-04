@@ -174,7 +174,7 @@ class Keyword(Base, Audit):
     brand = relationship("ClientBrand", lazy=True)
 
     def _json_fields(self):
-        return ["id_keyword", "id_brand", "st_keyword", "st_product", "st_status"] + super()._json_fields()
+        return ["id_keyword", "id_brand", "st_keyword", "st_product", "st_status", "brand"] + super()._json_fields()
 
 class Advertisement(Base, Audit):
     __tablename__ = "tb_advertisement"

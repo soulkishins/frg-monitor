@@ -1,0 +1,80 @@
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+        <p-button label="Nova" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+        <p-button severity="secondary" label="Excluir" icon="pi pi-trash" outlined (onClick)="deleteSelectedKeywords()" [disabled]="!selectedKeywords || !selectedKeywords.length" />
+    </ng-template>
+
+    <ng-template #end>
+        <p-button label="Exportar" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+    </ng-template>
+</p-toolbar>
+
+<p-table
+    #dt
+    [value]="keywords()"
+    [rows]="50"
+    [columns]="cols"
+    [paginator]="true"
+    [globalFilterFields]="['brand.client.st_name', 'brand.st_brand', 'st_keyword', 'st_status']"
+    [tableStyle]="{ 'min-width': '75rem' }"
+    [(selection)]="selectedKeywords"
+    [rowHover]="true"
+    dataKey="id_keyword"
+    currentPageReportTemplate="Mostrando {first} até {last} de {totalRecords} palavras-chave"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[50, 100, 200, 300]"
+>
+    <ng-template #caption>
+        <div class="flex items-center justify-between">
+            <h5 class="m-0">Gerenciar Palavras-chave</h5>
+            <p-iconfield>
+                <p-inputicon styleClass="pi pi-search" />
+                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
+            </p-iconfield>
+        </div>
+    </ng-template>
+    <ng-template #header>
+        <tr>
+            <th style="width: 3rem">
+                <p-tableHeaderCheckbox />
+            </th>
+            <th pSortableColumn="brand.client.st_name" style="min-width:16rem">
+                Cliente
+                <p-sortIcon field="brand.client.st_name" />
+            </th>
+            <th pSortableColumn="brand.st_brand" style="min-width:16rem">
+                Marca
+                <p-sortIcon field="brand.st_brand" />
+            </th>
+            <th pSortableColumn="st_keyword" style="min-width:16rem">
+                Palavra-chave
+                <p-sortIcon field="st_keyword" />
+            </th>
+            <th pSortableColumn="st_status" style="min-width:10rem">
+                Status
+                <p-sortIcon field="st_status" />
+            </th>
+            <th style="min-width: 8rem"></th>
+        </tr>
+    </ng-template>
+    <ng-template #body let-keyword>
+        <tr>
+            <td>
+                <p-tableCheckbox [value]="keyword" />
+            </td>
+            <td>{{ keyword.brand?.client?.st_name }}</td>
+            <td>{{ keyword.brand?.st_brand }}</td>
+            <td>{{ keyword.st_keyword }}</td>
+            <td>
+                <p-tag [value]="keyword.st_status === 'active' ? 'Ativo' : 'Inativo'"
+                       [severity]="keyword.st_status === 'active' ? 'success' : 'danger'" />
+            </td>
+            <td>
+                <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editKeyword(keyword)" />
+                <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteKeyword(keyword)" />
+            </td>
+        </tr>
+    </ng-template>
+</p-table>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

@@ -1,7 +1,9 @@
+<p-toast />
+
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
         <p-button label="Novo" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-        <p-button severity="secondary" label="Excluir" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
+        <p-button severity="danger" label="Excluir" icon="pi pi-trash" [outlined]="true" (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
     </ng-template>
 
     <ng-template #end>
@@ -9,60 +11,108 @@
     </ng-template>
 </p-toolbar>
 
+<p-panel #panel [toggleable]="true" [collapsed]="true">
+    <ng-template #header>
+        <div class="flex items-center gap-2">
+            <i class="pi pi-box"></i>
+            <span class="font-bold">Gestão de Produtos</span>
+        </div>
+    </ng-template>
+    <ng-template #icons>
+        <p-button icon="pi pi-refresh" severity="primary" rounded text (click)="loadData(undefined)" pTooltip="Atualizar" tooltipPosition="top" tooltipStyleClass="custom-tooltip" />
+        <p-button icon="pi pi-eraser" severity="danger" rounded text (click)="clearFilters(dt)" pTooltip="Limpar Filtros" tooltipPosition="top" tooltipStyleClass="custom-tooltip" />
+        <p-button icon="pi pi-search" severity="info" rounded text (click)="dt.reset()" pTooltip="Aplicar Filtros" tooltipPosition="top" tooltipStyleClass="custom-tooltip" />
+    </ng-template>
+    <p-fluid>
+        <div class="grid grid-cols-4 gap-4">
+            <div>
+                <p-iftalabel>
+                    <p-select [(ngModel)]="filters['st_status']" inputId="st_status" [options]="statuses" optionLabel="label" styleClass="w-full" />
+                    <label for="st_status">Status</label>
+                </p-iftalabel>
+            </div>
+            <div>
+                <p-iftalabel>
+                    <input pInputText id="st_name" [(ngModel)]="filters['st_name']" />
+                    <label for="st_name">Cliente</label>
+                </p-iftalabel>
+            </div>
+            <div>
+                <p-iftalabel>
+                    <input pInputText id="st_brand" [(ngModel)]="filters['st_brand']" />
+                    <label for="st_brand">Marca</label>
+                </p-iftalabel>
+            </div>
+            <div>
+                <p-iftalabel>
+                    <input pInputText id="st_product" [(ngModel)]="filters['st_product']" />
+                    <label for="st_product">Produto</label>
+                </p-iftalabel>
+            </div>
+            <div>
+                <p-iftalabel>
+                    <input pInputText id="st_category" [(ngModel)]="filters['st_category']" />
+                    <label for="st_category">Categoria</label>
+                </p-iftalabel>
+            </div>
+            <div>
+                <p-iftalabel>
+                    <input pInputText id="st_subcategory" [(ngModel)]="filters['st_subcategory']" />
+                    <label for="st_subcategory">Subcategoria</label>
+                </p-iftalabel>
+            </div>
+        </div>
+    </p-fluid>
+</p-panel>
+
 <p-table
     #dt
     [value]="products()"
     [rows]="50"
-    [columns]="cols"
     [paginator]="true"
-    [globalFilterFields]="['st_product', 'brand.client.st_name', 'brand.st_brand', 'subcategory.category.st_category', 'subcategory.st_subcategory', 'st_status']"
+    [lazy]="true"
     [tableStyle]="{ 'min-width': '75rem' }"
     [(selection)]="selectedProducts"
     [rowHover]="true"
+    [totalRecords]="page.total"
     dataKey="id_product"
-    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} produtos"
+    currentPageReportTemplate="Exibindo do {first} ao {last} de {totalRecords} Registros"
     [showCurrentPageReport]="true"
     [rowsPerPageOptions]="[50, 100, 200, 300]"
+    [loading]="loading"
+    (onLazyLoad)="loadData($event)"
+    [(rows)]="page.limit"
 >
-    <ng-template #caption>
-        <div class="flex items-center justify-between">
-            <h5 class="m-0">Gerenciar Produtos</h5>
-            <p-iconfield>
-                <p-inputicon styleClass="pi pi-search" />
-                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
-            </p-iconfield>
-        </div>
-    </ng-template>
     <ng-template #header>
         <tr>
             <th style="width: 3rem">
                 <p-tableHeaderCheckbox />
             </th>
-            <th pSortableColumn="brand.client.st_name">
+            <th pSortableColumn="brand.client.st_name" style="min-width: 20rem">
                 Cliente
                 <p-sortIcon field="brand.client.st_name" />
             </th>
-            <th pSortableColumn="brand.st_brand">
+            <th pSortableColumn="brand.st_brand" style="min-width: 20rem">
                 Marca
                 <p-sortIcon field="brand.st_brand" />
             </th>
-            <th pSortableColumn="subcategory.category.st_category">
+            <th pSortableColumn="subcategory.category.st_category" style="min-width: 20rem">
                 Categoria
                 <p-sortIcon field="subcategory.category.st_category" />
             </th>
-            <th pSortableColumn="subcategory.st_subcategory">
+            <th pSortableColumn="subcategory.st_subcategory" style="min-width: 20rem">
                 Subcategoria
                 <p-sortIcon field="subcategory.st_subcategory" />
             </th>
-            <th pSortableColumn="st_product">
+            <th pSortableColumn="st_product" style="min-width: 20rem">
                 Produto
                 <p-sortIcon field="st_product" />
             </th>
-            <th pSortableColumn="st_status">
+            <th pSortableColumn="st_status" style="min-width: 10rem">
                 Status
                 <p-sortIcon field="st_status" />
             </th>
-            <th style="min-width: 12rem"></th>
+            <th style="min-width: 8rem"></th>
         </tr>
     </ng-template>
     <ng-template #body let-product>
@@ -79,8 +129,8 @@
                 <p-tag [value]="getStatusLabel(product.st_status)" [severity]="getSeverity(product.st_status)" />
             </td>
             <td>
-                <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editProduct(product)" />
-                <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteProduct(product)" />
+                <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" severity="info" (onClick)="editProduct(product)" />
+                <p-button icon="pi pi-trash" [rounded]="true" [outlined]="true" severity="danger" (onClick)="deleteProduct(product)" />
             </td>
         </tr>
     </ng-template>
