@@ -26,12 +26,12 @@ class ClientBrandProductCrud(Crud):
     def filter_by(self, indexes, filters) -> list:
         where = []
         
-        if 'id_brand' in indexes:
+        if 'id_brand' in filters:
             where.append(ClientBrandProduct.id_brand == filters['id_brand'])
 
-        if 'st_brand' in indexes:
+        if 'st_brand' in filters:
             where.append(ClientBrand.st_name == filters['st_brand'])
-        if 'subcategory' in indexes:
+        if 'subcategory' in filters:
             where.append(ClientBrandProduct.id_subcategory == filters['subcategory'])
 
         if 'st_product' in filters:
