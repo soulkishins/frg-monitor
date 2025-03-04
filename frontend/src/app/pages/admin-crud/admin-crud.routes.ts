@@ -9,7 +9,7 @@ export default [
     { path: 'marca', loadChildren: () => import('./brand/brand.routes'), canMatch: [canMatchGuard] },
     { path: 'produto', loadChildren: () => import('./products/product.routes'), canMatch: [canMatchGuard] },
     { path: 'usuario', loadChildren: () => import('./users/user.routes'), canMatch: [canMatchGuard] },
-    { path: 'palavra-chave', loadChildren: () => import('./palavra-chave/keyword.routes'), canMatch: [canMatchGuard] },
+    { path: 'palavra-chave', loadChildren: () => import('./keyword/keyword.routes'), canMatch: [canMatchGuard] },
     { path: 'perfil', component: Profile, canMatch: [canMatchGuard] },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

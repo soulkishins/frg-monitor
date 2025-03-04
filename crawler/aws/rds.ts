@@ -78,7 +78,7 @@ export class AdvertisementManager {
             INSERT INTO tb_advertisement_keyword (
                 id_advertisement, id_keyword, st_keyword, dt_created
             ) VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
-            ON CONFLICT (id_keyword) 
+            ON CONFLICT (id_advertisement, id_keyword) 
             DO UPDATE SET
                 st_keyword = EXCLUDED.st_keyword
             WHERE tb_advertisement_keyword.st_keyword <> EXCLUDED.st_keyword
