@@ -59,11 +59,33 @@ export class AdvertisementManager {
             INSERT INTO tb_advertisement_product (
                 id_advertisement, id_product, st_varity_seq, st_varity_name, st_created_by, dt_created
             ) VALUES ($1, $2, $3, $4, 'crawler', CURRENT_TIMESTAMP)
+            ON CONFLICT (id_advertisement, id_product, st_varity_seq) 
+            DO UPDATE SET
+                st_varity_name = EXCLUDED.st_varity_name
+            WHERE tb_advertisement_product.st_varity_name <> EXCLUDED.st_varity_name
         `;
         
         const values = [
             data.id_advertisement, data.id_product,
             data.st_varity_seq, data.st_varity_name
+        ];
+
+        await this.pool.query(query, values);
+    }
+
+    async addKeyword(data: {id_keyword: string, st_keyword: string, id_advertisement: string}): Promise<void> {
+        const query = `
+            INSERT INTO tb_advertisement_keyword (
+                id_advertisement, id_keyword, st_keyword, dt_created
+            ) VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
+            ON CONFLICT (id_keyword) 
+            DO UPDATE SET
+                st_keyword = EXCLUDED.st_keyword
+            WHERE tb_advertisement_keyword.st_keyword <> EXCLUDED.st_keyword
+        `;
+        
+        const values = [
+            data.id_advertisement, data.id_keyword, data.st_keyword
         ];
 
         await this.pool.query(query, values);
@@ -94,22 +116,22 @@ export class AdvertisementManager {
         return result.rows[0] || null;
     }
 
-    async getAdvertisementByPlataform(st_plataform: string, st_plataform_id: string, st_url: string): Promise<IAdvertisement | null> {
+    async getAdvertisementByPlataform(st_plataform: string, st_plataform_id: string, st_url: string, id_brand: string): Promise<IAdvertisement | null> {
         const queryID = `
             SELECT * FROM tb_advertisement 
-            WHERE st_plataform = $1 AND st_plataform_id = $2
+            WHERE st_plataform = $1 AND st_plataform_id = $2 AND id_brand = $3
         `;
         const queryURL = `
             SELECT * FROM tb_advertisement 
-            WHERE st_plataform = $1 AND st_url = $2
+            WHERE st_plataform = $1 AND st_url = $2 AND id_brand = $3
         `;
 
         if (st_plataform_id !== 'N/A') {
-            const result = await this.pool.query(queryID, [st_plataform, st_plataform_id]);
+            const result = await this.pool.query(queryID, [st_plataform, st_plataform_id, id_brand]);
             return result.rows[0] || null;
         }
 
-        const result = await this.pool.query(queryURL, [st_plataform, st_url]);
+        const result = await this.pool.query(queryURL, [st_plataform, st_url, id_brand]);
         return result.rows[0] || null;
     }
 
@@ -185,7 +207,7 @@ export class AdvertisementManager {
                 param++;
             }
 
-            if (data.st_status === 'NEW' && record.st_status !== 'ERROR') {
+            if (data.st_status === 'NEW' && record.st_status === 'ERROR') {
                 query += 'st_status = $' + param + ',';
                 values.push(data.st_status);
                 param++;
