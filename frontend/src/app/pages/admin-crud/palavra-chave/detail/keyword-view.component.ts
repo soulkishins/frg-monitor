@@ -145,8 +145,54 @@ export class KeywordView implements OnInit {
                 ...selectedBrand,
                 client: selectedClient
             };
+            
+            // Carregar produtos da marca selecionada
+            const params = {
+                id_brand: event.value
+            };
+            
+            this.productService.getProducts(params).subscribe({
+                next: (response) => {
+                    const produtosProcessados: ProcessedProduct[] = [];
+                    
+                    response.list.forEach(produto => {
+                        try {
+                            const variedades: ProductVariety[] = JSON.parse(produto.st_variety || '[]');
+                            
+                            variedades.forEach(variedade => {
+                                if (variedade.status !== 'deleted') {
+                                    produtosProcessados.push({
+                                        ...produto,
+                                        variety: variedade.variety,
+                                        price: variedade.price,
+                                        flagCadastro: new Date(produto.dt_created).toLocaleDateString('pt-BR')
+                                    });
+                                }
+                            });
+                        } catch (e) {
+                            console.error('Erro ao processar variedades do produto:', e);
+                            produtosProcessados.push({
+                                ...produto,
+                                variety: 'N/A',
+                                price: 0,
+                                flagCadastro: new Date(produto.dt_created).toLocaleDateString('pt-BR')
+                            });
+                        }
+                    });
+                    
+                    this.produtos = produtosProcessados;
+                    this.produtosFiltrados = [...this.produtos];
+                },
+                error: (error) => {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Erro',
+                        detail: 'Erro ao carregar produtos',
+                        life: 3000
+                    });
+                }
+            });
         }
-        this.filtrarProdutos();
     }
 
     filtrarProdutos() {
@@ -160,6 +206,11 @@ export class KeywordView implements OnInit {
         });
     }
 
+    loadProdutos() {
+        this.produtos = [];
+        this.produtosFiltrados = [];
+    }
+
     loadKeyword(id: string) {
         this.keywordService.getKeyword(id).subscribe(
             (data: KeywordResponse) => {
@@ -169,6 +220,75 @@ export class KeywordView implements OnInit {
                 if (this.keyword.brand?.client) {
                     this.selectedClient = this.keyword.brand.client.id;
                     this.loadBrands(this.selectedClient);
+
+                    // Carregar produtos da marca selecionada
+                    if (this.keyword.id_brand) {
+                        const params = {
+                            id_brand: this.keyword.id_brand
+                        };
+                        
+                        // Processar st_product para ter os produtos selecionados
+                        let produtosSelecionados: any[] = [];
+                        try {
+                            produtosSelecionados = JSON.parse(this.keyword.st_product || '[]');
+                        } catch (e) {
+                            console.error('Erro ao processar st_product:', e);
+                        }
+                        
+                        this.productService.getProducts(params).subscribe({
+                            next: (response) => {
+                                const produtosProcessados: ProcessedProduct[] = [];
+                                
+                                response.list.forEach(produto => {
+                                    try {
+                                        const variedades: ProductVariety[] = JSON.parse(produto.st_variety || '[]');
+                                        
+                                        variedades.forEach(variedade => {
+                                            if (variedade.status !== 'deleted') {
+                                                const produtoProcessado = {
+                                                    ...produto,
+                                                    variety: variedade.variety,
+                                                    price: variedade.price,
+                                                    flagCadastro: new Date(produto.dt_created).toLocaleDateString('pt-BR')
+                                                };
+                                                
+                                                // Verificar se o produto está no st_product
+                                                const produtoSelecionado = produtosSelecionados.find(
+                                                    (p: any) => p.id_product === produto.id_product && 
+                                                               p.st_varity_name === variedade.variety
+                                                );
+                                                
+                                                if (produtoSelecionado) {
+                                                    this.selectedProducts.push(produtoProcessado);
+                                                }
+                                                
+                                                produtosProcessados.push(produtoProcessado);
+                                            }
+                                        });
+                                    } catch (e) {
+                                        console.error('Erro ao processar variedades do produto:', e);
+                                        produtosProcessados.push({
+                                            ...produto,
+                                            variety: 'N/A',
+                                            price: 0,
+                                            flagCadastro: new Date(produto.dt_created).toLocaleDateString('pt-BR')
+                                        });
+                                    }
+                                });
+                                
+                                this.produtos = produtosProcessados;
+                                this.produtosFiltrados = [...this.produtos];
+                            },
+                            error: (error) => {
+                                this.messageService.add({
+                                    severity: 'error',
+                                    summary: 'Erro',
+                                    detail: 'Erro ao carregar produtos',
+                                    life: 3000
+                                });
+                            }
+                        });
+                    }
                 }
             },
             (error) => {
@@ -196,50 +316,6 @@ export class KeywordView implements OnInit {
                     severity: 'error',
                     summary: 'Erro',
                     detail: 'Erro ao carregar marcas',
-                    life: 3000
-                });
-            }
-        });
-    }
-
-    loadProdutos() {
-        this.productService.getProducts({}).subscribe({
-            next: (response) => {
-                const produtosProcessados: ProcessedProduct[] = [];
-                
-                response.list.forEach(produto => {
-                    try {
-                        const variedades: ProductVariety[] = JSON.parse(produto.st_variety || '[]');
-                        
-                        variedades.forEach(variedade => {
-                            if (variedade.status !== 'deleted') {
-                                produtosProcessados.push({
-                                    ...produto,
-                                    variety: variedade.variety,
-                                    price: variedade.price,
-                                    flagCadastro: new Date(produto.dt_created).toLocaleDateString('pt-BR')
-                                });
-                            }
-                        });
-                    } catch (e) {
-                        console.error('Erro ao processar variedades do produto:', e);
-                        produtosProcessados.push({
-                            ...produto,
-                            variety: 'N/A',
-                            price: 0,
-                            flagCadastro: new Date(produto.dt_created).toLocaleDateString('pt-BR')
-                        });
-                    }
-                });
-                
-                this.produtos = produtosProcessados;
-                this.produtosFiltrados = [...this.produtos];
-            },
-            error: (error) => {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Erro',
-                    detail: 'Erro ao carregar produtos',
                     life: 3000
                 });
             }
@@ -276,8 +352,7 @@ export class KeywordView implements OnInit {
                 st_keyword: this.keyword.st_keyword,
                 st_status: this.keyword.st_status,
                 id_brand: this.keyword.id_brand,
-                st_product: JSON.stringify(selectedProductsFormatted),
-                brand: this.keyword.brand
+                st_product: JSON.stringify(selectedProductsFormatted)
             };
 
             if (this.keyword.id_keyword) {
