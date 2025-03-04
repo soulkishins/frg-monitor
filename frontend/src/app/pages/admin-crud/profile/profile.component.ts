@@ -10,7 +10,8 @@ import { UserService } from '../../service/user.service';
 import { UserResponse, UserRequest } from '../../models/user.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CognitoService } from '../../service/cognito.service';
-
+import { ProfileService } from '../../service/profile.service';
+import { Page } from '../../models/global.model';
 @Component({
     selector: 'app-profile',
     standalone: true,
@@ -33,11 +34,11 @@ export class Profile implements OnInit {
     confirmPassword: string = '';
 
     constructor(
-        private userService: UserService,
+        private profileService: ProfileService,
         private messageService: MessageService,
-        private route: ActivatedRoute,
         private router: Router,
-        private cognitoService: CognitoService
+        private cognitoService: CognitoService,
+        private userService: UserService
     ) {}
 
     ngOnInit() {
@@ -63,9 +64,9 @@ export class Profile implements OnInit {
     }
 
     loadUser(id: string) {
-        this.userService.getUser(id).subscribe(
-            (data: UserResponse) => {
-                this.user = data;
+        this.profileService.getUsers({ st_value: id }).subscribe(
+            (data: Page<UserResponse>) => {
+                this.user = data.list[0];
             },
             (error) => {
                 this.messageService.add({
