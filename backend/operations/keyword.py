@@ -35,6 +35,9 @@ class KeywordCrud(Crud):
         data['id_brand'] = indexes['brand']
         return super().to_model(indexes, data)
     
+    def create(self, indexes, data) -> Keyword:
+        return super().create(indexes, data)
+    
     def get_schedule(self, indexes, filters, body) -> tuple[int, dict]:
         # Inicializa o cliente do EventBridge Schedule
         client = boto3.client('scheduler', region_name='sa-east-1')
