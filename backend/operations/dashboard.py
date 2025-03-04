@@ -68,10 +68,10 @@ class Dashboard(Crud):
                 count(distinct ah.id_advertisement) ads,
                 count(distinct CASE WHEN ah.st_status = 'REPORTED' THEN ah.id_advertisement END) reports
             from
-                tb_keyword k
-                left join tb_advertisement_keyword ak on
+                invoices.tb_keyword k
+                left join invoices.tb_advertisement_keyword ak on
                     k.id_keyword = ak.id_keyword
-                left join tb_advertisement_history ah on
+                left join invoices.tb_advertisement_history ah on
                     ak.id_advertisement = ah.id_advertisement
                 and ah.dt_created >= current_timestamp - INTERVAL '1 days'
             where
