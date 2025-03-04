@@ -11,10 +11,25 @@ import { TableModule } from 'primeng/table';
 import { KeywordService } from '../../../service/keyword.service';
 import { CompanyService } from '../../../service/company.service';
 import { BrandService } from '../../../service/brand.service';
+import { ProductService } from '../../../service/product.service';
 import { KeywordResponse, KeywordRequest } from '../../../models/keyword.model';
 import { CompanyResponse } from '../../../models/company.model';
 import { BrandResponse } from '../../../models/brand.model';
+import { ProductResponse } from '../../../models/product.model';
 import { ActivatedRoute, Router } from '@angular/router';
+
+interface ProductVariety {
+    seq: string;
+    variety: string;
+    price: number;
+    status: string;
+}
+
+interface ProcessedProduct extends ProductResponse {
+    variety: string;
+    price: number;
+    flagCadastro?: string;
+}
 
 @Component({
     selector: 'app-keyword-view',
@@ -30,7 +45,7 @@ import { ActivatedRoute, Router } from '@angular/router';
         TableModule
     ],
     templateUrl: './keyword-view.component.html',
-    providers: [MessageService, KeywordService, CompanyService, BrandService]
+    providers: [MessageService, KeywordService, CompanyService, BrandService, ProductService]
 })
 export class KeywordView implements OnInit {
     isEditing: boolean = false;
@@ -39,7 +54,7 @@ export class KeywordView implements OnInit {
     clients: CompanyResponse[] = [];
     brands: BrandResponse[] = [];
     selectedClient: string = '';
-    produtos: any[] = [];
+    produtos: ProcessedProduct[] = [];
 
     statusOptions = [
         { label: 'Ativo', value: 'active' },
@@ -50,6 +65,7 @@ export class KeywordView implements OnInit {
         private keywordService: KeywordService,
         private companyService: CompanyService,
         private brandService: BrandService,
+        private productService: ProductService,
         private messageService: MessageService,
         private route: ActivatedRoute,
         private router: Router
@@ -158,13 +174,47 @@ export class KeywordView implements OnInit {
     }
 
     loadProdutos() {
-        // Aqui você deve implementar a chamada ao serviço que carrega os produtos
-        // Por enquanto vou usar dados de exemplo
-        this.produtos = [
-            { flagCadastro: true, nomeProduto: 'Produto 1', nomeVariedade: 'Variedade 1', preco: 10.50 },
-            { flagCadastro: false, nomeProduto: 'Produto 2', nomeVariedade: 'Variedade 2', preco: 15.75 },
-            { flagCadastro: true, nomeProduto: 'Produto 3', nomeVariedade: 'Variedade 3', preco: 20.00 }
-        ];
+        this.productService.getProducts({}).subscribe({
+            next: (response) => {
+                const produtosProcessados: ProcessedProduct[] = [];
+                
+                response.list.forEach(produto => {
+                    try {
+                        const variedades: ProductVariety[] = JSON.parse(produto.st_variety || '[]');
+                        
+                        variedades.forEach(variedade => {
+                            if (variedade.status !== 'deleted') {
+                                produtosProcessados.push({
+                                    ...produto,
+                                    variety: variedade.variety,
+                                    price: variedade.price,
+                                    flagCadastro: new Date(produto.dt_created).toLocaleDateString('pt-BR')
+                                });
+                            }
+                        });
+                    } catch (e) {
+                        console.error('Erro ao processar variedades do produto:', e);
+                        // Se houver erro no parse, adiciona o produto sem variedades
+                        produtosProcessados.push({
+                            ...produto,
+                            variety: 'N/A',
+                            price: 0,
+                            flagCadastro: new Date(produto.dt_created).toLocaleDateString('pt-BR')
+                        });
+                    }
+                });
+                
+                this.produtos = produtosProcessados;
+            },
+            error: (error) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: 'Erro ao carregar produtos',
+                    life: 3000
+                });
+            }
+        });
     }
 
     goBack() {
