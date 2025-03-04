@@ -44,14 +44,15 @@
                     <label for="brand" class="block font-bold mb-3">Marca</label>
                     <p-dropdown [options]="brands" [(ngModel)]="keyword.id_brand" name="id_brand"
                         optionLabel="st_brand" optionValue="id_brand" placeholder="Selecione uma marca"
-                        [disabled]="!selectedClient" [style]="{'width': '100%'}">
+                        [disabled]="!selectedClient" [style]="{'width': '100%'}"
+                        (onChange)="filtrarProdutos()">
                     </p-dropdown>
                 </div>
             </div>
         </div>
 
         <div class="mt-4">
-            <p-table [value]="produtos" [paginator]="true" [rows]="10" [responsive]="true">
+            <p-table [value]="produtosFiltrados" [paginator]="true" [rows]="10" [responsive]="true">
                 <ng-template pTemplate="header">
                     <tr>
                         <th style="width: 3rem">

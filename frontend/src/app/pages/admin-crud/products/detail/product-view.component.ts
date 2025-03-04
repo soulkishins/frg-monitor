@@ -22,7 +22,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ProductService } from '../../../service/product.service';
-import { ProductResponse, Brand, Subcategory, Category, Client } from '../../../models/product.model';
+import { ProductResponse} from '../../../models/product.model';
 import { CompanyService } from '../../../service/company.service';
 import { BrandService } from '../../../service/brand.service';
 import { CompanyResponse } from '../../../models/company.model';

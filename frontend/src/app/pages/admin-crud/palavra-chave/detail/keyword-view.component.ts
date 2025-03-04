@@ -55,6 +55,7 @@ export class KeywordView implements OnInit {
     brands: BrandResponse[] = [];
     selectedClient: string = '';
     produtos: ProcessedProduct[] = [];
+    produtosFiltrados: ProcessedProduct[] = [];
 
     statusOptions = [
         { label: 'Ativo', value: 'active' },
@@ -114,6 +115,7 @@ export class KeywordView implements OnInit {
             this.brandService.getBrands().subscribe({
                 next: (brands) => {
                     this.brands = brands.list.filter(brand => brand.id_client === clientId);
+                    this.filtrarProdutos();
                 },
                 error: (error) => {
                     console.error('Erro ao carregar marcas:', error);
@@ -129,6 +131,18 @@ export class KeywordView implements OnInit {
             this.brands = [];
         }
         this.keyword.id_brand = '';
+        this.filtrarProdutos();
+    }
+
+    filtrarProdutos() {
+        this.produtosFiltrados = this.produtos.filter(produto => {
+            const matchClient = !this.selectedClient || 
+                              (produto.brand?.client?.id === this.selectedClient);
+            const matchBrand = !this.keyword.id_brand || 
+                             (produto.brand?.id_brand === this.keyword.id_brand);
+            
+            return matchClient && matchBrand;
+        });
     }
 
     loadKeyword(id: string) {
@@ -194,7 +208,6 @@ export class KeywordView implements OnInit {
                         });
                     } catch (e) {
                         console.error('Erro ao processar variedades do produto:', e);
-                        // Se houver erro no parse, adiciona o produto sem variedades
                         produtosProcessados.push({
                             ...produto,
                             variety: 'N/A',
@@ -205,6 +218,7 @@ export class KeywordView implements OnInit {
                 });
                 
                 this.produtos = produtosProcessados;
+                this.produtosFiltrados = [...this.produtos];
             },
             error: (error) => {
                 this.messageService.add({

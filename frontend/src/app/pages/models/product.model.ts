@@ -9,8 +9,45 @@ export interface ProductResponse {
     st_created_by: string;
     dt_modified: string;
     st_modified_by: string;
-    subcategory: Subcategory;
-    brand: Brand;
+    subcategory: {
+        id_subcategory: string;
+        id_category: string;
+        st_subcategory: string;
+        st_status: string;
+        category: {
+            id_category: string;
+            st_category: string;
+            st_status: string;
+            dt_created: string;
+            st_created_by: string;
+            dt_modified: string;
+            st_modified_by: string;
+        };
+        dt_created: string;
+        st_created_by: string;
+        dt_modified: string;
+        st_modified_by: string;
+    };
+    brand: {
+        id_brand: string;
+        id_client: string;
+        st_brand: string;
+        st_status: string;
+        client: {
+            id: string;
+            st_name: string;
+            st_document: string;
+            st_status: string;
+            dt_created: string;
+            st_created_by: string;
+            dt_modified: string;
+            st_modified_by: string;
+        };
+        dt_created: string;
+        st_created_by: string;
+        dt_modified: string;
+        st_modified_by: string;
+    };
 }
 
 export interface Product {
@@ -28,49 +65,4 @@ export interface ProductRequest {
     st_product: string;
     st_variety: string;
     st_status: string;
-}
-
-export interface Category {
-    id_category: string;
-    st_category: string;
-    st_status: string;
-    dt_created: string;
-    st_created_by: string;
-    dt_modified: string;
-    st_modified_by: string;
-}
-
-export interface Subcategory {
-    id_subcategory: string;
-    id_category: string;
-    st_subcategory: string;
-    st_status: string;
-    category: Category;
-    dt_created: string;
-    st_created_by: string;
-    dt_modified: string;
-    st_modified_by: string;
-}
-
-export interface Client {
-    id: string;
-    st_name: string;
-    st_document: string;
-    st_status: string;
-    dt_created: string;
-    st_created_by: string;
-    dt_modified: string;
-    st_modified_by: string;
-}
-
-export interface Brand {
-    id_brand: string;
-    id_client: string;
-    st_brand: string;
-    st_status: string;
-    client: Client;
-    dt_created: string;
-    st_created_by: string;
-    dt_modified: string;
-    st_modified_by: string;
 }
