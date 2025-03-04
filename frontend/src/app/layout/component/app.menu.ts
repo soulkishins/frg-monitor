@@ -22,18 +22,18 @@ export class AppMenu {
             {
                 label: 'Cadastros',
                 items: [
-                    { label: 'Cliente', icon: 'pi pi-fw pi-table', routerLink: ['/cadastro/cliente'] },
-                    { label: 'Marca', icon: 'pi pi-fw pi-table', routerLink: ['/cadastro/marca'] },
-                    { label: 'Categoria', icon: 'pi pi-fw pi-table', routerLink: ['/cadastro/categoria'] },
-                    { label: 'Sub Categoria', icon: 'pi pi-fw pi-table', routerLink: ['/cadastro/subcategoria'] },
-                    { label: 'Produto', icon: 'pi pi-fw pi-table', routerLink: ['/cadastro/produto'] },
-                    { label: 'Palavra-chave', icon: 'pi pi-fw pi-table', routerLink: ['/cadastro/palavra-chave'] },
+                    { label: 'Cliente', icon: 'pi pi-fw pi-users', routerLink: ['/cadastro/cliente'] },
+                    { label: 'Marca', icon: 'pi pi-fw pi-id-card', routerLink: ['/cadastro/marca'] },
+                    { label: 'Categoria', icon: 'pi pi-fw pi-book', routerLink: ['/cadastro/categoria'] },
+                    { label: 'Sub Categoria', icon: 'pi pi-fw pi-bookmark', routerLink: ['/cadastro/subcategoria'] },
+                    { label: 'Produto', icon: 'pi pi-fw pi-box', routerLink: ['/cadastro/produto'] },
+                    { label: 'Palavra-chave', icon: 'pi pi-fw pi-tags', routerLink: ['/cadastro/palavra-chave'] },
                 ]
             },
             {
                 label: 'Monitoramento',
                 items: [
-                    { label: 'Anúncios', icon: 'pi pi-fw pi-table', routerLink: ['/anuncio/lista'] },
+                    { label: 'Anúncios', icon: 'pi pi-fw pi-shop', routerLink: ['/anuncio/lista'] },
                 ]
             },
             {

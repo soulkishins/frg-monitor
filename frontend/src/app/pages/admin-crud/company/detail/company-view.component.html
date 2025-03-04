@@ -1,17 +1,19 @@
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
-        <h2>{{ isEditing ? 'Editar Cliente' : 'Novo Cliente' }}</h2>
+        <div class="flex items-center gap-2">
+            <i class="pi pi-users"></i>
+            <span class="font-bold">Gestão de Clientes - {{ isEditing ? 'Editar Cliente' : 'Novo Cliente' }}</span>
+        </div>
+    </ng-template>
+
+    <ng-template #end>
+        <p-button label="Voltar" icon="pi pi-arrow-left" severity="secondary" (click)="goBack()" />
     </ng-template>
 </p-toolbar>
 
 <div class="card">
     <form [formGroup]="companyForm" (ngSubmit)="saveCompany()">
         <div class="flex flex-col gap-6 p-4">
-            <div>
-                <label for="status" class="block font-bold mb-3">Status</label>
-                <p-select formControlName="status" inputId="status" [options]="statuses" optionLabel="label" optionValue="value" placeholder="Selecione o Status" [style]="{'width':'100%'}" />
-            </div>
-
             <div>
                 <label for="name" class="block font-bold mb-3">Nome</label>
                 <input type="text" pInputText id="name" formControlName="name" required autofocus [style]="{'width':'100%'}" />
@@ -32,6 +34,11 @@
                 <small class="text-red-500" *ngIf="companyForm.get('identification')?.errors?.['duplicated'] && companyForm.get('identification')?.touched">
                     CNPJ já cadastrado
                 </small>
+            </div>
+
+            <div>
+                <label for="status" class="block font-bold mb-3">Status</label>
+                <p-select formControlName="status" inputId="status" [options]="statuses" optionLabel="label" optionValue="value" placeholder="Selecione o Status" [style]="{'width':'100%'}" />
             </div>
         </div>
 

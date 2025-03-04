@@ -26,7 +26,10 @@
 >
     <ng-template #caption>
         <div class="flex items-center justify-between">
-            <h5 class="m-0">Gerenciar Marcas</h5>
+            <div class="flex items-center gap-2">
+                <i class="pi pi-id-card"></i>
+                <span class="font-bold">Gestão de Marcas</span>
+            </div>
             <p-iconfield>
                 <p-inputicon styleClass="pi pi-search" />
                 <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />

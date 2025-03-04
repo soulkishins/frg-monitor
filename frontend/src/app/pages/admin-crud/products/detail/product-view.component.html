@@ -1,19 +1,19 @@
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
-        <h2>{{ isEditing ? 'Editar Produto' : 'Novo Produto' }}</h2>
+        <div class="flex items-center gap-2">
+            <i class="pi pi-box"></i>
+            <span class="font-bold">Gestão de Produtos - {{ isEditing ? 'Editar Produto' : 'Novo Produto' }}</span>
+        </div>
+    </ng-template>
+
+    <ng-template #end>
+        <p-button label="Voltar" icon="pi pi-arrow-left" severity="secondary" (click)="goBack()" />
     </ng-template>
 </p-toolbar>
 
 <div class="card">
     <form (ngSubmit)="saveProduct()">
         <div class="flex flex-col gap-6 p-4">
-            <div>
-                <label for="status" class="block font-bold mb-3">Status *</label>
-                <p-select [(ngModel)]="product.st_status" name="st_status" inputId="status" [options]="statuses" optionLabel="label" optionValue="value" 
-                    placeholder="Selecione um Status" [required]="true" [style]="{'width': '100%'}" />
-                <small class="text-red-500" *ngIf="submitted && !product.st_status">Status é obrigatório.</small>
-            </div>
-
             <div>
                 <label for="client" class="block font-bold mb-3">Cliente *</label>
                 <p-select [(ngModel)]="selectedClient" name="selectedClient" inputId="client" [options]="clients" optionLabel="st_name" optionValue="id" 
@@ -46,6 +46,13 @@
                 <label for="product" class="block font-bold mb-3">Descrição *</label>
                 <input type="text" pInputText id="product" name="st_product" [(ngModel)]="product.st_product" required autofocus [style]="{'width': '100%'}" />
                 <small class="text-red-500" *ngIf="submitted && !product.st_product">Descrição é obrigatória.</small>
+            </div>
+
+            <div>
+                <label for="status" class="block font-bold mb-3">Status *</label>
+                <p-select [(ngModel)]="product.st_status" name="st_status" inputId="status" [options]="statuses" optionLabel="label" optionValue="value" 
+                    placeholder="Selecione um Status" [required]="true" [style]="{'width': '100%'}" />
+                <small class="text-red-500" *ngIf="submitted && !product.st_status">Status é obrigatório.</small>
             </div>
 
             <div>

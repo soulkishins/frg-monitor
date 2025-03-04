@@ -1,6 +1,13 @@
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
-        <h2>{{ isEditing ? 'Editar Marca' : 'Nova Marca' }}</h2>
+        <div class="flex items-center gap-2">
+            <i class="pi pi-id-card"></i>
+            <span class="font-bold">Gestão de Marcas - {{ isEditing ? 'Editar Marca' : 'Nova Marca' }}</span>
+        </div>
+    </ng-template>
+
+    <ng-template #end>
+        <p-button label="Voltar" icon="pi pi-arrow-left" severity="secondary" (click)="goBack()" />
     </ng-template>
 </p-toolbar>
 
@@ -14,15 +21,15 @@
             </div>
 
             <div>
-                <label for="status" class="block font-bold mb-3">Status</label>
-                <p-select [(ngModel)]="brand.status" name="status" inputId="status" [options]="statuses" optionLabel="label" optionValue="value" placeholder="Selecione um Status" [style]="{'width': '100%'}" required />
-                <small class="text-red-500" *ngIf="submitted && !brand.status">Status é obrigatório</small>
-            </div>
-
-            <div>
                 <label for="name" class="block font-bold mb-3">Nome</label>
                 <input type="text" pInputText id="name" name="name" [(ngModel)]="brand.name" required autofocus [style]="{'width': '100%'}" />
                 <small class="text-red-500" *ngIf="submitted && !brand.name">Nome é obrigatório</small>
+            </div>
+
+            <div>
+                <label for="status" class="block font-bold mb-3">Status</label>
+                <p-select [(ngModel)]="brand.status" name="status" inputId="status" [options]="statuses" optionLabel="label" optionValue="value" placeholder="Selecione um Status" [style]="{'width': '100%'}" required />
+                <small class="text-red-500" *ngIf="submitted && !brand.status">Status é obrigatório</small>
             </div>
         </div>
 

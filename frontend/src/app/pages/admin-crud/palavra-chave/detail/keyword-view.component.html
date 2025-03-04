@@ -1,6 +1,13 @@
 <p-toolbar styleClass="mb-6">
-    <ng-template pTemplate="start">
-        <h2>{{ isEditing ? 'Editar Palavra-chave' : 'Nova Palavra-chave' }}</h2>
+    <ng-template #start>
+        <div class="flex items-center gap-2">
+            <i class="pi pi-tags"></i>
+            <span class="font-bold">Gestão de Palavras-chave - {{ isEditing ? 'Editar Palavra-chave' : 'Nova Palavra-chave' }}</span>
+        </div>
+    </ng-template>
+
+    <ng-template #end>
+        <p-button label="Voltar" icon="pi pi-arrow-left" severity="secondary" (click)="goBack()" />
     </ng-template>
 </p-toolbar>
 
@@ -9,20 +16,20 @@
     <form (ngSubmit)="saveKeyword()">
         <div class="flex flex-col gap-6 p-4">
             <div>
+                <label for="keyword" class="block font-bold mb-3">Palavra-chave *</label>
+                <input pInputText id="keyword" [(ngModel)]="keyword.st_keyword" name="st_keyword"
+                    [ngClass]="{ 'ng-invalid ng-dirty': submitted && !keyword.st_keyword }"
+                    [style]="{'width': '100%'}" />
+                <small class="text-red-500" *ngIf="submitted && !keyword.st_keyword">Palavra-chave é obrigatória.</small>
+            </div>
+
+            <div>
                 <label for="status" class="block font-bold mb-3">Status *</label>
                 <p-dropdown [options]="statusOptions" [(ngModel)]="keyword.st_status" name="st_status"
                     optionLabel="label" optionValue="value" [style]="{'width': '100%'}"
                     [ngClass]="{ 'ng-invalid ng-dirty': submitted && !keyword.st_status }">
                 </p-dropdown>
                 <small class="text-red-500" *ngIf="submitted && !keyword.st_status">Status é obrigatório.</small>
-            </div>
-
-            <div>
-                <label for="keyword" class="block font-bold mb-3">Palavra-chave *</label>
-                <input pInputText id="keyword" [(ngModel)]="keyword.st_keyword" name="st_keyword"
-                    [ngClass]="{ 'ng-invalid ng-dirty': submitted && !keyword.st_keyword }"
-                    [style]="{'width': '100%'}" />
-                <small class="text-red-500" *ngIf="submitted && !keyword.st_keyword">Palavra-chave é obrigatória.</small>
             </div>
 
             <div class="flex gap-4">

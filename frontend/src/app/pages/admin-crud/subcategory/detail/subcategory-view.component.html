@@ -1,6 +1,13 @@
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
-        <h2>{{ isEditing ? 'Editar Subcategoria' : 'Nova Subcategoria' }}</h2>
+        <div class="flex items-center gap-2">
+            <i class="pi pi-bookmark"></i>
+            <span class="font-bold">Gestão de Subcategorias - {{ isEditing ? 'Editar Subcategoria' : 'Nova Subcategoria' }}</span>
+        </div>
+    </ng-template>
+
+    <ng-template #end>
+        <p-button label="Voltar" icon="pi pi-arrow-left" severity="secondary" (click)="goBack()" />
     </ng-template>
 </p-toolbar>
 
@@ -14,15 +21,15 @@
             </div>
 
             <div>
-                <label for="status" class="block font-bold mb-3">Status</label>
-                <p-select [(ngModel)]="subCategory.st_status" name="st_status" inputId="status" [options]="statuses" optionLabel="label" optionValue="value" placeholder="Selecione um Status" [style]="{'width': '100%'}" required />
-                <small class="text-red-500" *ngIf="submitted && !subCategory.st_status">Status é obrigatório.</small>
-            </div>            
-
-            <div>
                 <label for="description" class="block font-bold mb-3">Descrição</label>
                 <input type="text" pInputText id="description" name="description" [(ngModel)]="subCategory.st_subcategory" required autofocus [style]="{'width': '100%'}" />
                 <small class="text-red-500" *ngIf="submitted && !subCategory.st_subcategory">Descrição é obrigatória.</small>
+            </div>
+
+            <div>
+                <label for="status" class="block font-bold mb-3">Status</label>
+                <p-select [(ngModel)]="subCategory.st_status" name="st_status" inputId="status" [options]="statuses" optionLabel="label" optionValue="value" placeholder="Selecione um Status" [style]="{'width': '100%'}" required />
+                <small class="text-red-500" *ngIf="submitted && !subCategory.st_status">Status é obrigatório.</small>
             </div>
         </div>
 

@@ -92,7 +92,7 @@ export class ProductView implements OnInit {
     // Novas propriedades para variedades e preços
     currentVariety: string = '';
     currentPrice: number = 0;
-    varietyList: Array<{variety: string, price: number, status?: string}> = [];
+    varietyList: Array<{seq: number, variety?: string, price?: number, status?: string}> = [];
     selectedVarietyIndex: number = -1;
 
     // Getter para lista filtrada
@@ -512,6 +512,7 @@ export class ProductView implements OnInit {
             if (this.selectedVarietyIndex > -1) {
                 // Atualiza a linha existente
                 this.varietyList[this.selectedVarietyIndex] = {
+                    seq: this.varietyList[this.selectedVarietyIndex].seq,
                     variety: this.currentVariety,
                     price: Number(this.currentPrice),
                     status: 'active'
@@ -520,6 +521,7 @@ export class ProductView implements OnInit {
             } else {
                 // Adiciona nova linha
                 this.varietyList.push({
+                    seq: this.varietyList.length + 1,
                     variety: this.currentVariety,
                     price: Number(this.currentPrice),
                     status: 'active'
@@ -537,7 +539,9 @@ export class ProductView implements OnInit {
     // Método para remover variedade da lista
     removeVariety(index: number, event: Event) {
         event.stopPropagation(); // Evita que o evento de clique da linha seja disparado
-        this.varietyList[index].status = 'deleted';
+        const { variety, price, ...varietyItem } = this.varietyList[index];
+        varietyItem.status = 'deleted';
+        this.varietyList[index] = varietyItem;
         if (this.selectedVarietyIndex === index) {
             this.currentVariety = '';
             this.currentPrice = 0;

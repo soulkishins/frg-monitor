@@ -119,8 +119,6 @@ export class CompanyList implements OnInit {
                     life: 3000
                 });
                 console.error('Erro ao carregar clientes:', error);
-                // Carrega dados mockados em caso de erro
-                this.companies.set(this.generateRandomClients());
             }
         });
 
