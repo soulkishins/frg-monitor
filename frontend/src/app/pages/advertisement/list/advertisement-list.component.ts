@@ -214,19 +214,24 @@ export class AdvertisementList implements OnInit {
             header: 'Confirmar Exportação',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
+                const key = this.getKey();
                 this.advertisementService
-                .exportAdvertisements()
+                .exportAdvertisements(key)
                 .subscribe({
                     next: () => {
                         this.messageService.add({
+                            key: 'export',
                             severity: 'success',
                             summary: 'Exportação em andamento',
                             detail: 'Exportação em andamento, aguarde alguns instantes...',
-                            life: 3000
+                            closable: false,
+                            sticky: true,
+                            icon: 'pi pi-spin pi-spinner',
                         });
+                        this.getReportStatus(key);
                     },
                     error: (error: any) => {
-                        console.error('Erro ao exportar os anúncios:', error);
+                        console.error('Erro ao exportar os anúncios denunciados:', error);
                         this.messageService.add({
                             severity: 'error',
                             summary: 'Erro',
@@ -245,16 +250,21 @@ export class AdvertisementList implements OnInit {
             header: 'Confirmar Exportação',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
+                const key = this.getKey();
                 this.advertisementService
-                .exportAdvertisements(this.selectedAdvertisements.map(ad => ad.id_advertisement))
+                .exportAdvertisements(key, this.selectedAdvertisements.map(ad => ad.id_advertisement))
                 .subscribe({
                     next: () => {
                         this.messageService.add({
+                            key: 'export',
                             severity: 'success',
                             summary: 'Exportação em andamento',
                             detail: 'Exportação em andamento, aguarde alguns instantes...',
-                            life: 3000
+                            closable: false,
+                            sticky: true,
+                            icon: 'pi pi-spin pi-spinner',
                         });
+                        this.getReportStatus(key);
                     },
                     error: (error: any) => {
                         console.error('Erro ao exportar os anúncios:', error);
@@ -268,6 +278,68 @@ export class AdvertisementList implements OnInit {
                 });
             }
         });
+    }
+
+    getReportStatus(key: string) {
+        setTimeout(() => {
+            this.advertisementService.getReportStatus(key).subscribe({
+                next: (status) => {
+                    if (status === 'COMPLETED') {
+                        this.messageService.clear('export');
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Exportação concluída',
+                            detail: 'Exportação concluída com sucesso!',
+                            life: 3000
+                        });
+                        this.advertisementService.getReport(key).subscribe({
+                            next: (report) => {
+                                const url = window.URL.createObjectURL(report);
+                                const a = document.createElement("a");
+                                a.href = url;
+                                a.download = key;
+                                a.target = '_blank';
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                window.URL.revokeObjectURL(url);
+                            },
+                            error: (error: any) => {
+                                console.error('Erro ao obter o arquivo do relatório da exportação dos anúncios:', error);
+                                this.messageService.add({
+                                    severity: 'error',
+                                    summary: 'Erro',
+                                    detail: 'Erro ao obter o arquivo do relatório da exportação dos anúncios',
+                                    life: 3000
+                                });
+                            }
+                        });
+                    }
+                    if (status === 'ERROR') {
+                        this.messageService.clear('export');
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao exportar os anúncios, tente novamente mais tarde',
+                            life: 3000
+                        });
+                    }
+                    if (status === 'PENDING') {
+                        this.getReportStatus(key);
+                    }
+                },
+                error: (error: any) => {
+                    console.error('Erro ao obter status da exportação dos anúncios:', error);
+                    this.messageService.clear('export');
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Erro',
+                        detail: 'Erro ao exportar os anúncios, tente novamente mais tarde',
+                        life: 3000
+                    });
+                }
+            });
+        }, 2000);
     }
 
     getSeverity(status: string): "success" | "info" | "warn" | "danger" | "secondary" | "contrast" | undefined {
@@ -286,5 +358,13 @@ export class AdvertisementList implements OnInit {
 
     openUrl(advertisement: AdvertisementListDto) {
         window.open(advertisement.st_url, '_blank');
+    }
+
+    private getKey(): string {
+        const date = new Date();
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+        return `export_${day}_${month}_${year}_${Math.random().toString(36).substring(2, 15)}.csv`;
     }
 }

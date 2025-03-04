@@ -22,7 +22,7 @@ __secret_name = os.getenv('secret_db')
 __region_name = os.getenv('secret_region')
 # Recuperar credenciais do AWS Secrets Manager
 __secret = __get_db_credentials(__secret_name, __region_name)
-__database_url = f"postgresql://{__secret['username']}:{__secret['password']}@{__secret['host']}:{__secret.get('port', 5432)}/{__secret['dbname']}"
+__database_url = f"postgresql://{__secret['username']}:{__secret['password']}@{__secret['host']}:{__secret.get('port', 5432)}/{__secret['dbname']}?options=-c%20TimeZone=America/Sao_Paulo"
 
 # Criar conexão com o banco de dados
 engine = create_engine(__database_url, echo=True)

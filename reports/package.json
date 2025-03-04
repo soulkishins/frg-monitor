@@ -1,0 +1,30 @@
+{
+  "name": "report-exporter",
+  "version": "1.0.0",
+  "description": "Gerador dos relatórios de exportação de anúncios para Denúncias",
+  "main": "main.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node local-test.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.758.0",
+    "@aws-sdk/client-secrets-manager": "^3.758.0",
+    "json2csv": "^6.0.0-alpha.2",
+    "pg": "^8.13.3",
+    "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/json2csv": "^5.0.7",
+    "@types/node": "^16.0.0",
+    "@types/pg": "^8.11.11",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.0.0",
+    "typescript": "^5.7.3"
+  }
+}

@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpResponse } from '@angular/common/http';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../../environment/environment';
 import { AdvertisementListDto, Advertisement, AdvertisementExport, AdvertisementHistory } from '../models/advertisement.model';
 import { Page } from '../models/global.model';
+import { CognitoService } from './cognito.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,7 @@ import { Page } from '../models/global.model';
 export class AdvertisementService {
   private readonly baseUrl = `${environment.api_url}/anuncio`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private cognitoService: CognitoService) { }
 
   getAdvertisements(filters: {[param: string]: string | number}): Observable<Page<AdvertisementListDto>> {
     return this.http.get<Page<AdvertisementListDto>>(this.baseUrl, { params: filters });
@@ -29,11 +30,20 @@ export class AdvertisementService {
     return this.http.patch<void>(`${this.baseUrl}`, { ids, status });
   }
 
-  exportAdvertisements(ids?: string[]): Observable<AdvertisementExport> {
-    if (ids) {
-      return this.http.post<AdvertisementExport>(`${this.baseUrl}/export`, { ids });
-    }
-    return this.http.get<AdvertisementExport>(`${this.baseUrl}/export`);
+  exportAdvertisements(key: string, ids?: string[]): Observable<AdvertisementExport> {
+    const user = this.cognitoService.retrieveUser();
+    return this.http.post<AdvertisementExport>(`${this.baseUrl}/exportacao`, { key, ids: ids || ['ALL'], user: user?.getUsername() });
+  }
+
+  getReport(file: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/relatorio/`, { responseType: 'blob', params: { file: file } });
+  }
+
+  getReportStatus(file: string): Observable<string> {
+    return this.http.head<void>(`${this.baseUrl}/exportacao/`, {observe: 'response', params: { key: file }})
+    .pipe(
+      map((response: HttpResponse<void>) => response.headers.get('x-export-status') || response.headers.get('X-Export-Status') || 'PENDING')
+    );
   }
 
   getStatuses(all: boolean = false): { label: string, value: string, color?: string }[] {

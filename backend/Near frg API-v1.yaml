@@ -19,6 +19,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -38,6 +39,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -70,8 +72,8 @@ paths:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
-              method.response.header.Access-Control-Allow-Headers: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         requestTemplates:
           application/json: "{\"statusCode\": 200}"
@@ -94,6 +96,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -119,6 +122,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -144,6 +148,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -182,8 +187,8 @@ paths:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,OPTIONS,PUT'"
-              method.response.header.Access-Control-Allow-Headers: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         requestTemplates:
           application/json: "{\"statusCode\": 200}"
@@ -204,6 +209,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -229,6 +235,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -263,8 +270,8 @@ paths:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
-              method.response.header.Access-Control-Allow-Headers: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         requestTemplates:
           application/json: "{\"statusCode\": 200}"
@@ -291,6 +298,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -322,6 +330,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -353,6 +362,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -393,8 +403,8 @@ paths:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,OPTIONS,PUT'"
-              method.response.header.Access-Control-Allow-Headers: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         requestTemplates:
           application/json: "{\"statusCode\": 200}"
@@ -415,6 +425,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -440,6 +451,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -474,8 +486,8 @@ paths:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
-              method.response.header.Access-Control-Allow-Headers: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         requestTemplates:
           application/json: "{\"statusCode\": 200}"
@@ -502,6 +514,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -533,6 +546,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -564,6 +578,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -604,8 +619,8 @@ paths:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,OPTIONS,PUT'"
-              method.response.header.Access-Control-Allow-Headers: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         requestTemplates:
           application/json: "{\"statusCode\": 200}"
@@ -626,6 +641,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -651,6 +667,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -685,8 +702,8 @@ paths:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
-              method.response.header.Access-Control-Allow-Headers: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         requestTemplates:
           application/json: "{\"statusCode\": 200}"
@@ -713,6 +730,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -744,6 +762,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -775,6 +794,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -815,8 +835,8 @@ paths:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,OPTIONS,PUT'"
-              method.response.header.Access-Control-Allow-Headers: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         requestTemplates:
           application/json: "{\"statusCode\": 200}"
@@ -837,6 +857,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -862,6 +883,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -896,8 +918,8 @@ paths:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
-              method.response.header.Access-Control-Allow-Headers: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         requestTemplates:
           application/json: "{\"statusCode\": 200}"
@@ -924,6 +946,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -955,6 +978,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -986,6 +1010,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -1024,8 +1049,8 @@ paths:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,OPTIONS,PUT'"
-              method.response.header.Access-Control-Allow-Headers: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         requestTemplates:
           application/json: "{\"statusCode\": 200}"
@@ -1048,6 +1073,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -1079,6 +1105,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -1109,6 +1136,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -1139,6 +1167,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -1159,6 +1188,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -1183,6 +1213,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -1208,6 +1239,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -1242,8 +1274,8 @@ paths:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
-              method.response.header.Access-Control-Allow-Headers: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         requestTemplates:
           application/json: "{\"statusCode\": 200}"
@@ -1270,6 +1302,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -1301,6 +1334,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -1332,6 +1366,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -1370,8 +1405,8 @@ paths:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,OPTIONS,PUT'"
-              method.response.header.Access-Control-Allow-Headers: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         requestTemplates:
           application/json: "{\"statusCode\": 200}"
@@ -1398,6 +1433,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
         responses:
@@ -1438,8 +1474,8 @@ paths:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,OPTIONS,PUT'"
-              method.response.header.Access-Control-Allow-Headers: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         requestTemplates:
           application/json: "{\"statusCode\": 200}"
@@ -1539,7 +1575,211 @@ paths:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /anuncio/exportacao:
+    post:
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Accept-Ranges:
+              schema:
+                type: "string"
+            Access-Control-Expose-Headers:
+              schema:
+                type: "string"
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Content-Range:
+              schema:
+                type: "string"
+            Content-Length:
+              schema:
+                type: "string"
+            Date:
+              schema:
+                type: "string"
+            Content-Type:
+              schema:
+                type: "string"
+          content:
+            image/webp:
+              schema:
+                $ref: "#/components/schemas/Empty"
+            image/jpg:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - Matrix-Cognito: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:sqs:path//"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Content-Range: "integration.response.header.Content-Range"
+              method.response.header.Access-Control-Expose-Headers: "'*'"
+              method.response.header.Content-Type: "integration.response.header.Content-Type"
+              method.response.header.Date: "integration.response.header.Date"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Content-Length: "integration.response.header.Content-Length"
+              method.response.header.Accept-Ranges: "integration.response.header.Accept-Ranges"
+        requestParameters:
+          integration.request.header.X-Amz-Target: "'AmazonSQS.SendMessage'"
+          integration.request.header.Content-Type: "'application/x-amz-json-1.0'"
+        requestTemplates:
+          application/json: "{\n    \"QueueUrl\": \"https://sqs.sa-east-1.amazonaws.com/300303587993/near-generate-file\"\
+            ,\n    \"MessageBody\": \"$util.escapeJavaScript($input.body)\",\n   \
+            \ \"MessageAttributes\": {\n        \"Authorization\": {\n           \
+            \ \"DataType\": \"String\",\n            \"StringValue\": \"$input.params('Authorization')\"\
+            \n        }\n    }\n}"
+        passthroughBehavior: "when_no_templates"
+        type: "aws"
+    head:
+      operationId: "advertisement.export_status"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:300303587993:function:near-crud-client/invocations"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    options:
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /anuncio/relatorio:
+    get:
+      parameters:
+      - name: "file"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Accept-Ranges:
+              schema:
+                type: "string"
+            Access-Control-Expose-Headers:
+              schema:
+                type: "string"
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Content-Range:
+              schema:
+                type: "string"
+            Content-Length:
+              schema:
+                type: "string"
+            Date:
+              schema:
+                type: "string"
+            Content-Type:
+              schema:
+                type: "string"
+          content:
+            text/csv:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::300303587993:role/ApiGatewayFrg"
+        httpMethod: "GET"
+        uri: "arn:aws:apigateway:sa-east-1:s3:path/matrix-notas/anuncios/REPORTS/{file}"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Content-Range: "integration.response.header.Content-Range"
+              method.response.header.Access-Control-Expose-Headers: "'*'"
+              method.response.header.Content-Type: "integration.response.header.Content-Type"
+              method.response.header.Date: "integration.response.header.Date"
+              method.response.header.Content-Length: "integration.response.header.Content-Length"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Accept-Ranges: "integration.response.header.Accept-Ranges"
+        requestParameters:
+          integration.request.path.file: "method.request.querystring.file"
+        passthroughBehavior: "when_no_templates"
+        type: "aws"
+    options:
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
               method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         requestTemplates:

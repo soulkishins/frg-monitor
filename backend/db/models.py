@@ -245,3 +245,13 @@ class AdvertisementHistory(Base, Audit):
 
     def _json_fields_advertisement(self):
         return ["dt_history", "st_status", "st_action", "st_history", "st_created_by"]
+
+class AdvertisementExport(Base):
+    __tablename__ = "tb_advertisement_export"
+    
+    st_key = Column(String, nullable=False, primary_key=True, onupdate=None)
+    dt_created = Column(TIMESTAMP, primary_key=True, onupdate=None)
+    st_status = Column(String, nullable=False)
+
+    def _json_fields(self):
+        return ["st_key", "dt_created", "st_status"]

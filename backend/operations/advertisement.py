@@ -1,5 +1,5 @@
 from operations.crud_base import Crud, Page
-from db.models import Advertisement, ClientBrand, ClientBrandProduct, AdvertisementProduct, Subcategory, AdvertisementHistory
+from db.models import Advertisement, ClientBrand, ClientBrandProduct, AdvertisementProduct, Subcategory, AdvertisementHistory, AdvertisementExport
 from db.views import VW_Advertisement
 from sqlalchemy.orm import contains_eager
 
@@ -83,14 +83,14 @@ class AdvertisementCrud(Crud):
             filters['page.sort'] if 'page.sort' in filters else 'dt_created.desc'
         )
     
-    def history(self, indexes, filters, body) -> list:
+    def history(self, indexes, filters, body) -> tuple:
         query = self._session.query(AdvertisementHistory)
         if 'advertisement' in indexes:
             query = query.filter(AdvertisementHistory.id_advertisement == indexes['advertisement'])
         query = query.order_by(AdvertisementHistory.dt_created.desc())
         return (200, query.limit(20).all())
     
-    def upd_status(self, indexes, filters, body) -> list:
+    def upd_status(self, indexes, filters, body) -> tuple:
         from sqlalchemy import update, insert, func
         stmt = (
             update(Advertisement)
@@ -122,6 +122,15 @@ class AdvertisementCrud(Crud):
         
         self._session.commit()
         return (200, f"Registros atualizados: {result.rowcount}")
+    
+    def export_status(self, indexes, filters, body) -> tuple:
+        query = self._session.query(AdvertisementExport)
+        query = query.filter(AdvertisementExport.st_key == filters['key'])
+        export = query.first()
+        if export:
+            return (200, None, {"x-export-status": export.st_status, "Access-Control-Expose-Headers": "x-export-status,X-Export-Status"})
+        else:
+            return (200, None, {"x-export-status": "PENDING", "Access-Control-Expose-Headers": "x-export-status,X-Export-Status"})
     
     def json_transform(self, method):
         if method == 'read':

@@ -82,7 +82,7 @@ def get_crud_service(operation_name, user, session):
         return AdvertisementCrud(user, session)
     return None
 
-def return_value(status_code, body, *, json_transform = None):
+def return_value(status_code, body, *, headers = None, json_transform = None):
     from db.models import Base
     from operations.crud_base import Page
     if isinstance(body, Base):
@@ -99,7 +99,7 @@ def return_value(status_code, body, *, json_transform = None):
             "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
             "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
             "Content-Type": "application/json"
-        },
+        } | (headers if headers else {}),
         "body": json.dumps(body, default=str)
     }
 
@@ -215,14 +215,23 @@ def lambda_handler(event, context):
                     session.commit()
                     return return_value(200, model, json_transform=crud_service.json_transform(method))
 
+                status, model, headers = None, None, None
                 _method = getattr(crud_service, method, None)
                 # Verificar se o método existe e invocá-lo
                 if not callable(_method):
                     return return_value(501, error_object(501, message=f"Operation not found: {operation_name}"))
-                status, model = _method(path_parameters, query_string_parameters, json.loads(body))
+                result = _method(path_parameters, query_string_parameters, json.loads(body))
+                if not isinstance(result, tuple):
+                    status = 200
+                    model = result
+                else:
+                    if len(result) == 3:
+                        status, model, headers = result
+                    else:
+                        status, model = result
                 if __DEFAULT_ERRORS.get(status, None):
                     return return_value(status, error_object(status, data=model))
-                return return_value(status, model, json_transform=crud_service.json_transform(method))
+                return return_value(status, model, headers=headers, json_transform=crud_service.json_transform(method))
 
             except Exception as e:
                 return handle_exception(f'Error ao processar request do CRUD {operation_name}', e)
