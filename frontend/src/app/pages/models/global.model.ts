@@ -22,3 +22,29 @@ export interface Page<T> {
         sort: string;
     }
 }
+
+export interface DashboardStats {
+    clients: number;
+    leads: number;
+    brands: number;
+    products: number;
+    keywords: number;
+    brandkeywords: number;
+    ads: number;
+    newads: number;
+}
+
+export interface TopKeyword {
+    keyword: string;
+    ads: number;
+    reports: number;
+}
+
+export interface AdsReport {
+    date: string;
+    news: number;
+    upds: number;
+    rpts: number;
+}
+
+

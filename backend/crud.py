@@ -80,6 +80,9 @@ def get_crud_service(operation_name, user, session):
     if operation_name == "advertisement":
         from operations.advertisement import AdvertisementCrud
         return AdvertisementCrud(user, session)
+    if operation_name == "dashboard":
+        from operations.dashboard import Dashboard
+        return Dashboard(user, session)
     return None
 
 def return_value(status_code, body, *, headers = None, json_transform = None):
