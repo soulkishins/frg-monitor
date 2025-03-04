@@ -30,13 +30,6 @@ class KeywordCrud(Crud):
             where.append(Keyword.st_status == filters['st_status'])
 
         return where + super().filter_by(indexes, filters)
-
-    def to_model(self, indexes, data) -> Keyword:
-        data['id_brand'] = indexes['brand']
-        return super().to_model(indexes, data)
-    
-    def create(self, indexes, data) -> Keyword:
-        return super().create(indexes, data)
     
     def get_schedule(self, indexes, filters, body) -> tuple[int, dict]:
         # Inicializa o cliente do EventBridge Schedule
