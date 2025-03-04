@@ -27,7 +27,7 @@ class ClientBrandProductCrud(Crud):
         where = []
         
         if 'id_brand' in indexes:
-            where.append(ClientBrand.id_brand == filters['id_brand'])
+            where.append(ClientBrandProduct.id_brand == filters['id_brand'])
 
         if 'st_brand' in indexes:
             where.append(ClientBrand.st_name == filters['st_brand'])
