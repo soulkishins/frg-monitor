@@ -1,5 +1,5 @@
 from operations.crud_base import Crud
-from db.models import User
+from db.models import User, UserAttr
 from sqlalchemy.orm import contains_eager
 
 class UserCrud(Crud):
@@ -24,5 +24,7 @@ class UserCrud(Crud):
             where.append(User.st_email.ilike(f"%{filters['st_email']}%"))
         if 'st_phone' in filters:
             where.append(User.st_phone.ilike(f"%{filters['st_phone']}%"))
+        if 'st_value' in filters:
+            where.append(UserAttr.st_value.ilike(f"%{filters['st_value']}%"))
 
         return where + super().filter_by(indexes, filters)
