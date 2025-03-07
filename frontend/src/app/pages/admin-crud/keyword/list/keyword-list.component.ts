@@ -82,7 +82,40 @@ export class KeywordList implements OnInit {
     ) {}
 
     exportCSV() {
-        this.dt.exportCSV();
+        const data = this.keywords().map(keyword => ({
+            'Cliente': keyword.brand?.client?.st_name || '',
+            'Marca': keyword.brand?.st_brand || '',
+            'Palavra-chave': keyword.st_keyword || '',
+            'Status': this.getStatusLabel(keyword.st_status)
+        }));
+        
+        const csvContent = this.convertToCSV(data);
+        const BOM = '\uFEFF';
+        const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'lista_palavras_chave.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    private convertToCSV(data: any[]): string {
+        const headers = Object.keys(data[0]);
+        const csvRows = [headers.join(',')];
+        
+        for (const row of data) {
+            const values = headers.map(header => {
+                const value = row[header] || '';
+                return `"${value}"`;
+            });
+            csvRows.push(values.join(','));
+        }
+        
+        return csvRows.join('\n');
     }
 
     ngOnInit() {
@@ -250,5 +283,9 @@ export class KeywordList implements OnInit {
                 });
             }
         });
+    }
+
+    getStatusLabel(status: string): string {
+        return status === 'active' ? 'Ativo' : 'Inativo';
     }
 }
