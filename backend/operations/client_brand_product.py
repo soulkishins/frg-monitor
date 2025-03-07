@@ -1,5 +1,5 @@
 from operations.crud_base import Crud
-from db.models import ClientBrandProduct, ClientBrand, Subcategory, Client
+from db.models import ClientBrandProduct, ClientBrand, Subcategory, Client, Category
 from sqlalchemy.orm import contains_eager
 
 class ClientBrandProductCrud(Crud):
@@ -11,7 +11,7 @@ class ClientBrandProductCrud(Crud):
             ClientBrandProduct.brand,
             ClientBrand.client,
             ClientBrandProduct.subcategory,
-            Subcategory.category
+            Subcategory.category,
         )
     
     def get_options(self) -> list:
@@ -26,11 +26,18 @@ class ClientBrandProductCrud(Crud):
     def filter_by(self, indexes, filters) -> list:
         where = []
         
+        if 'st_name' in filters:
+            where.append(Client.st_name.ilike(f"%{filters['st_name']}%"))
+            
         if 'id_brand' in filters:
             where.append(ClientBrandProduct.id_brand == filters['id_brand'])
-
         if 'st_brand' in filters:
-            where.append(ClientBrand.st_name == filters['st_brand'])
+            where.append(ClientBrand.st_brand.ilike(f"%{filters['st_brand']}%"))
+            
+        if 'st_category' in filters:
+            where.append(Category.st_category.ilike(f"%{filters['st_category']}%"))
+        if 'st_subcategory' in filters:
+            where.append(Subcategory.st_subcategory.ilike(f"%{filters['st_subcategory']}%"))
         if 'subcategory' in filters:
             where.append(ClientBrandProduct.id_subcategory == filters['subcategory'])
 
@@ -41,4 +48,5 @@ class ClientBrandProductCrud(Crud):
         if 'st_status' in filters:
             where.append(ClientBrandProduct.st_status == filters['st_status'])
 
+            
         return where + super().filter_by(indexes, filters)
