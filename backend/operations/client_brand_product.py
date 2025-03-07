@@ -50,3 +50,21 @@ class ClientBrandProductCrud(Crud):
 
             
         return where + super().filter_by(indexes, filters)
+
+    def get_orderby(self, orderby: str):
+        if not orderby:
+            return ClientBrandProduct.dt_created.desc()
+        order = orderby.split('.')
+        if order[0] == 'st_name':
+            return Client.st_name.asc() if len(order) == 1 or order[1] == 'asc' else Client.st_name.desc()
+        if order[0] == 'st_brand':
+            return ClientBrand.st_brand.asc() if len(order) == 1 or order[1] == 'asc' else ClientBrand.st_brand.desc()        
+        if order[0] == 'st_category':
+            return Category.st_category.asc() if len(order) == 1 or order[1] == 'asc' else Category.st_category.desc()
+        if order[0] == 'st_subcategory':
+            return Subcategory.st_subcategory.asc() if len(order) == 1 or order[1] == 'asc' else Subcategory.st_subcategory.desc()
+        if len(order) == 1:
+            return getattr(ClientBrandProduct, order[0]).asc()
+        if order[1] == 'desc':
+            return getattr(ClientBrandProduct, order[0]).desc()
+        return getattr(ClientBrandProduct, order[0]).asc()
