@@ -39,7 +39,7 @@ class Base:
     def __str__(self):
         return json.dumps(self.to_dict(), default=str)
 
-Base.metadata.schema = "invoices"
+Base.metadata.schema = "pricemonitor"
 
 class Audit:
     dt_created = Column(TIMESTAMP, default=func.current_timestamp(), onupdate=None) # Não pode ser atualizado
@@ -73,7 +73,7 @@ class User(Base, Audit):
 class UserAttr(Base):
     __tablename__ = "tb_user_attr"
     
-    id_user = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_user.id"), primary_key=True, onupdate=None)
+    id_user = Column(UUID(as_uuid=True), ForeignKey("pricemonitor.tb_user.id"), primary_key=True, onupdate=None)
     id_attr = Column(String, primary_key=True, onupdate=None)
     st_value = Column(String, nullable=False)
     
@@ -101,7 +101,7 @@ class Subcategory(Base, Audit):
     __tablename__ = "tb_subcategory"
     
     id_subcategory = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, onupdate=None)
-    id_category = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_category.id_category"), nullable=False)
+    id_category = Column(UUID(as_uuid=True), ForeignKey("pricemonitor.tb_category.id_category"), nullable=False)
     st_subcategory = Column(String, nullable=False)
     st_status = Column(String, nullable=False)
     
@@ -131,7 +131,7 @@ class ClientBrand(Base, Audit):
     __tablename__ = "tb_client_brand"
     
     id_brand = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, onupdate=None)
-    id_client = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_client.id"), nullable=False)
+    id_client = Column(UUID(as_uuid=True), ForeignKey("pricemonitor.tb_client.id"), nullable=False)
     st_brand = Column(String, nullable=False)
     st_status = Column(String, nullable=False)
     
@@ -147,8 +147,8 @@ class ClientBrandProduct(Base, Audit):
     __tablename__ = "tb_client_brand_product"
     
     id_product = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, onupdate=None)
-    id_brand = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_client_brand.id_brand"), nullable=False)
-    id_subcategory = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_subcategory.id_subcategory"), nullable=False)
+    id_brand = Column(UUID(as_uuid=True), ForeignKey("pricemonitor.tb_client_brand.id_brand"), nullable=False)
+    id_subcategory = Column(UUID(as_uuid=True), ForeignKey("pricemonitor.tb_subcategory.id_subcategory"), nullable=False)
     st_product = Column(String, nullable=False)
     st_variety = Column(String, nullable=False)
     st_status = Column(String, nullable=False)
@@ -166,7 +166,7 @@ class Keyword(Base, Audit):
     __tablename__ = "tb_keyword"
     
     id_keyword = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, onupdate=None)
-    id_brand = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_client_brand.id_brand"), nullable=False, onupdate=None)
+    id_brand = Column(UUID(as_uuid=True), ForeignKey("pricemonitor.tb_client_brand.id_brand"), nullable=False, onupdate=None)
     st_keyword = Column(String, nullable=False)
     st_product = Column(String, nullable=False)
     st_status = Column(String, nullable=False)
@@ -180,7 +180,7 @@ class Advertisement(Base, Audit):
     __tablename__ = "tb_advertisement"
     
     id_advertisement = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, onupdate=None)
-    id_brand = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_client_brand.id_brand"), nullable=False, onupdate=None)
+    id_brand = Column(UUID(as_uuid=True), ForeignKey("pricemonitor.tb_client_brand.id_brand"), nullable=False, onupdate=None)
     st_plataform = Column(String, nullable=False)
     st_plataform_id = Column(String, nullable=False)
     st_url = Column(String, nullable=False)
@@ -215,8 +215,8 @@ class Advertisement(Base, Audit):
 class AdvertisementProduct(Base, Audit):
     __tablename__ = "tb_advertisement_product"
     
-    id_advertisement = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_advertisement.id_advertisement"), primary_key=True, onupdate=None)
-    id_product = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_client_brand_product.id_product"), primary_key=True, onupdate=None)
+    id_advertisement = Column(UUID(as_uuid=True), ForeignKey("pricemonitor.tb_advertisement.id_advertisement"), primary_key=True, onupdate=None)
+    id_product = Column(UUID(as_uuid=True), ForeignKey("pricemonitor.tb_client_brand_product.id_product"), primary_key=True, onupdate=None)
     st_varity_seq = Column(String, nullable=False, primary_key=True, onupdate=None)
     st_varity_name = Column(String, nullable=False, onupdate=None)
 
@@ -232,7 +232,7 @@ class AdvertisementProduct(Base, Audit):
 class AdvertisementHistory(Base, Audit):
     __tablename__ = "tb_advertisement_history"
     
-    id_advertisement = Column(UUID(as_uuid=True), ForeignKey("invoices.tb_advertisement.id_advertisement"), primary_key=True, onupdate=None)
+    id_advertisement = Column(UUID(as_uuid=True), ForeignKey("pricemonitor.tb_advertisement.id_advertisement"), primary_key=True, onupdate=None)
     dt_history = Column(TIMESTAMP, primary_key=True, onupdate=None)
     st_status = Column(String, nullable=False)
     st_action = Column(String, nullable=False)

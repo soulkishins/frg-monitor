@@ -189,9 +189,9 @@ create table if not exists tb_advertisement_export (
 	st_key varchar not null,
 	st_status varchar not null,
 	dt_created timestamp not null
-)
+);
 
-drop view if exists vw_advertisement
+drop view if exists vw_advertisement;
 
 create or replace view vw_advertisement
 as

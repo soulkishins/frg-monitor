@@ -65,7 +65,7 @@ export class ConfigManager {
                     database: dbSecret.dbname,
                     password: dbSecret.password,
                     port: parseInt(dbSecret.port || '5432'),
-                    schema: dbSecret.schema || 'invoices'
+                    schema: dbSecret.schema || 'pricemonitor'
                 },
                 aws: {
                     region: process.env.AWS_REGION || 'sa-east-1',
