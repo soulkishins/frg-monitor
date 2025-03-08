@@ -130,8 +130,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -269,8 +267,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -324,8 +320,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -388,12 +382,10 @@ paths:
             image/jpg:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
         httpMethod: "GET"
-        uri: "arn:aws:apigateway:sa-east-1:s3:path/matrix-notas/anuncios/{plataform}/{plataform_id}/{file}"
+        uri: "arn:aws:apigateway:sa-east-1:s3:path/frg-price-monitor-data/anuncios/{plataform}/{plataform_id}/{file}"
         responses:
           default:
             statusCode: "200"
@@ -429,8 +421,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -518,8 +508,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -753,8 +741,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -894,8 +880,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -983,8 +967,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1124,8 +1106,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1213,8 +1193,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1286,8 +1264,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1363,8 +1339,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1423,8 +1397,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1500,8 +1472,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1639,8 +1609,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1780,8 +1748,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -1903,8 +1869,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -2026,8 +1990,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -2077,12 +2039,10 @@ paths:
             text/csv:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
         httpMethod: "GET"
-        uri: "arn:aws:apigateway:sa-east-1:s3:path/matrix-notas/anuncios/REPORTS/{file}"
+        uri: "arn:aws:apigateway:sa-east-1:s3:path/frg-price-monitor-data/anuncios/REPORTS/{file}"
         responses:
           default:
             statusCode: "200"
@@ -2116,8 +2076,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -2205,8 +2163,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -2266,8 +2222,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -2385,8 +2339,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         responses:
           default:

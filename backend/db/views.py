@@ -16,6 +16,7 @@ class VW_Advertisement(Base):
     st_name = Column(String)
     st_brand = Column(String)
     st_product = Column(String)
+    st_seller = Column(String)
     st_title = Column(String)
     db_price = Column(FLOAT)
     st_status = Column(String)
@@ -29,6 +30,7 @@ class VW_Advertisement(Base):
             "st_name",
             "st_brand",
             "st_product",
+            "st_seller",
             "st_title",
             "db_price",
             "st_status"

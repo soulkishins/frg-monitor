@@ -208,7 +208,8 @@ select
 	ad.st_title,
 	ad.db_price,
 	ad.st_status,
-	ad.st_url
+	ad.st_url,
+	ad.st_vendor as st_seller
 from tb_advertisement ad
 join tb_client_brand cb on
 	ad.id_brand = cb.id_brand
@@ -230,4 +231,5 @@ group by
 	ad.st_title,
 	ad.db_price,
 	ad.st_status,
-	ad.st_url;
+	ad.st_url,
+	ad.st_vendor;

@@ -24,7 +24,7 @@
 
             <div>
                 <label for="email" class="block font-bold mb-3">Email</label>
-                <input type="email" pInputText id="email" name="email" [(ngModel)]="user.st_email" required [style]="{'width': '100%'}" />
+                <input type="email" pInputText id="email" name="email" [(ngModel)]="user.st_email" required [style]="{'width': '100%'}" [disabled]="isEditing" />
                 <small class="text-red-500" *ngIf="submitted && !user.st_email">Email é obrigatório</small>
             </div>
 

@@ -41,7 +41,7 @@
                             "budgets": [
                                 {
                                     "type": "initial",
-                                    "maximumWarning": "1mb",
+                                    "maximumWarning": "2mb",
                                     "maximumError": "5mb"
                                 },
                                 {
@@ -50,7 +50,17 @@
                                     "maximumError": "4kb"
                                 }
                             ],
-                            "outputHashing": "all"
+                            "outputHashing": "all",
+                            "optimization": true,
+                            "extractLicenses": true,
+                            "sourceMap": false,
+                            "namedChunks": false,
+                            "allowedCommonJsDependencies": [
+                                "buffer",
+                                "@aws-crypto/sha256-js",
+                                "js-cookie",
+                                "isomorphic-unfetch"
+                            ]
                         },
                         "development": {
                             "optimization": false,

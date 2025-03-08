@@ -4,6 +4,7 @@ from sqlalchemy.orm import contains_eager
 import boto3
 import os
 from datetime import datetime
+import random
 
 user_pool_id = os.getenv('user_pool_id')
 
@@ -15,13 +16,16 @@ class UserCrud(Crud):
         # Cria o usuário no banco de dados
         record = super().create(indexes, data)
         self._session.commit()
+        
+        obj = record.to_dict()
 
         try:
             # Inicializa o cliente do Cognito
             cognito = boto3.client('cognito-idp', region_name='sa-east-1')
             
             # Gera uma senha para o usuário
-            password = 'FrgInitial@' + datetime.now().strftime('%Y')
+            password = 'Frg@' + datetime.now().strftime('%Y') + '!' + str(random.randint(1000, 9999))
+            obj['st_password'] = password
             
             # Cria o usuário no Cognito
             cognito_response = cognito.admin_create_user(
@@ -61,8 +65,8 @@ class UserCrud(Crud):
             self._session.delete(record)
             self._session.commit()
             raise Exception(f"Erro ao criar usuário no Cognito: {str(e)}")
-        
-        return record
+
+        return obj
 
     def update(self, indexes, data) -> User:
         record = super().update(indexes, data)

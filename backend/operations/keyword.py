@@ -4,21 +4,29 @@ from sqlalchemy.orm import contains_eager
 import boto3
 import json
 
+import os
+
+crawler_sqs = os.getenv('crawler_sqs')
+scheduler_role_arn = os.getenv('scheduler_role_arn')
+scheduler_cron = os.getenv('scheduler_cron')
+
 class KeywordCrud(Crud):
     def get_model(self) -> Keyword:
         return Keyword
     
     def create(self, indexes, data) -> Keyword:
         created = super().create(indexes, data)
-        if created:
+        if created and created.st_status != 'inactive':
             self._session.commit()
             self.create_schedule(indexes, {}, created)
         return created
     
     def update(self, indexes, data) -> Keyword:
         updated = super().update(indexes, data)
-        if updated:
+        if updated and updated.st_status != 'inactive':
             self.create_schedule(indexes, {}, updated)
+        if updated and updated.st_status == 'inactive':
+            self.delete_schedule(indexes)
         return updated
     
     def delete(self, indexes) -> tuple[int, dict]:
@@ -77,11 +85,11 @@ class KeywordCrud(Crud):
                     Description = f'{record.st_keyword} - {record.st_product}',
                     FlexibleTimeWindow = { "Mode": "OFF" },
                     Name = str(record.id_keyword),
-                    ScheduleExpression = "cron(10 23 * * ? *)",
+                    ScheduleExpression = scheduler_cron,
                     ScheduleExpressionTimezone = "America/Sao_Paulo",
                     State = "ENABLED",
                     Target = {
-                        "Arn": "arn:aws:sqs:sa-east-1:300303587993:near-crawler-ml",
+                        "Arn": crawler_sqs,
                         "Input": json.dumps(
                             {
                                 "id_keyword": str(record.id_keyword),
@@ -94,7 +102,7 @@ class KeywordCrud(Crud):
                             "MaximumEventAgeInSeconds": 86400,
                             "MaximumRetryAttempts": 0
                         },
-                        "RoleArn": "arn:aws:iam::300303587993:role/service-role/EventBridgeSendMessageFull"
+                        "RoleArn": scheduler_role_arn
                     }
                 )
         else:
@@ -104,11 +112,11 @@ class KeywordCrud(Crud):
                     Description = f'{record.st_keyword} - {record.st_product}',
                     FlexibleTimeWindow = { "Mode": "OFF" },
                     Name = str(record.id_keyword),
-                    ScheduleExpression = "cron(0 6 * * ? *)",
+                    ScheduleExpression = scheduler_cron,
                     ScheduleExpressionTimezone = "America/Sao_Paulo",
                     State = "ENABLED",
                     Target = {
-                        "Arn": "arn:aws:sqs:sa-east-1:300303587993:near-crawler-ml",
+                        "Arn": crawler_sqs,
                         "Input": json.dumps(
                             {
                                 "id_keyword": str(record.id_keyword),
@@ -121,7 +129,7 @@ class KeywordCrud(Crud):
                             "MaximumEventAgeInSeconds": 86400,
                             "MaximumRetryAttempts": 0
                         },
-                        "RoleArn": "arn:aws:iam::300303587993:role/service-role/EventBridgeSendMessageFull"
+                        "RoleArn": scheduler_role_arn
                     }
                 )
 

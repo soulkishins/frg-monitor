@@ -1,6 +1,6 @@
 from operations.crud_base import Crud
 from sqlalchemy import text
-
+import os
 class Dashboard(Crud):
     def list(self, indexes, filters) -> tuple[int, list]:
         
@@ -42,7 +42,7 @@ class Dashboard(Crud):
             }
 
     def get_status(self) -> str:
-        return """
+        return f"""
             with dates (cdate, ctime, days) as (
                 select
                     current_date,
@@ -50,28 +50,28 @@ class Dashboard(Crud):
                     to_char(current_date, 'dd')::int
             )
             select
-                (select count(1) from pricemonitor.tb_client where st_status <> 'INACTIVE') as clients,
-                (select count(1) from pricemonitor.tb_client where st_status = 'LEAD') as leads,
-                (select count(1) from pricemonitor.tb_client_brand where st_status <> 'INACTIVE') as brands,
-                (select count(1) from pricemonitor.tb_client_brand_product where st_status <> 'INACTIVE') as products,
-                (select count(1) from pricemonitor.tb_keyword where st_status <> 'INACTIVE') as keywords,
-                (select count(distinct id_brand) from pricemonitor.tb_keyword where st_status <> 'INACTIVE') as brandkeywords,
-                (select count(1) from pricemonitor.tb_advertisement where coalesce(dt_modified, dt_created) >= cdate - INTERVAL '1 days' * days) as ads,
-                (select count(1) from pricemonitor.tb_advertisement where coalesce(dt_modified, dt_created) >= ctime - INTERVAL '1 days') as newads
+                (select count(1) from {os.getenv("db_schema")}.tb_client where st_status <> 'INACTIVE') as clients,
+                (select count(1) from {os.getenv("db_schema")}.tb_client where st_status = 'LEAD') as leads,
+                (select count(1) from {os.getenv("db_schema")}.tb_client_brand where st_status <> 'INACTIVE') as brands,
+                (select count(1) from {os.getenv("db_schema")}.tb_client_brand_product where st_status <> 'INACTIVE') as products,
+                (select count(1) from {os.getenv("db_schema")}.tb_keyword where st_status <> 'INACTIVE') as keywords,
+                (select count(distinct id_brand) from {os.getenv("db_schema")}.tb_keyword where st_status <> 'INACTIVE') as brandkeywords,
+                (select count(1) from {os.getenv("db_schema")}.tb_advertisement where coalesce(dt_modified, dt_created) >= cdate - INTERVAL '1 days' * days) as ads,
+                (select count(1) from {os.getenv("db_schema")}.tb_advertisement where coalesce(dt_modified, dt_created) >= ctime - INTERVAL '1 days') as newads
             from dates
         """
     
     def get_top_keywords(self) -> str:
-        return """
+        return f"""
             select 
                 k.st_keyword keyword,
                 count(distinct ah.id_advertisement) ads,
                 count(distinct CASE WHEN ah.st_status = 'REPORTED' THEN ah.id_advertisement END) reports
             from
-                pricemonitor.tb_keyword k
-                left join pricemonitor.tb_advertisement_keyword ak on
+                {os.getenv("db_schema")}.tb_keyword k
+                left join {os.getenv("db_schema")}.tb_advertisement_keyword ak on
                     k.id_keyword = ak.id_keyword
-                left join pricemonitor.tb_advertisement_history ah on
+                left join {os.getenv("db_schema")}.tb_advertisement_history ah on
                     ak.id_advertisement = ah.id_advertisement
                 and ah.dt_created >= current_timestamp - INTERVAL '1 days'
             where
@@ -84,7 +84,7 @@ class Dashboard(Crud):
         """
 
     def get_ads_report(self) -> str:
-        return """
+        return f"""
             WITH last_7_days AS (
                 SELECT CURRENT_DATE - (INTERVAL '1 days' * i) AS dt
                 FROM generate_series(0, 6) AS i
@@ -96,7 +96,7 @@ class Dashboard(Crud):
             count(CASE WHEN ah.st_action = 'USER_REPORTED' THEN ah.id_advertisement END) rpts
             from 
             last_7_days l7
-            left join pricemonitor.tb_advertisement_history ah on
+            left join {os.getenv("db_schema")}.tb_advertisement_history ah on
                 ah.dt_created::date = l7.dt 
             group by
                 l7.dt

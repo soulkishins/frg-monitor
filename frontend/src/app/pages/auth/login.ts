@@ -9,12 +9,26 @@ import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
 import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
 import { CognitoService } from '../service/cognito.service';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @Component({
     selector: 'app-login',
     standalone: true,
-    imports: [CommonModule, ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, AppFloatingConfigurator],
-    templateUrl: './login.html'
+    imports: [
+        CommonModule,
+        ButtonModule,
+        CheckboxModule,
+        InputTextModule,
+        PasswordModule,
+        FormsModule,
+        RouterModule,
+        RippleModule,
+        AppFloatingConfigurator,
+        ToastModule
+    ],
+    templateUrl: './login.html',
+    providers:[MessageService]
 })
 export class Login {
     username: string = '';
@@ -25,7 +39,8 @@ export class Login {
 
     constructor(
         private cognitoService: CognitoService,
-        private router: Router
+        private router: Router,
+        private messageService: MessageService
     ) {}
 
     login() {
@@ -43,6 +58,12 @@ export class Login {
                 this.mfaRequired = true;
             } else {
                 console.error('Erro de login:', error);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: 'Não foi possível realizar o login! Verifique suas credenciais e tente novamente.',
+                    life: 3000
+                });
             }
         });
     }

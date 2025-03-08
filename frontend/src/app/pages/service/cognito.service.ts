@@ -7,7 +7,8 @@ import { environment } from '../../../environment/environment';
 })
 export class CognitoService {
     private userPool: CognitoUserPool;
-    private currentCognitoUser: CognitoUser | undefined = undefined;
+    private currentCognitoUser: CognitoUser | null = null;
+    private currentUserData: any = null;
 
     constructor() {
         this.userPool = new CognitoUserPool({
@@ -21,14 +22,13 @@ export class CognitoService {
     }
 
     retrieveSession(): Promise<CognitoUserSession> {
-        const cognitoUser = this.retrieveUser();
-
-        if (!cognitoUser) {
+        const loggedUser = this.retrieveUser();
+        if (!loggedUser) {
             return Promise.reject('No user is currently logged in.');
         }
 
         return new Promise((resolve, reject) => {
-            cognitoUser.getSession((err: any, session: any) => {
+            loggedUser.getSession((err: any, session: any) => {
                 if (err) {
                     reject(err);
                 } else if (session.isValid()) {
@@ -53,6 +53,7 @@ export class CognitoService {
 
         const cognitoUser = new CognitoUser(userData);
         this.currentCognitoUser = cognitoUser;
+        this.currentUserData = userData;
 
         return new Promise((resolve, reject) => {
             cognitoUser.authenticateUser(authenticationDetails, {
@@ -61,12 +62,15 @@ export class CognitoService {
                     const idToken = session.getIdToken().getJwtToken();
                     const refreshToken = session.getRefreshToken().getToken();
 
+                    
                     if (rememberMe) {
                         // Salva no localStorage para lembrar o usuário
+                        localStorage.setItem('currentUser', JSON.stringify(this.currentUserData));
                         localStorage.setItem('cognitoIdToken', idToken);
                         localStorage.setItem('cognitoRefreshToken', refreshToken);
                     } else {
                         // Salva no sessionStorage para expirar quando o navegador for fechado
+                        sessionStorage.setItem('currentUser', JSON.stringify(this.currentUserData));
                         sessionStorage.setItem('cognitoIdToken', idToken);
                         sessionStorage.setItem('cognitoRefreshToken', refreshToken);
                     }
@@ -292,8 +296,10 @@ export class CognitoService {
             cognitoUser.signOut();
             localStorage.removeItem('cognitoIdToken');
             localStorage.removeItem('cognitoRefreshToken');
+            localStorage.removeItem('currentUser');
             sessionStorage.removeItem('cognitoIdToken');
             sessionStorage.removeItem('cognitoRefreshToken');
+            sessionStorage.removeItem('currentUser');
         }
     }
 }

@@ -12,11 +12,7 @@ export class SQSService {
 
     constructor(region: string, queueUrl: string) {
         this.sqsClient = new SQSClient({ 
-            region: region,
-            credentials: {
-                accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!
-            }
+            region: region
         });
         this.queueUrl = queueUrl;
     }

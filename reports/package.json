@@ -15,7 +15,8 @@
     "@aws-sdk/client-secrets-manager": "^3.758.0",
     "json2csv": "^6.0.0-alpha.2",
     "pg": "^8.13.3",
-    "uuid": "^11.0.5"
+    "uuid": "^11.0.5",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",

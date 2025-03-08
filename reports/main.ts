@@ -1,5 +1,6 @@
 import { ConfigManager } from './base/config';
 import { CSVGenerator } from './services/csv-generator';
+import { ExcelGenerator } from './services/excel-generator';
 import { ReportManager } from './services/rds';
 import { S3Uploader } from './services/s3-uploader';
 
@@ -22,11 +23,16 @@ export const handler = async (event: any) => {
             const uploader = new S3Uploader(config.aws);
             const reportManager = new ReportManager(config.database);
             const csvGenerator = new CSVGenerator(uploader, reportManager);
+            const excelGenerator = new ExcelGenerator(uploader, reportManager);
             console.log('Serviços iniciados com sucesso.');
 
             // Executar a geração do relatório
             console.log('Iniciando geração do relatório...');
-            await csvGenerator.generateCSV(messageBody);
+            if (messageBody.type == 'csv') {
+                await csvGenerator.generateCSV(messageBody);
+            } else {
+                await excelGenerator.generateExcel(messageBody);
+            }
             console.log('Relatório gerado com sucesso.');
 
             await reportManager.close();

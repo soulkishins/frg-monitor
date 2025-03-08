@@ -81,10 +81,16 @@
                 </p-iftalabel>
             </div>
 
-            <div class="col-span-2">
+            <div>
                 <p-iftalabel>
                     <input pInputText id="st_name" [(ngModel)]="filters['st_name']" />
                     <label for="st_name">Cliente</label>
+                </p-iftalabel>
+            </div>
+            <div>
+                <p-iftalabel>
+                    <input pInputText id="st_seller" [(ngModel)]="filters['st_seller']" />
+                    <label for="st_seller">Vendedor</label>
                 </p-iftalabel>
             </div>
             <div>
@@ -133,6 +139,22 @@
             <th style="width: 3rem">
                 <p-tableHeaderCheckbox />
             </th>
+            <th pSortableColumn="st_status" style="min-width: 10rem">
+                Status
+                <p-sortIcon field="st_status" />
+            </th>
+            <th pSortableColumn="st_title" style="min-width: 30rem">
+                Título
+                <p-sortIcon field="st_title" />
+            </th>
+            <th pSortableColumn="st_seller" style="min-width:20rem">
+                Vendedor
+                <p-sortIcon field="st_seller" />
+            </th>
+            <th pSortableColumn="db_price" style="min-width: 9rem">
+                Preço
+                <p-sortIcon field="db_price" />
+            </th>
             <th pSortableColumn="st_plataform" style="min-width: 10rem">
                 Plataforma
                 <p-sortIcon field="st_plataform" />
@@ -153,18 +175,6 @@
                 Produto
                 <p-sortIcon field="st_product" />
             </th>
-            <th pSortableColumn="st_title" style="min-width: 30rem">
-                Título
-                <p-sortIcon field="st_title" />
-            </th>
-            <th pSortableColumn="db_price" style="min-width: 9rem">
-                Preço
-                <p-sortIcon field="db_price" />
-            </th>
-            <th pSortableColumn="st_status" style="min-width: 10rem">
-                Status
-                <p-sortIcon field="st_status" />
-            </th>
             <th style="min-width: 8rem"></th>
         </tr>
     </ng-template>
@@ -173,16 +183,17 @@
             <td style="width: 3rem">
                 <p-tableCheckbox [value]="advertisement" />
             </td>
-            <td style="min-width: 12rem">{{ advertisement.st_plataform }}</td>
-            <td style="min-width: 16rem">{{ advertisement.st_plataform_id }}</td>
-            <td>{{ advertisement.st_name }}</td>
-            <td>{{ advertisement.st_brand }}</td>
-            <td>{{ advertisement.st_product }}</td>
-            <td>{{ advertisement.st_title }}</td>
-            <td>{{ advertisement.db_price | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}</td>
             <td>
                 <p-tag [value]="getStatus(advertisement.st_status)" [severity]="getSeverity(advertisement.st_status)"/>
             </td>
+            <td>{{ advertisement.st_title }}</td>
+            <td>{{ advertisement.st_seller }}</td>
+            <td>{{ advertisement.db_price | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}</td>
+            <td>{{ advertisement.st_plataform }}</td>
+            <td>{{ advertisement.st_plataform_id }}</td>
+            <td>{{ advertisement.st_name }}</td>
+            <td>{{ advertisement.st_brand }}</td>
+            <td>{{ advertisement.st_product }}</td>
             <td>
                 <p-button icon="pi pi-eye"           class="mr-2" [rounded]="true" [outlined]="true" severity="info" (onClick)="viewAdvertisement(advertisement)" />
                 <p-button icon="pi pi-external-link" class="mr-2" [rounded]="true" [outlined]="true" severity="help" (onClick)="openUrl(advertisement)" />

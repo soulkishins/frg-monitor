@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { map, Observable, Subject } from 'rxjs';
 import { environment } from '../../../environment/environment';
 import { AdvertisementListDto, Advertisement, AdvertisementExport, AdvertisementHistory } from '../models/advertisement.model';
 import { Page } from '../models/global.model';
@@ -31,12 +31,30 @@ export class AdvertisementService {
   }
 
   exportAdvertisements(key: string, ids?: string[]): Observable<AdvertisementExport> {
-    const user = this.cognitoService.retrieveUser();
-    return this.http.post<AdvertisementExport>(`${this.baseUrl}/exportacao`, { key, ids: ids || ['ALL'], user: user?.getUsername() });
+    let result: Subject<AdvertisementExport> = new Subject();
+    this.cognitoService.retrieveSession()
+      .then(session => {
+        const user = session.getIdToken().payload['email'];
+        if (!user) {
+          result.error('Usuário não encontrado');
+          result.complete();
+          return;
+        }
+        const response = this.http.post<AdvertisementExport>(`${this.baseUrl}/exportacao`, {
+          key, ids: ids || ['ALL'],
+          user
+        });
+        response.subscribe(result);
+      })
+      .catch(err => {
+        result.error(err);
+        result.complete();
+      });
+    return result
   }
 
   getReport(file: string): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/relatorio/`, { responseType: 'blob', params: { file: file } });
+    return this.http.get(`${this.baseUrl}/relatorio/`, { responseType: 'blob', params: { file: file }, headers: { 'accept': 'application/octet-stream' } });
   }
 
   getReportStatus(file: string): Observable<string> {

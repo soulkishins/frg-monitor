@@ -83,8 +83,8 @@ export class UserView implements OnInit {
             };
 
             if (this.user.id) {
-                this.userService.putUser(this.user.id, userRequest).subscribe(
-                    (response) => {
+                this.userService.putUser(this.user.id, userRequest).subscribe({
+                    next: (response) => {
                         this.messageService.add({
                             severity: 'success',
                             summary: 'Sucesso',
@@ -93,7 +93,7 @@ export class UserView implements OnInit {
                         });
                         this.goBack();
                     },
-                    (error) => {
+                    error: (error) => {
                         this.messageService.add({
                             severity: 'error',
                             summary: 'Erro',
@@ -101,19 +101,20 @@ export class UserView implements OnInit {
                             life: 3000
                         });
                     }
-                );
+                });
             } else {
-                this.userService.postUser(userRequest).subscribe(
-                    (response) => {
+                this.userService.postUser(userRequest).subscribe({
+                    next: (response) => {
                         this.messageService.add({
                             severity: 'success',
                             summary: 'Sucesso',
-                            detail: 'Usuário Criado',
-                            life: 3000
+                            detail: 'Usuário criado com sucesso! Senha: ' + response.st_password,
+                            sticky: true
                         });
-                        this.goBack();
+                        this.user = response;
+                        this.isEditing = true;
                     },
-                    (error) => {
+                    error: (error) => {
                         this.messageService.add({
                             severity: 'error',
                             summary: 'Erro',
@@ -121,7 +122,7 @@ export class UserView implements OnInit {
                             life: 3000
                         });
                     }
-                );
+                });
             }
         }
     }

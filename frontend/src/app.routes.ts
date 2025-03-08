@@ -10,9 +10,7 @@ export const appRoutes: Routes = [
         children: [
             { path: '', component: Dashboard, canActivate: [canActivateGuard] },
             { path: 'cadastro', loadChildren: () => import('./app/pages/admin-crud/admin-crud.routes') },
-            { path: 'anuncio', loadChildren: () => import('./app/pages/advertisement/advertisement.routes') },
-            { path: 'uikit', loadChildren: () => import('./app/pages/old/uikit/uikit.routes') },
-            { path: 'pages', loadChildren: () => import('./app/pages/old/pages.routes') }
+            { path: 'anuncio', loadChildren: () => import('./app/pages/advertisement/advertisement.routes') }
         ]
     },
     { path: 'auth', loadChildren: () => import('./app/pages/auth/auth.routes') },

@@ -4,6 +4,7 @@ export interface UserResponse {
     st_email: string;
     st_phone: string | null;
     dt_created: string;
+    st_password: string;
     st_created_by: string;
     dt_modified: string | null;
     st_modified_by: string | null;
