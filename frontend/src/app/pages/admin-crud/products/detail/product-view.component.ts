@@ -466,8 +466,39 @@ export class ProductView implements OnInit {
             return;
         }
 
+        // Validar variedades existentes
+        let existingVarieties: any[] = [];
+        try {
+            existingVarieties = this.product.st_variety ? JSON.parse(this.product.st_variety) : [];
+        } catch (error) {
+            console.error('Erro ao parsear variedades existentes:', error);
+            existingVarieties = [];
+        }
+
+        // Marcar como deletadas as variedades que não estão mais na lista
+        existingVarieties.forEach(existingVariety => {
+            const stillExists = this.varietyList.some(v => 
+                v.variety === existingVariety.variety && 
+                v.price === existingVariety.price
+            );
+            if (!stillExists) {
+                existingVariety.status = 'deleted';
+            }
+        });
+
+        // Adicionar novas variedades à lista existente
+        this.varietyList.forEach(newVariety => {
+            const exists = existingVarieties.some(v => 
+                v.variety === newVariety.variety && 
+                v.price === newVariety.price
+            );
+            if (!exists) {
+                existingVarieties.push(newVariety);
+            }
+        });
+
         // Converter a lista de variedades para JSON string
-        this.product.st_variety = JSON.stringify(this.varietyList);
+        this.product.st_variety = JSON.stringify(existingVarieties);
 
         const productRequest: ProductRequest = {
             id_brand: this.product.id_brand,
@@ -539,9 +570,7 @@ export class ProductView implements OnInit {
     // Método para remover variedade da lista
     removeVariety(index: number, event: Event) {
         event.stopPropagation(); // Evita que o evento de clique da linha seja disparado
-        const { variety, price, ...varietyItem } = this.varietyList[index];
-        varietyItem.status = 'deleted';
-        this.varietyList[index] = varietyItem;
+        this.varietyList.splice(index, 1);
         if (this.selectedVarietyIndex === index) {
             this.currentVariety = '';
             this.currentPrice = 0;

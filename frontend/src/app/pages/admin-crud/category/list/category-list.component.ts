@@ -82,7 +82,38 @@ export class CategoryList implements OnInit {
     ) {}
 
     exportCSV() {
-        this.dt.exportCSV();
+        const data = this.categories().map(category => ({
+            'Descrição': category.st_category,
+            'Status': category.st_status,
+        }));
+        
+        const csvContent = this.convertToCSV(data);
+        const BOM = '\uFEFF';
+        const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'lista_categorias.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    private convertToCSV(data: any[]): string {
+        const headers = Object.keys(data[0]);
+        const csvRows = [headers.join(',')];
+        
+        for (const row of data) {
+            const values = headers.map(header => {
+                const value = row[header] || '';
+                return `"${value}"`;
+            });
+            csvRows.push(values.join(','));
+        }
+        
+        return csvRows.join('\n');
     }
 
     ngOnInit() {

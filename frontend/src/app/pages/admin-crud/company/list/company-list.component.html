@@ -5,7 +5,7 @@
     </ng-template>
 
     <ng-template #end>
-        <p-button label="Exportar lista" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+        <p-button label="Exportar" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
     </ng-template>
 </p-toolbar>
 
@@ -45,7 +45,10 @@
                 Nome
                 <p-sortIcon field="name" />
             </th>
-            <th>CNPJ</th>
+            <th pSortableColumn="identification" style="min-width:16rem">
+                CNPJ
+                <p-sortIcon field="identification" />
+            </th>
             <th pSortableColumn="status" style="min-width: 8rem">
                 Status
                 <p-sortIcon field="status" />

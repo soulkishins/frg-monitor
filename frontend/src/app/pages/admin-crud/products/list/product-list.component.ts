@@ -145,7 +145,42 @@ export class ProductList implements OnInit {
     ) {}
 
     exportCSV() {
-        this.dt.exportCSV();
+        const data = this.products().map(product => ({
+            'Cliente': product.brand?.client?.st_name || '',
+            'Marca': product.brand?.st_brand || '',
+            'Categoria': product.subcategory?.category?.st_category || '',
+            'Subcategoria': product.subcategory?.st_subcategory || '',
+            'Produto': product.st_product || '',
+            'Status': this.getStatusLabel(product.st_status)
+        }));
+        
+        const csvContent = this.convertToCSV(data);
+        const BOM = '\uFEFF';
+        const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'lista_produtos.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    private convertToCSV(data: any[]): string {
+        const headers = Object.keys(data[0]);
+        const csvRows = [headers.join(',')];
+        
+        for (const row of data) {
+            const values = headers.map(header => {
+                const value = row[header] || '';
+                return `"${value}"`;
+            });
+            csvRows.push(values.join(','));
+        }
+        
+        return csvRows.join('\n');
     }
 
     ngOnInit() {
