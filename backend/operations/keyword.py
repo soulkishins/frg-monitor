@@ -77,7 +77,7 @@ class KeywordCrud(Crud):
                     Description = f'{record.st_keyword} - {record.st_product}',
                     FlexibleTimeWindow = { "Mode": "OFF" },
                     Name = str(record.id_keyword),
-                    ScheduleExpression = "cron(10 20-23 * * ? *)",
+                    ScheduleExpression = "cron(10 23 * * ? *)",
                     ScheduleExpressionTimezone = "America/Sao_Paulo",
                     State = "ENABLED",
                     Target = {
@@ -104,7 +104,7 @@ class KeywordCrud(Crud):
                     Description = f'{record.st_keyword} - {record.st_product}',
                     FlexibleTimeWindow = { "Mode": "OFF" },
                     Name = str(record.id_keyword),
-                    ScheduleExpression = "cron(10 20-23 * * ? *)",
+                    ScheduleExpression = "cron(0 6 * * ? *)",
                     ScheduleExpressionTimezone = "America/Sao_Paulo",
                     State = "ENABLED",
                     Target = {

@@ -18,11 +18,20 @@ export class CSVGenerator {
             // Inserir registro na tabela de exportação com status PENDING
             await this.reportManager.insertAdvertisementExport(message.key, 'PENDING');
 
+            if (message.ids.length == 0) {
+                await this.reportManager.updateAdvertisementExport(message.key, 'NO_DATA');
+                return;
+            }
+
+            if (message.ids[0] == 'ALL') {
+                message.ids = [];
+            }
+
             // Recuperar registros da tabela tb_advertisement
             const advertisements = await this.reportManager.listAdvertisements(message.ids);
 
             if (advertisements.length == 0) {
-                await this.reportManager.updateAdvertisementExport(message.key, 'ERROR');
+                await this.reportManager.updateAdvertisementExport(message.key, 'NO_DATA');
                 return;
             }
 

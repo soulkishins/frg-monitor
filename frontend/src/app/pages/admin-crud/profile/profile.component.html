@@ -1,3 +1,5 @@
+<p-toast />
+
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
         <div class="flex items-center gap-2">
@@ -22,7 +24,7 @@
 
             <div>
                 <label for="email" class="block font-bold mb-3">Email</label>
-                <input type="email" pInputText id="email" name="email" [(ngModel)]="user.st_email" required [style]="{'width': '100%'}" />
+                <input type="email" pInputText id="email" name="email" [(ngModel)]="user.st_email" required [style]="{'width': '100%'}" disabled />
                 <small class="text-red-500" *ngIf="submitted && !user.st_email">Email é obrigatório</small>
             </div>
 
@@ -30,22 +32,33 @@
                 <label for="phone" class="block font-bold mb-3">Telefone</label>
                 <input type="tel" pInputText id="phone" name="phone" [(ngModel)]="user.st_phone" [style]="{'width': '100%'}" />
             </div>
+        </div>
+
+        <div class="flex justify-end gap-2 p-4 border-t-1">
+            <p-button type="submit" label="Salvar" icon="pi pi-check" />
+        </div>
+
+        <div class="flex flex-col gap-6 p-4">
+            <div>
+                <label for="oldPassword" class="block font-bold mb-3">Senha Atual</label>
+                <input type="password" pInputText id="oldPassword" name="oldPassword" [(ngModel)]="oldPassword" [style]="{'width': '100%'}" autocomplete="current-password" />
+                <small class="text-red-500" *ngIf="submitted && !oldPassword && newPassword">Senha atual é obrigatória</small>
+            </div>
 
             <div>
                 <label for="newPassword" class="block font-bold mb-3">Nova Senha</label>
-                <input type="password" pInputText id="newPassword" name="newPassword" [(ngModel)]="newPassword" [style]="{'width': '100%'}" />
+                <input type="password" pInputText id="newPassword" name="newPassword" [(ngModel)]="newPassword" [style]="{'width': '100%'}" autocomplete="new-password" />
             </div>
 
             <div>
                 <label for="confirmPassword" class="block font-bold mb-3">Confirmar Nova Senha</label>
-                <input type="password" pInputText id="confirmPassword" name="confirmPassword" [(ngModel)]="confirmPassword" [style]="{'width': '100%'}" />
+                <input type="password" pInputText id="confirmPassword" name="confirmPassword" [(ngModel)]="confirmPassword" [style]="{'width': '100%'}" autocomplete="new-password" />
                 <small class="text-red-500" *ngIf="newPassword && confirmPassword && newPassword !== confirmPassword">As senhas não coincidem</small>
             </div>
         </div>
 
         <div class="flex justify-end gap-2 p-4 border-t-1">
-            <p-button type="button" label="Voltar" icon="pi pi-arrow-left" text (click)="goBack()" />
-            <p-button type="submit" label="Salvar" icon="pi pi-check" />
+            <p-button label="Atualizar Senha" icon="pi pi-check" severity="success" (click)="saveUserPassword()" />
         </div>
     </form>
 </div> 

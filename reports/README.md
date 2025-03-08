@@ -69,14 +69,7 @@ The Lambda function expects an event with the following structure
 
 ## Updating Lambda source
 ```bash
-zip -r lambda_function.zip . -x "*.git*" "*__pycache__*" "*.venv*" "*python*"
 
-aws lambda update-function-code --function-name near-crud-client --zip-file fileb://lambda_function.zip
-
-pip install -r requirements-pkg.txt -t python/
-
-zip -r matrix-layer.zip python
-
-rm -rf lambda_function.zip && zip -r lambda_function.zip . -x "*.git*" "*__pycache__*" "*.venv*" "*python*" && aws lambda update-function-code --function-name near-crud-client --zip-file fileb://lambda_function.zip
+cd ./dist && zip -r lambda_function.zip . && mv lambda_function.zip ../  && cd .. && zip -r lambda_function.zip ./node_modules && aws lambda update-function-code --function-name near-export-reports --zip-file fileb://lambda_function.zip
 
 ```

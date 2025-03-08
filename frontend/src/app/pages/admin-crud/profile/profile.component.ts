@@ -8,10 +8,10 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { InputTextModule } from 'primeng/inputtext';
 import { UserService } from '../../service/user.service';
 import { UserResponse, UserRequest } from '../../models/user.model';
-import { ActivatedRoute, Router } from '@angular/router';
 import { CognitoService } from '../../service/cognito.service';
 import { ProfileService } from '../../service/profile.service';
 import { Page } from '../../models/global.model';
+import { Router } from '@angular/router';
 @Component({
     selector: 'app-profile',
     standalone: true,
@@ -24,21 +24,22 @@ import { Page } from '../../models/global.model';
         InputTextModule
     ],
     templateUrl: './profile.component.html',
-    providers: [MessageService, UserService, CognitoService]
+    providers: [MessageService, UserService]
 })
 export class Profile implements OnInit {
-    isEditing: boolean = false;
     user!: UserResponse;
+    isEditing: boolean = false;
     submitted: boolean = false;
     newPassword: string = '';
+    oldPassword: string = '';
     confirmPassword: string = '';
 
     constructor(
-        private profileService: ProfileService,
-        private messageService: MessageService,
         private router: Router,
         private cognitoService: CognitoService,
-        private userService: UserService
+        private profileService: ProfileService,
+        private userService: UserService,
+        private messageService: MessageService,
     ) {}
 
     ngOnInit() {
@@ -80,7 +81,7 @@ export class Profile implements OnInit {
     }
 
     goBack() {
-        this.router.navigate(['/cadastro/usuario/lista']);
+        this.router.navigate(['/']);
     }
 
     saveUser() {
@@ -93,59 +94,56 @@ export class Profile implements OnInit {
                 st_phone: this.user.st_phone || undefined
             };
 
+            this.userService.putUser(this.user.id, userRequest).subscribe({
+                next: (response) => {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Sucesso',
+                        detail: 'Usuário Atualizado',
+                        life: 3000
+                    });
+                },
+                error: (error) => {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Erro',
+                        detail: 'Erro ao atualizar usuário',
+                        life: 3000
+                    });
+                }
+            });
+        }
+    }
+
+    saveUserPassword() {
+        this.submitted = true;
+        if (this.user.st_name?.trim() && this.user.st_email?.trim()) {
             // Verifica se as senhas foram preenchidas e são iguais
-            if (this.newPassword && this.confirmPassword && this.newPassword === this.confirmPassword) {
-                userRequest.st_password = this.newPassword;
-            } else if ((this.newPassword || this.confirmPassword) && this.newPassword !== this.confirmPassword) {
+            if (this.oldPassword && this.newPassword && this.confirmPassword && this.newPassword === this.confirmPassword) {
+                this.cognitoService
+                .updateUserPassword(this.user.st_name, this.oldPassword, this.newPassword)
+                .then(() => {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Sucesso',
+                        detail: 'Senha atualizada com sucesso',
+                        life: 3000
+                    });
+                }).catch((error) => {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Erro',
+                        detail: 'Erro ao atualizar senha: ' + error,
+                        life: 3000
+                    });
+                });
+            } else {
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Erro',
-                    detail: 'As senhas não coincidem',
+                    detail: 'Não foi possível atualizar a senha, verifique se as senhas são iguais.',
                     life: 3000
                 });
-                return;
-            }
-
-            if (this.user.id) {
-                this.userService.putUser(this.user.id, userRequest).subscribe(
-                    (response) => {
-                        this.messageService.add({
-                            severity: 'success',
-                            summary: 'Sucesso',
-                            detail: 'Usuário Atualizado',
-                            life: 3000
-                        });
-                        this.goBack();
-                    },
-                    (error) => {
-                        this.messageService.add({
-                            severity: 'error',
-                            summary: 'Erro',
-                            detail: 'Erro ao atualizar usuário',
-                            life: 3000
-                        });
-                    }
-                );
-            } else {
-                this.userService.postUser(userRequest).subscribe(
-                    (response) => {
-                        this.messageService.add({
-                            severity: 'success',
-                            summary: 'Sucesso',
-                            detail: 'Usuário Criado',
-                            life: 3000
-                        });
-                        this.goBack();
-                    },
-                    (error) => {
-                        this.messageService.add({
-                            severity: 'error',
-                            summary: 'Erro',
-                            detail: 'Erro ao criar usuário',
-                            life: 3000
-                        });
-                    }
-                );
             }
         }
     }
