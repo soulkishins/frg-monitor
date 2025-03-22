@@ -56,6 +56,13 @@ export class CategoryList implements OnInit {
     categoryDialog: boolean = false;
 
     categories = signal<CategoryResponse[]>([]);
+    
+    // Propriedades de paginação
+    totalRecords: number = 0;
+    pageSize: number = 50;
+    currentPage: number = 0;
+    sortField: string = 'st_category';
+    sortOrder: number = 1;
 
     category!: CategoryResponse;
 
@@ -121,9 +128,16 @@ export class CategoryList implements OnInit {
     }
 
     loadCategoryData() {
-        this.categoryService.getCategories().subscribe(
+        const params = {
+            limit: this.pageSize,
+            offset: this.currentPage * this.pageSize,
+            sort: `${this.sortField}.${this.sortOrder === 1 ? 'asc' : 'desc'}`
+        };
+
+        this.categoryService.getCategories(params).subscribe(
             (data: Page<CategoryResponse>) => {
                 this.categories.set(data.list);
+                this.totalRecords = data.page.total;
             },
             (error) => {
                 this.messageService.add({
@@ -316,5 +330,17 @@ export class CategoryList implements OnInit {
                 );
             }
         }
+    }
+
+    onPage(event: any) {
+        this.currentPage = event.first / event.rows;
+        this.pageSize = event.rows;
+        this.loadCategoryData();
+    }
+
+    onSort(event: any) {
+        this.sortField = event.field;
+        this.sortOrder = event.order;
+        this.loadCategoryData();
     }
 }

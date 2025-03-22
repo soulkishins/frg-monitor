@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environment/environment';
 import { CategoryResponse, CategoryRequest } from '../models/category.model';
@@ -13,8 +13,16 @@ export class CategoryService {
 
   constructor(private http: HttpClient) { }
 
-  getCategories(): Observable<Page<CategoryResponse>> {
-    return this.http.get<Page<CategoryResponse>>(this.baseUrl);
+  getCategories(params?: { limit?: number; offset?: number; sort?: string }): Observable<Page<CategoryResponse>> {
+    let httpParams = new HttpParams();
+    
+    if (params) {
+      if (params.limit) httpParams = httpParams.set('limit', params.limit.toString());
+      if (params.offset) httpParams = httpParams.set('offset', params.offset.toString());
+      if (params.sort) httpParams = httpParams.set('sort', params.sort);
+    }
+    
+    return this.http.get<Page<CategoryResponse>>(this.baseUrl, { params: httpParams });
   }
 
   getCategory(id: string): Observable<CategoryResponse> {

@@ -53,6 +53,13 @@ export class BrandList implements OnInit {
     brandDialog: boolean = false;
 
     brands = signal<Brand[]>([]);
+    
+    // Propriedades de paginação
+    totalRecords: number = 0;
+    pageSize: number = 50;
+    currentPage: number = 0;
+    sortField: string = 'st_brand';
+    sortOrder: number = 1;
 
     brand!: Brand;
 
@@ -116,7 +123,13 @@ export class BrandList implements OnInit {
     }
 
     loadBrandData() {
-        this.brandService.getBrands().subscribe({
+        const params = {
+            limit: this.pageSize,
+            offset: this.currentPage * this.pageSize,
+            sort: `${this.sortField}.${this.sortOrder === 1 ? 'asc' : 'desc'}`
+        };
+
+        this.brandService.getBrands(params).subscribe({
             next: (response) => {
                 this.brands.set(response.list.map((brand) => ({
                     id: brand.id_brand,
@@ -124,6 +137,7 @@ export class BrandList implements OnInit {
                     status: brand.st_status,
                     client_name: brand.client.st_name
                 })));
+                this.totalRecords = response.page.total;
             },
             error: (error) => {
                 this.messageService.add({
@@ -329,5 +343,17 @@ export class BrandList implements OnInit {
             default:
                 return status || 'Desconhecido';
         }
+    }
+
+    onPage(event: any) {
+        this.currentPage = event.first / event.rows;
+        this.pageSize = event.rows;
+        this.loadBrandData();
+    }
+
+    onSort(event: any) {
+        this.sortField = event.field;
+        this.sortOrder = event.order;
+        this.loadBrandData();
     }
 }

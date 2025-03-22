@@ -14,7 +14,8 @@
 <p-table
     #dt
     [value]="keywords()"
-    [rows]="50"
+    [rows]="pageSize"
+    [totalRecords]="totalRecords"
     [columns]="cols"
     [paginator]="true"
     [globalFilterFields]="['brand.client.st_name', 'brand.st_brand', 'st_keyword', 'st_status']"
@@ -25,6 +26,8 @@
     currentPageReportTemplate="Mostrando {first} até {last} de {totalRecords} palavras-chave"
     [showCurrentPageReport]="true"
     [rowsPerPageOptions]="[50, 100, 200, 300]"
+    (onPage)="onPage($event)"
+    (onSort)="onSort($event)"
 >
     <ng-template #caption>
         <div class="flex items-center justify-between">

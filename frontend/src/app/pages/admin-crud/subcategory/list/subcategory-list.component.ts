@@ -57,6 +57,13 @@ export class SubCategoryList implements OnInit {
     subCategories = signal<SubCategoryResponse[]>([]);
     selectedSubCategories!: SubCategoryResponse[] | null;
 
+    // Propriedades de paginação
+    totalRecords: number = 0;
+    pageSize: number = 50;
+    currentPage: number = 0;
+    sortField: string = 'st_subcategory';
+    sortOrder: number = 1;
+
     subCategory: SubCategoryResponse = {} as SubCategoryResponse;
 
     submitted: boolean = false;
@@ -119,9 +126,16 @@ export class SubCategoryList implements OnInit {
     }
 
     loadSubCategoryData() {
-        this.subCategoryService.getSubCategories().subscribe(
+        const params = {
+            limit: this.pageSize,
+            offset: this.currentPage * this.pageSize,
+            sort: `${this.sortField}.${this.sortOrder === 1 ? 'asc' : 'desc'}`
+        };
+
+        this.subCategoryService.getSubCategories(params).subscribe(
             (response) => {
                 this.subCategories.set(response.list);
+                this.totalRecords = response.page.total;
             },
             (error: any) => {
                 this.messageService.add({
@@ -319,5 +333,17 @@ export class SubCategoryList implements OnInit {
                 );
             }
         }
+    }
+
+    onPage(event: any) {
+        this.currentPage = event.first / event.rows;
+        this.pageSize = event.rows;
+        this.loadSubCategoryData();
+    }
+
+    onSort(event: any) {
+        this.sortField = event.field;
+        this.sortOrder = event.order;
+        this.loadSubCategoryData();
     }
 }

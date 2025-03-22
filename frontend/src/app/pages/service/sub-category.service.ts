@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environment/environment';
 import { SubCategoryResponse, SubCategoryRequest } from '../models/sub-category.model';
@@ -13,9 +13,16 @@ export class SubCategoryService {
 
   constructor(private http: HttpClient) { }
 
-  getSubCategories(): Observable<Page<SubCategoryResponse>> {
-    const url = `${this.baseUrl}`;
-    return this.http.get<Page<SubCategoryResponse>>(url);
+  getSubCategories(params?: { limit?: number; offset?: number; sort?: string }): Observable<Page<SubCategoryResponse>> {
+    let httpParams = new HttpParams();
+    
+    if (params) {
+      if (params.limit) httpParams = httpParams.set('limit', params.limit.toString());
+      if (params.offset) httpParams = httpParams.set('offset', params.offset.toString());
+      if (params.sort) httpParams = httpParams.set('sort', params.sort);
+    }
+    
+    return this.http.get<Page<SubCategoryResponse>>(this.baseUrl, { params: httpParams });
   }
 
   getSubCategory(subCategoryId: string): Observable<SubCategoryResponse> {

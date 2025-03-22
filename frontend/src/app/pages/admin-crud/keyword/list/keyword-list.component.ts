@@ -56,6 +56,13 @@ export class KeywordList implements OnInit {
     keywordDialog: boolean = false;
 
     keywords = signal<KeywordResponse[]>([]);
+    
+    // Propriedades de paginação
+    totalRecords: number = 0;
+    pageSize: number = 50;
+    currentPage: number = 0;
+    sortField: string = 'st_keyword';
+    sortOrder: number = 1;
 
     keyword!: KeywordResponse;
 
@@ -123,11 +130,18 @@ export class KeywordList implements OnInit {
     }
 
     loadKeywordData() {
-        this.keywordService.getKeywords().subscribe(
-            (data: Page<KeywordResponse>) => {
+        const params = {
+            limit: this.pageSize,
+            offset: this.currentPage * this.pageSize,
+            sort: `${this.sortField}.${this.sortOrder === 1 ? 'asc' : 'desc'}`
+        };
+
+        this.keywordService.getKeywords(params).subscribe({
+            next: (data: Page<KeywordResponse>) => {
                 this.keywords.set(data.list);
+                this.totalRecords = data.page.total;
             },
-            (error) => {
+            error: (error) => {
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Erro',
@@ -135,7 +149,7 @@ export class KeywordList implements OnInit {
                     life: 3000
                 });
             }
-        );
+        });
 
         this.cols = [
             { field: 'brand.client.st_name', header: 'Cliente' },
@@ -287,5 +301,17 @@ export class KeywordList implements OnInit {
 
     getStatusLabel(status: string): string {
         return status === 'active' ? 'Ativo' : 'Inativo';
+    }
+
+    onPage(event: any) {
+        this.currentPage = event.first / event.rows;
+        this.pageSize = event.rows;
+        this.loadKeywordData();
+    }
+
+    onSort(event: any) {
+        this.sortField = event.field;
+        this.sortOrder = event.order;
+        this.loadKeywordData();
     }
 }

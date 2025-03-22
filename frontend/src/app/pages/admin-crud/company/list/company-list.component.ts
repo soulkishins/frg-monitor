@@ -53,6 +53,13 @@ export class CompanyList implements OnInit {
     companyDialog: boolean = false;
 
     companies = signal<Company[]>([]);
+    
+    // Propriedades de paginação
+    totalRecords: number = 0;
+    pageSize: number = 50;
+    currentPage: number = 0;
+    sortField: string = 'st_name';
+    sortOrder: number = 1;
 
     company!: Company;
 
@@ -133,7 +140,14 @@ export class CompanyList implements OnInit {
     }
 
     loadDataAndFields() {
-        this.companyService.getClients().subscribe({
+        const params = {
+            limit: this.pageSize,
+            offset: this.currentPage * this.pageSize,
+            sort: `${this.sortField}.${this.sortOrder === 1 ? 'asc' : 'desc'}`,
+            status: 'ACTIVE'
+        };
+
+        this.companyService.getClients(params).subscribe({
             next: (data: Page<CompanyResponse>) => {
                 const mappedCompanies: Company[] = data.list.map((item: CompanyResponse) => ({
                     id: item.id,
@@ -142,6 +156,7 @@ export class CompanyList implements OnInit {
                     status: item.st_status.toLowerCase()
                 }));
                 this.companies.set(mappedCompanies);
+                this.totalRecords = data.page.total;
             },
             error: (error) => {
                 this.messageService.add({
@@ -445,6 +460,18 @@ export class CompanyList implements OnInit {
 
         this.companyDialog = false;
         this.company = {};
+    }
+
+    onPage(event: any) {
+        this.currentPage = event.first / event.rows;
+        this.pageSize = event.rows;
+        this.loadDataAndFields();
+    }
+
+    onSort(event: any) {
+        this.sortField = event.field;
+        this.sortOrder = event.order;
+        this.loadDataAndFields();
     }
 
 }

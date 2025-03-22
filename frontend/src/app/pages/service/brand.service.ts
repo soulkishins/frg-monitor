@@ -12,10 +12,18 @@ export class BrandService {
 
   constructor(private http: HttpClient) {}
 
-  getBrands(clientId?: string): Observable<Page<BrandResponse>> {
-    const url = clientId 
-      ? `${this.baseUrl}?clientId=${clientId}`
-      : `${this.baseUrl}`;
+  getBrands(params?: { limit: number; offset: number; sort: string }): Observable<Page<BrandResponse>> {
+    let url = this.baseUrl;
+    
+    if (params) {
+      const queryParams = new URLSearchParams({
+        limit: params.limit.toString(),
+        offset: params.offset.toString(),
+        sort: params.sort
+      });
+      url += `?${queryParams.toString()}`;
+    }
+    
     return this.http.get<Page<BrandResponse>>(url);
   }
 
