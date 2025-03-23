@@ -18,10 +18,16 @@ class SubcategoryCrud(Crud):
     def filter_by(self, indexes, filters) -> list:
         where = []
 
-        if 'category' in indexes:
-            where.append(Subcategory.id_category == indexes['category'])
-        if 'st_subcategory' in filters:
-            where.append(Subcategory.st_subcategory.ilike(f"%{filters['st_subcategory']}%"))
+        if 'st_category' in filters and 'st_subcategory' in filters:
+            where.append(
+                (Category.st_category.ilike(f"%{filters['st_category']}%")) |
+                (Subcategory.st_subcategory.ilike(f"%{filters['st_subcategory']}%"))
+            )
+        else:
+            if 'category' in indexes:
+                where.append(Subcategory.id_category == indexes['category'])
+            if 'st_subcategory' in filters:
+                where.append(Subcategory.st_subcategory.ilike(f"%{filters['st_subcategory']}%"))
         if 'st_status' in filters:
             where.append(Subcategory.st_status == filters['st_status'])
 

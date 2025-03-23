@@ -1,5 +1,5 @@
 from operations.crud_base import Crud
-from db.models import Keyword, ClientBrand
+from db.models import Keyword, ClientBrand, Client
 from sqlalchemy.orm import contains_eager
 import boto3
 import json
@@ -47,12 +47,19 @@ class KeywordCrud(Crud):
     def filter_by(self, indexes, filters) -> list:
         where = []
 
-        if 'brand' in indexes:
-            where.append(Keyword.id_brand == indexes['brand'])
-        if 'st_keyword' in filters:
-            where.append(Keyword.st_keyword.ilike(f"%{filters['st_keyword']}%"))
-        if 'st_product' in filters:
-            where.append(Keyword.st_product.ilike(f"%{filters['st_product']}%"))
+        if 'st_keyword' in filters and 'st_brand' in filters and 'st_client' in filters:
+            where.append(
+                (Keyword.st_keyword.ilike(f"%{filters['st_keyword']}%")) |
+                (ClientBrand.st_brand.ilike(f"%{filters['st_brand']}%")) |
+                (Client.st_name.ilike(f"%{filters['st_client']}%")) 
+            )
+        else:
+            if 'brand' in indexes:
+                where.append(Keyword.id_brand == indexes['brand'])
+            if 'st_keyword' in filters:
+                where.append(Keyword.st_keyword.ilike(f"%{filters['st_keyword']}%"))
+            if 'st_product' in filters:
+                where.append(Keyword.st_product.ilike(f"%{filters['st_product']}%"))
         if 'st_status' in filters:
             where.append(Keyword.st_status == filters['st_status'])
 

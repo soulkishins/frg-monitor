@@ -18,10 +18,16 @@ class ClientBrandCrud(Crud):
     def filter_by(self, indexes, filters) -> list:
         where = []
 
-        if 'st_client_name' in filters:
-            where.append(Client.st_name.ilike(f"%{filters['st_client_name']}%"))
-        if 'st_brand' in filters:
-            where.append(ClientBrand.st_brand.ilike(f"%{filters['st_brand']}%"))
+        if 'st_client_name' in filters and 'st_brand' in filters:
+            where.append(
+                (Client.st_name.ilike(f"%{filters['st_client_name']}%")) |
+                (ClientBrand.st_brand.ilike(f"%{filters['st_brand']}%"))
+            )
+        else:
+            if 'st_client_name' in filters:
+                where.append(Client.st_name.ilike(f"%{filters['st_client_name']}%"))
+            if 'st_brand' in filters:
+                where.append(ClientBrand.st_brand.ilike(f"%{filters['st_brand']}%"))
         if 'st_status' in filters:
             where.append(ClientBrand.st_status == filters['st_status'])
 
