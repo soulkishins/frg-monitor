@@ -13,12 +13,8 @@ export class KeywordService {
 
   constructor(private http: HttpClient) { }
 
-  getKeywords(params?: { limit: number; offset: number; sort: string }): Observable<Page<KeywordResponse>> {
-    let url = this.baseUrl;
-    if (params) {
-      url += `?limit=${params.limit}&offset=${params.offset}&sort=${params.sort}`;
-    }
-    return this.http.get<Page<KeywordResponse>>(url);
+  getKeywords(filters: {[param: string]: string | number} = {}): Observable<Page<KeywordResponse>> {
+    return this.http.get<Page<KeywordResponse>>(this.baseUrl, { params: filters });
   }
 
   getKeyword(id: string): Observable<KeywordResponse> {

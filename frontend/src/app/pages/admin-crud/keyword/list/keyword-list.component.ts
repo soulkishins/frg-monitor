@@ -63,6 +63,7 @@ export class KeywordList implements OnInit {
     currentPage: number = 0;
     sortField: string = 'st_keyword';
     sortOrder: number = 1;
+    searchTerm: string = '';
 
     keyword!: KeywordResponse;
 
@@ -130,11 +131,17 @@ export class KeywordList implements OnInit {
     }
 
     loadKeywordData() {
-        const params = {
-            limit: this.pageSize,
-            offset: this.currentPage * this.pageSize,
-            sort: `${this.sortField}.${this.sortOrder === 1 ? 'asc' : 'desc'}`
+        const params: {[param: string]: string | number} = {
+            'page.limit': this.pageSize,
+            'page.offset': this.currentPage * this.pageSize,
+            'page.sort': `${this.sortField}.${this.sortOrder === 1 ? 'asc' : 'desc'}`
         };
+
+        if (this.searchTerm) {
+            params['st_keyword'] = this.searchTerm;
+            params['st_brand'] = this.searchTerm;
+            params['st_client'] = this.searchTerm;
+        }
 
         this.keywordService.getKeywords(params).subscribe({
             next: (data: Page<KeywordResponse>) => {
@@ -164,7 +171,10 @@ export class KeywordList implements OnInit {
     }
 
     onGlobalFilter(table: Table, event: Event) {
-        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+        const value = (event.target as HTMLInputElement).value;
+        this.searchTerm = value;
+        this.currentPage = 0;
+        this.loadKeywordData();
     }
 
     openNew() {
@@ -310,8 +320,10 @@ export class KeywordList implements OnInit {
     }
 
     onSort(event: any) {
-        this.sortField = event.field;
-        this.sortOrder = event.order;
-        this.loadKeywordData();
+        if (this.sortField !== event.field || this.sortOrder !== event.order) {
+            this.sortField = event.field;
+            this.sortOrder = event.order;
+            this.loadKeywordData();
+        }
     }
 }

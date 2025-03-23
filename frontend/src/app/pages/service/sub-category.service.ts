@@ -13,16 +13,8 @@ export class SubCategoryService {
 
   constructor(private http: HttpClient) { }
 
-  getSubCategories(params?: { limit?: number; offset?: number; sort?: string }): Observable<Page<SubCategoryResponse>> {
-    let httpParams = new HttpParams();
-    
-    if (params) {
-      if (params.limit) httpParams = httpParams.set('limit', params.limit.toString());
-      if (params.offset) httpParams = httpParams.set('offset', params.offset.toString());
-      if (params.sort) httpParams = httpParams.set('sort', params.sort);
-    }
-    
-    return this.http.get<Page<SubCategoryResponse>>(this.baseUrl, { params: httpParams });
+  getSubCategories(filters: {[param: string]: string | number} = {}): Observable<Page<SubCategoryResponse>> {
+    return this.http.get<Page<SubCategoryResponse>>(this.baseUrl, { params: filters });
   }
 
   getSubCategory(subCategoryId: string): Observable<SubCategoryResponse> {

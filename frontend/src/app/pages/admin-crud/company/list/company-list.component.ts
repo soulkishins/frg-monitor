@@ -60,6 +60,7 @@ export class CompanyList implements OnInit {
     currentPage: number = 0;
     sortField: string = 'st_name';
     sortOrder: number = 1;
+    searchTerm: string = '';
 
     company!: Company;
 
@@ -140,12 +141,17 @@ export class CompanyList implements OnInit {
     }
 
     loadDataAndFields() {
-        const params = {
-            limit: this.pageSize,
-            offset: this.currentPage * this.pageSize,
-            sort: `${this.sortField}.${this.sortOrder === 1 ? 'asc' : 'desc'}`,
-            status: 'ACTIVE'
+        const params: {[param: string]: string | number} = {
+            'page.limit': this.pageSize,
+            'page.offset': this.currentPage * this.pageSize,
+            'page.sort': `${this.sortField}.${this.sortOrder === 1 ? 'asc' : 'desc'}`,
+            'st_status': 'ACTIVE'
         };
+
+        if (this.searchTerm) {
+            params['st_name'] = this.searchTerm;
+            params['st_document'] = this.searchTerm;
+        }
 
         this.companyService.getClients(params).subscribe({
             next: (data: Page<CompanyResponse>) => {
@@ -180,7 +186,10 @@ export class CompanyList implements OnInit {
     }
 
     onGlobalFilter(table: Table, event: Event) {
-        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+        const value = (event.target as HTMLInputElement).value;
+        this.searchTerm = value;
+        this.currentPage = 0;
+        this.loadDataAndFields();
     }
 
     openNew() {

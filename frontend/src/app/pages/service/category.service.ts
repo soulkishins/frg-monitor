@@ -13,16 +13,8 @@ export class CategoryService {
 
   constructor(private http: HttpClient) { }
 
-  getCategories(params?: { limit?: number; offset?: number; sort?: string }): Observable<Page<CategoryResponse>> {
-    let httpParams = new HttpParams();
-    
-    if (params) {
-      if (params.limit) httpParams = httpParams.set('limit', params.limit.toString());
-      if (params.offset) httpParams = httpParams.set('offset', params.offset.toString());
-      if (params.sort) httpParams = httpParams.set('sort', params.sort);
-    }
-    
-    return this.http.get<Page<CategoryResponse>>(this.baseUrl, { params: httpParams });
+  getCategories(filters: {[param: string]: string | number} = {}): Observable<Page<CategoryResponse>> {
+    return this.http.get<Page<CategoryResponse>>(this.baseUrl, { params: filters });
   }
 
   getCategory(id: string): Observable<CategoryResponse> {

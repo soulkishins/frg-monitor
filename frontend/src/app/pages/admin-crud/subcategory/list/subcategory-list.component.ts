@@ -63,6 +63,7 @@ export class SubCategoryList implements OnInit {
     currentPage: number = 0;
     sortField: string = 'st_subcategory';
     sortOrder: number = 1;
+    searchTerm: string = '';
 
     subCategory: SubCategoryResponse = {} as SubCategoryResponse;
 
@@ -126,11 +127,16 @@ export class SubCategoryList implements OnInit {
     }
 
     loadSubCategoryData() {
-        const params = {
+        const params: {[param: string]: string | number} = {
             limit: this.pageSize,
             offset: this.currentPage * this.pageSize,
             sort: `${this.sortField}.${this.sortOrder === 1 ? 'asc' : 'desc'}`
         };
+
+        if (this.searchTerm) {
+            params['st_subcategory'] = this.searchTerm;
+            params['st_category'] = this.searchTerm;
+        }
 
         this.subCategoryService.getSubCategories(params).subscribe(
             (response) => {
@@ -160,7 +166,10 @@ export class SubCategoryList implements OnInit {
     }
 
     onGlobalFilter(table: Table, event: Event) {
-        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+        const value = (event.target as HTMLInputElement).value;
+        this.searchTerm = value;
+        this.currentPage = 0;
+        this.loadSubCategoryData();
     }
 
     openNew() {
@@ -342,8 +351,10 @@ export class SubCategoryList implements OnInit {
     }
 
     onSort(event: any) {
-        this.sortField = event.field;
-        this.sortOrder = event.order;
-        this.loadSubCategoryData();
+        if (event.field !== this.sortField || event.order !== this.sortOrder) {
+            this.sortField = event.field;
+            this.sortOrder = event.order;
+            this.loadSubCategoryData();
+        }
     }
 }

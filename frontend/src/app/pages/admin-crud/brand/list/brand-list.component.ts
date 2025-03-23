@@ -60,6 +60,7 @@ export class BrandList implements OnInit {
     currentPage: number = 0;
     sortField: string = 'st_brand';
     sortOrder: number = 1;
+    searchTerm: string = '';
 
     brand!: Brand;
 
@@ -123,11 +124,16 @@ export class BrandList implements OnInit {
     }
 
     loadBrandData() {
-        const params = {
+        const params: {[param: string]: string | number} = {
             limit: this.pageSize,
             offset: this.currentPage * this.pageSize,
             sort: `${this.sortField}.${this.sortOrder === 1 ? 'asc' : 'desc'}`
         };
+
+        if (this.searchTerm) {
+            params['st_brand'] = this.searchTerm;
+            params['st_client_name'] = this.searchTerm;
+        }
 
         this.brandService.getBrands(params).subscribe({
             next: (response) => {
@@ -165,7 +171,10 @@ export class BrandList implements OnInit {
     }
 
     onGlobalFilter(table: Table, event: Event) {
-        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+        const value = (event.target as HTMLInputElement).value;
+        this.searchTerm = value;
+        this.currentPage = 0;
+        this.loadBrandData();
     }
 
     openNew() {
@@ -352,8 +361,10 @@ export class BrandList implements OnInit {
     }
 
     onSort(event: any) {
-        this.sortField = event.field;
-        this.sortOrder = event.order;
-        this.loadBrandData();
+        if (this.sortField !== event.field || this.sortOrder !== event.order) {
+            this.sortField = event.field;
+            this.sortOrder = event.order;
+            this.loadBrandData();
+        }
     }
 }

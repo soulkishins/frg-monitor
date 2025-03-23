@@ -63,6 +63,7 @@ export class CategoryList implements OnInit {
     currentPage: number = 0;
     sortField: string = 'st_category';
     sortOrder: number = 1;
+    searchTerm: string = '';
 
     category!: CategoryResponse;
 
@@ -128,11 +129,15 @@ export class CategoryList implements OnInit {
     }
 
     loadCategoryData() {
-        const params = {
+        const params: {[param: string]: string | number} = {
             limit: this.pageSize,
             offset: this.currentPage * this.pageSize,
             sort: `${this.sortField}.${this.sortOrder === 1 ? 'asc' : 'desc'}`
         };
+
+        if (this.searchTerm) {
+            params['st_category'] = this.searchTerm;
+        }
 
         this.categoryService.getCategories(params).subscribe(
             (data: Page<CategoryResponse>) => {
@@ -160,7 +165,10 @@ export class CategoryList implements OnInit {
     }
 
     onGlobalFilter(table: Table, event: Event) {
-        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+        const value = (event.target as HTMLInputElement).value;
+        this.searchTerm = value;
+        this.currentPage = 0;
+        this.loadCategoryData();
     }
 
     openNew() {
@@ -339,8 +347,10 @@ export class CategoryList implements OnInit {
     }
 
     onSort(event: any) {
-        this.sortField = event.field;
-        this.sortOrder = event.order;
-        this.loadCategoryData();
+        if (event.field !== this.sortField || event.order !== this.sortOrder) {
+            this.sortField = event.field;
+            this.sortOrder = event.order;
+            this.loadCategoryData();
+        }
     }
 }

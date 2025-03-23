@@ -13,21 +13,8 @@ export class CompanyService {
 
   constructor(private http: HttpClient) { }
 
-  getClients(params: { limit?: number; offset?: number; sort?: string; status?: string } = {}): Observable<Page<CompanyResponse>> {
-    let url = this.baseUrl;
-    const queryParams = new URLSearchParams();
-    
-    if (params.limit) queryParams.append('page.limit', params.limit.toString());
-    if (params.offset) queryParams.append('page.offset', params.offset.toString());
-    if (params.sort) queryParams.append('page.sort', params.sort);
-    if (params.status) queryParams.append('st_status', params.status);
-
-    const queryString = queryParams.toString();
-    if (queryString) {
-      url += `?${queryString}`;
-    }
-
-    return this.http.get<Page<CompanyResponse>>(url);
+  getClients(filters: {[param: string]: string | number} = {}): Observable<Page<CompanyResponse>> {
+    return this.http.get<Page<CompanyResponse>>(this.baseUrl, { params: filters });
   }
 
   getClient(id: string): Observable<CompanyResponse> {
