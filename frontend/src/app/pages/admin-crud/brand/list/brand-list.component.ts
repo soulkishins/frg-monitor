@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, EventEmitter, OnInit, signal, ViewChild } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Table, TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
@@ -22,6 +22,8 @@ import { BrandService } from '../../../../pages/service/brand.service';
 import { Brand } from '../../../../pages/models/brand.model';
 import { Column, ExportColumn } from '../../../../pages/models/global.model';
 import { Router } from '@angular/router';
+import { of } from 'rxjs';
+import { debounceTime, delay, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 @Component({
     selector: 'app-brand-list',
@@ -55,12 +57,14 @@ export class BrandList implements OnInit {
     brands = signal<Brand[]>([]);
     
     // Propriedades de paginação
-    totalRecords: number = 0;
-    pageSize: number = 50;
-    currentPage: number = 0;
-    sortField: string = 'st_brand';
-    sortOrder: number = 1;
+    page: {
+        total: number;
+        limit: number;
+        offset: number;
+        sort?: string;
+    } = {total: 0, limit: 50, offset: 0, sort: 'st_brand'};
     searchTerm: string = '';
+    loading: boolean = false;
 
     brand!: Brand;
 
@@ -75,6 +79,8 @@ export class BrandList implements OnInit {
     exportColumns!: ExportColumn[];
 
     cols!: Column[];
+
+    filterChange = new EventEmitter<string>(); // Emissor de eventos
 
     constructor(
         private brandService: BrandService,
@@ -120,15 +126,28 @@ export class BrandList implements OnInit {
     }
 
     ngOnInit() {
-        this.loadBrandData();
+        //this.loadBrandData();
+        this.filterChange.pipe(
+            debounceTime(750), // Espera 500ms para evitar chamadas excessivas
+            distinctUntilChanged(),
+            switchMap(value => value)
+        ).subscribe(response => {
+            console.log('Iniciando busca', response);
+            this.loadBrandData();
+        });
     }
 
-    loadBrandData() {
-        const params: {[param: string]: string | number} = {
-            limit: this.pageSize,
-            offset: this.currentPage * this.pageSize,
-            sort: `${this.sortField}.${this.sortOrder === 1 ? 'asc' : 'desc'}`
-        };
+    loadBrandData(event?: any) {
+
+        if (!event) {
+            event = {first: this.page.offset, rows: this.page.limit};
+        }
+
+        this.loading = true;
+        const params: any = {};
+        params['page.limit'] = event.rows;
+        params['page.offset'] = event.first;
+        params['page.sort'] = `${event.sortField || this.page.sort}${event.sortOrder !== -1 ? '.asc' : '.desc'}`;
 
         if (this.searchTerm) {
             params['st_brand'] = this.searchTerm;
@@ -143,7 +162,7 @@ export class BrandList implements OnInit {
                     status: brand.st_status,
                     client_name: brand.client.st_name
                 })));
-                this.totalRecords = response.page.total;
+                this.page = response.page;
             },
             error: (error) => {
                 this.messageService.add({
@@ -153,6 +172,9 @@ export class BrandList implements OnInit {
                     life: 3000
                 });
                 console.error('Erro ao carregar dados:', error);
+            },
+            complete: () => {
+                this.loading = false;
             }
         });
 
@@ -173,8 +195,12 @@ export class BrandList implements OnInit {
     onGlobalFilter(table: Table, event: Event) {
         const value = (event.target as HTMLInputElement).value;
         this.searchTerm = value;
-        this.currentPage = 0;
-        this.loadBrandData();
+        this.page.offset = 0;
+        
+        this.filterChange.emit(value);
+        if (value === '') {
+            this.loadBrandData();
+        }
     }
 
     openNew() {
@@ -351,20 +377,6 @@ export class BrandList implements OnInit {
                 return 'Inativo';
             default:
                 return status || 'Desconhecido';
-        }
-    }
-
-    onPage(event: any) {
-        this.currentPage = event.first / event.rows;
-        this.pageSize = event.rows;
-        this.loadBrandData();
-    }
-
-    onSort(event: any) {
-        if (this.sortField !== event.field || this.sortOrder !== event.order) {
-            this.sortField = event.field;
-            this.sortOrder = event.order;
-            this.loadBrandData();
         }
     }
 }
