@@ -169,8 +169,7 @@ export class CompanyList implements OnInit {
 
 
         if (this.searchTerm) {
-            params['st_name'] = this.searchTerm;
-            params['st_document'] = this.searchTerm;
+            params['search_global'] = this.searchTerm;
         }
 
         this.companyService.getClients(params).subscribe({

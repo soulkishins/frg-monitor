@@ -152,9 +152,7 @@ export class KeywordList implements OnInit {
         params['page.sort'] = `${event.sortField || this.page.sort}${event.sortOrder !== -1 ? '.asc' : '.desc'}`;
 
         if (this.searchTerm) {
-            params['st_keyword'] = this.searchTerm;
-            params['st_brand'] = this.searchTerm;
-            params['st_client'] = this.searchTerm;
+            params['search_global'] = this.searchTerm;
         }
 
         this.keywordService.getKeywords(params).subscribe({

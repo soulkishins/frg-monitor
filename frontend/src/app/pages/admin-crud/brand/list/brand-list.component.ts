@@ -150,8 +150,7 @@ export class BrandList implements OnInit {
         params['page.sort'] = `${event.sortField || this.page.sort}${event.sortOrder !== -1 ? '.asc' : '.desc'}`;
 
         if (this.searchTerm) {
-            params['st_brand'] = this.searchTerm;
-            params['st_client_name'] = this.searchTerm;
+            params['search_global'] = this.searchTerm;
         }
 
         this.brandService.getBrands(params).subscribe({

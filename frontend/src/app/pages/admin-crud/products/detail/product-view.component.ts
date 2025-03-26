@@ -36,6 +36,8 @@ import { mergeMap, map } from 'rxjs/operators';
 import { ProductRequest } from '../../../models/product.model';
 import { Column, ExportColumn } from '../../../models/global.model';
 import { LOCALE_ID } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 // Registrar o locale
 registerLocaleData(localePt);
@@ -101,13 +103,29 @@ export class ProductView implements OnInit {
     }
 
     clients: CompanyResponse[] = [];
+    filteredClients: CompanyResponse[] = [];
     brands: BrandResponse[] = [];
+    filteredBrands: BrandResponse[] = [];
     categories: CategoryResponse[] = [];
     subcategories: SubCategoryResponse[] = [];
 
     selectedClient: string = '';
     selectedBrand: string = '';
     selectedCategory: string = '';
+
+    loading: boolean = false;
+    loadingBrands: boolean = false;
+
+    page: {
+        total: number;
+        limit: number;
+        offset: number;
+        sort?: string;
+    } = {total: 0, limit: 50, offset: 0, sort: 'st_name'};
+
+    private searchSubject = new Subject<string>();
+    private searchBrandSubject = new Subject<string>();
+    private destroy$ = new Subject<void>();
 
     @ViewChild('dt') dt!: Table;
 
@@ -154,67 +172,87 @@ export class ProductView implements OnInit {
         ];
 
         this.exportColumns = this.cols.map(col => ({ title: col.header, dataKey: col.field }));
+
+        // Configurar o debounce para busca de clientes
+        this.searchSubject.pipe(
+            takeUntil(this.destroy$),
+            debounceTime(300),
+            distinctUntilChanged(),
+            switchMap(query => {
+                this.loading = true;
+                return this.companyService.getClients({ 
+                    "st_name": query, 
+                    "page.limit": this.page.limit, 
+                    "page.sort": "st_name.asc" 
+                });
+            })
+        ).subscribe({
+            next: (companies) => {
+                this.filteredClients = companies.list;
+                this.loading = false;
+            },
+            error: (error) => {
+                console.error('Erro ao buscar clientes:', error);
+                this.loading = false;
+            }
+        });
+
+        // Configurar o debounce para busca de marcas
+        this.searchBrandSubject.pipe(
+            takeUntil(this.destroy$),
+            debounceTime(300),
+            distinctUntilChanged(),
+            switchMap(query => {
+                this.loadingBrands = true;
+                const clientName = this.clients.find(c => c.id === this.selectedClient)?.st_name || '';
+                return this.brandService.getBrands({ 
+                    "st_brand": query, 
+                    "page.limit": this.page.limit, 
+                    "page.sort": "st_brand.asc",
+                    "st_client_name": clientName
+                });
+            })
+        ).subscribe({
+            next: (brands) => {
+                this.filteredBrands = brands.list;
+                this.loadingBrands = false;
+            },
+            error: (error) => {
+                console.error('Erro ao buscar marcas:', error);
+                this.loadingBrands = false;
+            }
+        });
     }
 
-    loadProductData() {
-        const productId = this.route.snapshot.params['id'];
-        if (productId && productId !== 'novo') {
-            this.isEditing = true;
-            this.productService.getProduct(productId).subscribe({
-                next: (response) => {
-                    this.product = response;
-                    
-                    // Carregar lista de variedades do JSON
-                    try {
-                        const parsedVarieties = response.st_variety ? JSON.parse(response.st_variety) : [];
-                        this.varietyList = parsedVarieties.map((v: any) => ({
-                            ...v,
-                            status: v.status || 'active'
-                        }));
-                    } catch (error) {
-                        console.error('Erro ao parsear variedades:', error);
-                        this.varietyList = [];
-                    }
-                    
-                    // Carregar cliente e marca
-                    if (this.product.brand?.client) {
-                        this.selectedClient = this.product.brand.client.id;
-                        this.loadBrands(this.selectedClient);
-                    }
-
-                    // Carregar categoria e subcategoria
-                    if (this.product.subcategory?.category) {
-                        this.selectedCategory = this.product.subcategory.category.id_category;
-                        this.loadSubcategories(this.selectedCategory);
-                    }
-                    
-                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Produto carregado', life: 3000 });
-                },
-                error: (error) => {
-                    console.error('Erro ao carregar produto:', error);
-                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar produto', life: 3000 });
-                    this.router.navigate(['../'], { relativeTo: this.route });
-                }
-            });
-        } else {
-            // Inicializa um novo produto
-            this.isEditing = false;
-            this.product = {} as ProductResponse;
-            this.product.st_status = 'ACTIVE';
-            this.varietyList = [];
-        }
+    ngOnDestroy() {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     loadClients() {
-        this.companyService.getClients().subscribe({
+        this.loading = true;
+        this.companyService.getClients({"page.limit": this.page.limit,"page.sort": "st_name.asc"}).subscribe({
             next: (clients) => {
                 this.clients = clients.list;
+                this.filteredClients = [...this.clients];
+                this.loading = false;
             },
             error: (error) => {
                 console.error('Erro ao carregar clientes:', error);
                 this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar clientes', life: 3000 });
+                this.loading = false;
             }
         });
+    }
+
+    filterClients(event: any) {
+        const query = event.filter.toLowerCase();
+        this.searchSubject.next(query);
+    }
+
+    filterBrands(event: any) {
+        const query = event.filter.toLowerCase();
+        this.searchBrandSubject.next(query);
     }
 
     loadBrands(clientId: string) {
@@ -222,19 +260,26 @@ export class ProductView implements OnInit {
             this.brands = [];
             return;
         }
-        this.brandService.getBrands().subscribe({
-            next: (data) => {
-                this.brands = data.list.filter(b => b.id_client === clientId);
-            },
-            error: (error) => {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Erro',
-                    detail: 'Erro ao carregar marcas',
-                    life: 3000
-                });
-            }
-        });
+        const clientName = this.clients.find(c => c.id === clientId)?.st_name || '';
+        if (clientName) {
+            this.brandService.getBrands({
+                "page.limit": this.page.limit,
+                "page.sort": "st_brand.asc",
+                "st_client_name": clientName
+            }).subscribe({
+                next: (data) => {
+                    this.brands = data.list;
+                },
+                error: (error) => {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Erro',
+                        detail: 'Erro ao carregar marcas',
+                        life: 3000
+                    });
+                }
+            });
+        }
     }
 
     loadCategories() {
@@ -271,20 +316,31 @@ export class ProductView implements OnInit {
 
     onClientChange(event: any) {
         const clientId = event.value;
+        this.selectedClient = clientId;
+        this.product.id_brand = '';
+        this.filteredBrands = [];
+        
         if (clientId) {
-            this.brandService.getBrands().subscribe({
-                next: (brands) => {
-                    this.brands = brands.list.filter(brand => brand.id_client === clientId);
-                },
-                error: (error) => {
-                    console.error('Erro ao carregar marcas:', error);
-                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar marcas', life: 3000 });
-                }
-            });
+            const clientName = this.clients.find(c => c.id === clientId)?.st_name || '';
+            if (clientName) {
+                this.brandService.getBrands({
+                    "page.limit": this.page.limit,
+                    "page.sort": "st_brand.asc",
+                    "st_client_name": clientName
+                }).subscribe({
+                    next: (brands) => {
+                        this.brands = brands.list;
+                        this.filteredBrands = [...this.brands];
+                    },
+                    error: (error) => {
+                        console.error('Erro ao carregar marcas:', error);
+                        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar marcas', life: 3000 });
+                    }
+                });
+            }
         } else {
             this.brands = [];
         }
-        this.product.id_brand = '';
     }
 
     onCategoryChange(event: any) {
@@ -339,15 +395,23 @@ export class ProductView implements OnInit {
         // Carregar cliente e marca
         if (this.product.brand?.client) {
             this.selectedClient = this.product.brand.client.id;
-            this.brandService.getBrands().subscribe({
-                next: (brands) => {
-                    // this.brands = brands.filter(b => b.id_client === this.product.brand?.client?.id);
-                },
-                error: (error) => {
-                    console.error('Erro ao carregar marcas:', error);
-                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar marcas', life: 3000 });
-                }
-            });
+            const clientName = this.product.brand.client.st_name || '';
+            if (clientName) {
+                this.brandService.getBrands({
+                    "page.limit": this.page.limit,
+                    "page.sort": "st_brand.asc",
+                    "st_client_name": clientName
+                }).subscribe({
+                    next: (brands) => {
+                        this.brands = brands.list;
+                        this.filteredBrands = [...this.brands];
+                    },
+                    error: (error) => {
+                        console.error('Erro ao carregar marcas:', error);
+                        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar marcas', life: 3000 });
+                    }
+                });
+            }
         }
 
         // Carregar categoria e subcategoria
@@ -585,6 +649,59 @@ export class ProductView implements OnInit {
             this.currentPrice = variety.price;
             this.selectedVarietyIndex = index;
             this.messageService.add({ severity: 'info', summary: 'Selecionado', detail: 'Variedade selecionada para edição', life: 3000 });
+        }
+    }
+
+    loadProductData() {
+        const productId = this.route.snapshot.params['id'];
+        if (productId && productId !== 'novo') {
+            this.isEditing = true;
+            this.productService.getProduct(productId).subscribe({
+                next: (response) => {
+                    this.product = response;
+                    
+                    // Carregar lista de variedades do JSON
+                    try {
+                        const parsedVarieties = response.st_variety ? JSON.parse(response.st_variety) : [];
+                        this.varietyList = parsedVarieties.map((v: any) => ({
+                            ...v,
+                            status: v.status || 'active'
+                        }));
+                    } catch (error) {
+                        console.error('Erro ao parsear variedades:', error);
+                        this.varietyList = [];
+                    }
+                    
+                    // Carregar cliente e marca
+                    if (this.product.brand?.client) {
+                        this.selectedClient = this.product.brand.client.id;
+                        // Filtrar o combo de clientes com base no nome do cliente
+                        if (this.product.brand.client.st_name) {
+                            this.filterClients({ filter: this.product.brand.client.st_name });
+                        }
+                        this.loadBrands(this.selectedClient);
+                    }
+
+                    // Carregar categoria e subcategoria
+                    if (this.product.subcategory?.category) {
+                        this.selectedCategory = this.product.subcategory.category.id_category;
+                        this.loadSubcategories(this.selectedCategory);
+                    }
+                    
+                    this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Produto carregado', life: 3000 });
+                },
+                error: (error) => {
+                    console.error('Erro ao carregar produto:', error);
+                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar produto', life: 3000 });
+                    this.router.navigate(['../'], { relativeTo: this.route });
+                }
+            });
+        } else {
+            // Inicializa um novo produto
+            this.isEditing = false;
+            this.product = {} as ProductResponse;
+            this.product.st_status = 'ACTIVE';
+            this.varietyList = [];
         }
     }
 }

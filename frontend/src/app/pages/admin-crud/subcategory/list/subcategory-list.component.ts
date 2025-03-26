@@ -152,8 +152,7 @@ export class SubCategoryList implements OnInit {
         params['page.sort'] = `${event.sortField || this.page.sort}${event.sortOrder !== -1 ? '.asc' : '.desc'}`;
 
         if (this.searchTerm) {
-            params['st_subcategory'] = this.searchTerm;
-            params['st_category'] = this.searchTerm;
+            params['search_global'] = this.searchTerm;
         }
 
         this.subCategoryService.getSubCategories(params).subscribe({
