@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, EventEmitter, OnInit, signal, ViewChild } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Table, TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
@@ -23,7 +23,7 @@ import { CategoryService } from '../../../../pages/service/category.service';
 import { CategoryResponse } from '../../../../pages/models/category.model';
 import { Column, ExportColumn, Page } from '../../../../pages/models/global.model';
 import { Router, RouterModule } from '@angular/router';
-
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 @Component({
     selector: 'app-category-list',
     standalone: true,
@@ -58,12 +58,15 @@ export class CategoryList implements OnInit {
     categories = signal<CategoryResponse[]>([]);
     
     // Propriedades de paginação
-    totalRecords: number = 0;
-    pageSize: number = 50;
-    currentPage: number = 0;
-    sortField: string = 'st_category';
-    sortOrder: number = 1;
+    page: {
+        total: number;
+        limit: number;
+        offset: number;
+        sort?: string;
+    } = {total: 0, limit: 50, offset: 0, sort: 'st_category'};
     searchTerm: string = '';
+    loading: boolean = false;
+
 
     category!: CategoryResponse;
 
@@ -81,6 +84,8 @@ export class CategoryList implements OnInit {
     exportColumns!: ExportColumn[];
 
     cols!: Column[];
+
+    filterChange = new EventEmitter<string>(); // Emissor de eventos
 
     constructor(
         private categoryService: CategoryService,
@@ -125,34 +130,50 @@ export class CategoryList implements OnInit {
     }
 
     ngOnInit() {
-        this.loadCategoryData();
+        //this.loadBrandData();
+        this.filterChange.pipe(
+            debounceTime(750), // Espera 500ms para evitar chamadas excessivas
+            distinctUntilChanged(),
+            switchMap(value => value)
+        ).subscribe(response => {
+            this.loadCategoryData();
+        });        
     }
 
-    loadCategoryData() {
-        const params: {[param: string]: string | number} = {
-            limit: this.pageSize,
-            offset: this.currentPage * this.pageSize,
-            sort: `${this.sortField}.${this.sortOrder === 1 ? 'asc' : 'desc'}`
-        };
+    loadCategoryData(event?: any) {
+
+        if (!event) {
+            event = {first: this.page.offset, rows: this.page.limit};
+        }
+
+        this.loading = true;
+        const params: any = {};
+        params['page.limit'] = event.rows;
+        params['page.offset'] = event.first;
+        params['page.sort'] = `${event.sortField || this.page.sort}${event.sortOrder !== -1 ? '.asc' : '.desc'}`;
 
         if (this.searchTerm) {
             params['st_category'] = this.searchTerm;
         }
 
-        this.categoryService.getCategories(params).subscribe(
-            (data: Page<CategoryResponse>) => {
+        this.categoryService.getCategories(params).subscribe({
+            next: (data: Page<CategoryResponse>) => {
                 this.categories.set(data.list);
-                this.totalRecords = data.page.total;
+                this.page = data.page;
             },
-            (error) => {
+            error: (error) => {
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Erro',
                     detail: 'Erro ao carregar categorias',
                     life: 3000
                 });
+                console.error('Erro ao carregar categorias:', error);
+            },
+            complete: () => {
+                this.loading = false;
             }
-        );
+        });
 
         this.cols = [
             { field: 'st_category', header: 'Nome' },
@@ -167,8 +188,12 @@ export class CategoryList implements OnInit {
     onGlobalFilter(table: Table, event: Event) {
         const value = (event.target as HTMLInputElement).value;
         this.searchTerm = value;
-        this.currentPage = 0;
-        this.loadCategoryData();
+        this.page.offset = 0;
+        
+        this.filterChange.emit(value);
+        if (value === '') {
+            this.loadCategoryData();
+        }
     }
 
     openNew() {
@@ -340,17 +365,4 @@ export class CategoryList implements OnInit {
         }
     }
 
-    onPage(event: any) {
-        this.currentPage = event.first / event.rows;
-        this.pageSize = event.rows;
-        this.loadCategoryData();
-    }
-
-    onSort(event: any) {
-        if (event.field !== this.sortField || event.order !== this.sortOrder) {
-            this.sortField = event.field;
-            this.sortOrder = event.order;
-            this.loadCategoryData();
-        }
-    }
 }

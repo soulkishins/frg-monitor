@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, EventEmitter, OnInit, signal, ViewChild } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Table, TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
@@ -23,7 +23,7 @@ import { Column, ExportColumn, Page } from '../../../models/global.model';
 import { Router, RouterModule } from '@angular/router';
 import { KeywordService } from '../../../service/keyword.service';
 import { KeywordResponse } from '../../../models/keyword.model';
-
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 @Component({
     selector: 'app-keyword-list',
     standalone: true,
@@ -58,12 +58,14 @@ export class KeywordList implements OnInit {
     keywords = signal<KeywordResponse[]>([]);
     
     // Propriedades de paginação
-    totalRecords: number = 0;
-    pageSize: number = 50;
-    currentPage: number = 0;
-    sortField: string = 'st_keyword';
-    sortOrder: number = 1;
+    page: {
+        total: number;
+        limit: number;
+        offset: number;
+        sort?: string;
+    } = {total: 0, limit: 50, offset: 0, sort: 'st_keyword'};
     searchTerm: string = '';
+    loading: boolean = false;
 
     keyword!: KeywordResponse;
 
@@ -81,6 +83,8 @@ export class KeywordList implements OnInit {
     exportColumns!: ExportColumn[];
 
     cols!: Column[];
+
+    filterChange = new EventEmitter<string>(); // Emissor de eventos
 
     constructor(
         private keywordService: KeywordService,
@@ -127,15 +131,25 @@ export class KeywordList implements OnInit {
     }
 
     ngOnInit() {
-        this.loadKeywordData();
+        this.filterChange.pipe(
+            debounceTime(750), // Espera 500ms para evitar chamadas excessivas
+            distinctUntilChanged(),
+            switchMap(value => value)
+        ).subscribe(response => {
+            this.loadKeywordData();
+        });         
     }
 
-    loadKeywordData() {
-        const params: {[param: string]: string | number} = {
-            'page.limit': this.pageSize,
-            'page.offset': this.currentPage * this.pageSize,
-            'page.sort': `${this.sortField}.${this.sortOrder === 1 ? 'asc' : 'desc'}`
-        };
+    loadKeywordData(event?: any) {
+        if (!event) {
+            event = {first: this.page.offset, rows: this.page.limit};
+        }
+
+        this.loading = true;
+        const params: any = {};
+        params['page.limit'] = event.rows;
+        params['page.offset'] = event.first;
+        params['page.sort'] = `${event.sortField || this.page.sort}${event.sortOrder !== -1 ? '.asc' : '.desc'}`;
 
         if (this.searchTerm) {
             params['st_keyword'] = this.searchTerm;
@@ -145,8 +159,8 @@ export class KeywordList implements OnInit {
 
         this.keywordService.getKeywords(params).subscribe({
             next: (data: Page<KeywordResponse>) => {
-                this.keywords.set(data.list);
-                this.totalRecords = data.page.total;
+                this.keywords.set(data.list);   
+                this.page = data.page;
             },
             error: (error) => {
                 this.messageService.add({
@@ -155,6 +169,10 @@ export class KeywordList implements OnInit {
                     detail: 'Erro ao carregar palavras-chave',
                     life: 3000
                 });
+                console.error('Erro ao carregar palavras-chave:', error);
+            },
+            complete: () => {
+                this.loading = false;
             }
         });
 
@@ -173,8 +191,12 @@ export class KeywordList implements OnInit {
     onGlobalFilter(table: Table, event: Event) {
         const value = (event.target as HTMLInputElement).value;
         this.searchTerm = value;
-        this.currentPage = 0;
-        this.loadKeywordData();
+        this.page.offset = 0;
+        
+        this.filterChange.emit(value);
+        if (value === '') {
+            this.loadKeywordData();
+        }
     }
 
     openNew() {
@@ -313,17 +335,4 @@ export class KeywordList implements OnInit {
         return status === 'active' ? 'Ativo' : 'Inativo';
     }
 
-    onPage(event: any) {
-        this.currentPage = event.first / event.rows;
-        this.pageSize = event.rows;
-        this.loadKeywordData();
-    }
-
-    onSort(event: any) {
-        if (this.sortField !== event.field || this.sortOrder !== event.order) {
-            this.sortField = event.field;
-            this.sortOrder = event.order;
-            this.loadKeywordData();
-        }
-    }
 }

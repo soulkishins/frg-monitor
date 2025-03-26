@@ -14,20 +14,22 @@
 <p-table
     #dt
     [value]="keywords()"
-    [rows]="pageSize"
-    [totalRecords]="totalRecords"
+    [totalRecords]="page.total"
     [columns]="cols"
     [paginator]="true"
-    [globalFilterFields]="['brand.client.st_name', 'brand.st_brand', 'st_keyword', 'st_status']"
     [tableStyle]="{ 'min-width': '75rem' }"
     [(selection)]="selectedKeywords"
     [rowHover]="true"
-    dataKey="id_keyword"
-    currentPageReportTemplate="Mostrando {first} até {last} de {totalRecords} palavras-chave"
+    dataKey="id"
+    currentPageReportTemplate="Mostrando {first} até {last} de {totalRecords} marcas"
     [showCurrentPageReport]="true"
     [rowsPerPageOptions]="[50, 100, 200, 300]"
-    (onPage)="onPage($event)"
-    (onSort)="onSort($event)"
+    [lazy]="true"
+    (onLazyLoad)="loadKeywordData($event)"
+    [(rows)]="page.limit"
+    [lazyLoadOnInit]="true"
+    [loading]="loading"
+
 >
     <ng-template #caption>
         <div class="flex items-center justify-between">

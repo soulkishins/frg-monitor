@@ -12,21 +12,21 @@
 <p-table
     #dt
     [value]="companies()"
-    [rows]="pageSize"
+    [totalRecords]="page.total"
     [columns]="cols"
     [paginator]="true"
-    [globalFilterFields]="['name', 'identification', 'status']"
     [tableStyle]="{ 'min-width': '75rem' }"
     [(selection)]="selectedCompanies"
     [rowHover]="true"
     dataKey="id"
-    currentPageReportTemplate="Exibindo {first} até {last} de {totalRecords}"
+    currentPageReportTemplate="Mostrando {first} até {last} de {totalRecords} marcas"
     [showCurrentPageReport]="true"
     [rowsPerPageOptions]="[50, 100, 200, 300]"
-    [totalRecords]="totalRecords"
     [lazy]="true"
-    (onPage)="onPage($event)"
-    (onSort)="onSort($event)"
+    (onLazyLoad)="loadDataAndFields($event)"
+    [(rows)]="page.limit"
+    [lazyLoadOnInit]="true"
+    [loading]="loading"
 >
     <ng-template #caption>
         <div class="flex items-center justify-between">

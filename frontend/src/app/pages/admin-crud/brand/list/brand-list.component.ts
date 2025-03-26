@@ -22,8 +22,7 @@ import { BrandService } from '../../../../pages/service/brand.service';
 import { Brand } from '../../../../pages/models/brand.model';
 import { Column, ExportColumn } from '../../../../pages/models/global.model';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
-import { debounceTime, delay, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 @Component({
     selector: 'app-brand-list',
@@ -126,13 +125,11 @@ export class BrandList implements OnInit {
     }
 
     ngOnInit() {
-        //this.loadBrandData();
         this.filterChange.pipe(
             debounceTime(750), // Espera 500ms para evitar chamadas excessivas
             distinctUntilChanged(),
             switchMap(value => value)
         ).subscribe(response => {
-            console.log('Iniciando busca', response);
             this.loadBrandData();
         });
     }

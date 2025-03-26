@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, EventEmitter, OnInit, signal, ViewChild } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Table, TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
@@ -22,7 +22,7 @@ import { CompanyService } from '../../../service/company.service';
 import { Company, CompanyResponse, CompanyRequest } from '../../../models/company.model';
 import { Column, ExportColumn, Page } from '../../../models/global.model';
 import { Router } from '@angular/router';
-
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 @Component({
     selector: 'app-crud',
     standalone: true,
@@ -53,13 +53,15 @@ export class CompanyList implements OnInit {
     companyDialog: boolean = false;
 
     companies = signal<Company[]>([]);
-    
+
     // Propriedades de paginação
-    totalRecords: number = 0;
-    pageSize: number = 50;
-    currentPage: number = 0;
-    sortField: string = 'st_name';
-    sortOrder: number = 1;
+    page: {
+        total: number;
+        limit: number;
+        offset: number;
+        sort?: string;
+    } = {total: 0, limit: 50, offset: 0, sort: 'st_name'};
+    loading: boolean = false;
     searchTerm: string = '';
 
     company!: Company;
@@ -92,6 +94,8 @@ export class CompanyList implements OnInit {
     exportColumns!: ExportColumn[];
 
     cols!: Column[];
+
+    filterChange = new EventEmitter<string>(); // Emissor de eventos
 
     constructor(
         private messageService: MessageService,
@@ -137,16 +141,29 @@ export class CompanyList implements OnInit {
     }
 
     ngOnInit() {
-        this.loadDataAndFields();
+        this.filterChange.pipe(
+            debounceTime(750), // Espera 500ms para evitar chamadas excessivas
+            distinctUntilChanged(),
+            switchMap(value => value)
+        ).subscribe(response => {
+            this.loadDataAndFields();
+        });        
     }
 
-    loadDataAndFields() {
-        const params: {[param: string]: string | number} = {
-            'page.limit': this.pageSize,
-            'page.offset': this.currentPage * this.pageSize,
-            'page.sort': `${this.sortField}.${this.sortOrder === 1 ? 'asc' : 'desc'}`,
-            'st_status': 'ACTIVE'
-        };
+    loadDataAndFields(event?: any) {
+
+        if (!event) {
+            event = {first: this.page.offset, rows: this.page.limit};
+        }
+
+        this.loading = true;
+
+        const params: any = {};
+        params['page.limit'] = event.rows;
+        params['page.offset'] = event.first;
+        params['page.sort'] = `${event.sortField || this.page.sort}${event.sortOrder !== -1 ? '.asc' : '.desc'}`;
+        params['st_status'] = 'ACTIVE';
+
 
         if (this.searchTerm) {
             params['st_name'] = this.searchTerm;
@@ -162,7 +179,7 @@ export class CompanyList implements OnInit {
                     status: item.st_status.toLowerCase()
                 }));
                 this.companies.set(mappedCompanies);
-                this.totalRecords = data.page.total;
+                this.page = data.page;
             },
             error: (error) => {
                 this.messageService.add({
@@ -172,6 +189,9 @@ export class CompanyList implements OnInit {
                     life: 3000
                 });
                 console.error('Erro ao carregar clientes:', error);
+            },
+            complete: () => {
+                this.loading = false;
             }
         });
 
@@ -188,8 +208,12 @@ export class CompanyList implements OnInit {
     onGlobalFilter(table: Table, event: Event) {
         const value = (event.target as HTMLInputElement).value;
         this.searchTerm = value;
-        this.currentPage = 0;
-        this.loadDataAndFields();
+        this.page.offset = 0;
+        
+        this.filterChange.emit(value);
+        if (value === '') {
+            this.loadDataAndFields();
+        }
     }
 
     openNew() {
@@ -469,18 +493,6 @@ export class CompanyList implements OnInit {
 
         this.companyDialog = false;
         this.company = {};
-    }
-
-    onPage(event: any) {
-        this.currentPage = event.first / event.rows;
-        this.pageSize = event.rows;
-        this.loadDataAndFields();
-    }
-
-    onSort(event: any) {
-        this.sortField = event.field;
-        this.sortOrder = event.order;
-        this.loadDataAndFields();
     }
 
 }
