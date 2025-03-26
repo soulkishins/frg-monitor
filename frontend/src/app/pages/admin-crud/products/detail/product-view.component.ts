@@ -36,6 +36,8 @@ import { mergeMap, map } from 'rxjs/operators';
 import { ProductRequest } from '../../../models/product.model';
 import { Column, ExportColumn } from '../../../models/global.model';
 import { LOCALE_ID } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 // Registrar o locale
 registerLocaleData(localePt);
@@ -104,6 +106,19 @@ export class ProductView implements OnInit {
     selectedBrand: string = '';
     selectedCategory: string = '';
 
+    // Propriedades para busca e carregamento
+    private searchSubject = new Subject<string>();
+    private searchBrandSubject = new Subject<string>();
+    private destroy$ = new Subject<void>();
+    loading: boolean = false;
+    filteredClients: any[] = [];
+    page: {
+        total: number;
+        limit: number;
+        offset: number;
+        sort?: string;
+    } = {total: 0, limit: 50, offset: 0, sort: 'st_name'};
+
     @ViewChild('dt') dt!: Table;
     exportColumns!: ExportColumn[];
     cols!: Column[];
@@ -126,7 +141,63 @@ export class ProductView implements OnInit {
     }
 
     ngOnInit() {
-        this.loadClients();
+        // Configuração do search para clientes
+        this.searchSubject.pipe(
+            takeUntil(this.destroy$),
+            debounceTime(300),
+            distinctUntilChanged(),
+            switchMap(query => {
+                this.loading = true;
+                return this.companyService.getClients({ 
+                    "st_name": query, 
+                    "page.limit": this.page.limit, 
+                    "page.sort": "st_name.asc" 
+                });
+            })
+        ).subscribe({
+            next: (companies) => {
+                this.filteredClients = companies.list.map((company: CompanyResponse) => ({
+                    label: company.st_name,
+                    value: company.id
+                }));
+                this.loading = false;
+            },
+            error: (error) => {
+                console.error('Erro ao buscar clientes:', error);
+                this.loading = false;
+            }
+        });
+
+        // Configuração do search para marcas
+        this.searchBrandSubject.pipe(
+            takeUntil(this.destroy$),
+            debounceTime(300),
+            distinctUntilChanged(),
+            switchMap(query => {
+                this.loading = true;
+                const selectedClientObj = this.filteredClients.find(c => c.value === this.selectedClient);
+                if (selectedClientObj) {
+                    return this.brandService.getBrands({
+                        "st_brand": query,
+                        "st_client_name": selectedClientObj.label,
+                        "page.limit": this.page.limit,
+                        "page.sort": "st_brand.asc"
+                    });
+                }
+                return [];
+            })
+        ).subscribe({
+            next: (data) => {
+                this.brands = data.list;
+                this.loading = false;
+            },
+            error: (error) => {
+                console.error('Erro ao buscar marcas:', error);
+                this.loading = false;
+            }
+        });
+
+        this.loadInitialClients();
         this.loadCategories();
 
         this.statuses = [
@@ -146,6 +217,99 @@ export class ProductView implements OnInit {
         ];
 
         this.exportColumns = this.cols.map(col => ({ title: col.header, dataKey: col.field }));
+    }
+
+    ngOnDestroy() {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    loadInitialClients() {
+        this.loading = true;
+        this.companyService.getClients({
+            "page.limit": this.page.limit,
+            "page.sort": "st_name.asc"
+        }).subscribe({
+            next: (companies) => {
+                this.filteredClients = companies.list.map((company: CompanyResponse) => ({
+                    label: company.st_name,
+                    value: company.id
+                }));
+                this.loading = false;
+                
+                // Se estiver editando e tiver um cliente selecionado, carrega as marcas
+                if (this.isEditing && this.selectedClient) {
+                    const selectedClientObj = this.filteredClients.find(c => c.value === this.selectedClient);
+                    if (selectedClientObj) {
+                        this.loadBrandsByClientName(selectedClientObj.label);
+                    }
+                }
+            },
+            error: (error) => {
+                console.error('Erro ao carregar clientes:', error);
+                this.loading = false;
+            }
+        });
+    }
+
+    loadBrandsByClientName(clientName: string) {
+        this.loading = true;
+        this.brandService.getBrands({
+            "st_client_name": clientName,
+            "page.limit": this.page.limit,
+            "page.sort": "st_brand.asc"
+        }).subscribe({
+            next: (data) => {
+                this.brands = data.list;
+                this.loading = false;
+            },
+            error: (error) => {
+                console.error('Erro ao carregar marcas:', error);
+                this.loading = false;
+            }
+        });
+    }
+
+    filterBrands(event: any) {
+        const query = event.filter.toLowerCase();
+        this.searchBrandSubject.next(query);
+    }
+
+    onClientChange(event: any) {
+        const clientId = event.value;
+        if (clientId) {
+            const selectedClientObj = this.filteredClients.find(c => c.value === clientId);
+            if (selectedClientObj) {
+                this.loadBrandsByClientName(selectedClientObj.label);
+            }
+            this.product.id_brand = '';
+        } else {
+            this.brands = [];
+            this.product.id_brand = '';
+        }
+    }
+
+    filterClients(event: any) {
+        const query = event.filter.toLowerCase();
+        this.searchSubject.next(query);
+    }
+
+    onCategoryChange(event: any) {
+        const categoryId = event.value;
+        if (categoryId) {
+            this.subCategoryService.getSubCategories().subscribe({
+                next: (subcategories) => {
+                    this.subcategories = subcategories.list.filter(subcategory => subcategory.id_category === categoryId);
+                },
+                error: (error) => {
+                    console.error('Erro ao carregar subcategorias:', error);
+                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar subcategorias', life: 3000 });
+                }
+            });
+        } else {
+            this.subcategories = [];
+        }
+        this.product.id_subcategory = '';
     }
 
     loadProductData() {
@@ -171,7 +335,10 @@ export class ProductView implements OnInit {
                     // Carregar cliente e marca
                     if (this.product.brand?.client) {
                         this.selectedClient = this.product.brand.client.id;
-                        this.loadBrands(this.selectedClient);
+                        const selectedClientObj = this.filteredClients.find(c => c.value === this.selectedClient);
+                        if (selectedClientObj) {
+                            this.loadBrandsByClientName(selectedClientObj.label);
+                        }
                     }
 
                     // Carregar categoria e subcategoria
@@ -195,38 +362,6 @@ export class ProductView implements OnInit {
             this.product.st_status = 'ACTIVE';
             this.varietyList = [];
         }
-    }
-
-    loadClients() {
-        this.companyService.getClients().subscribe({
-            next: (clients) => {
-                this.clients = clients.list;
-            },
-            error: (error) => {
-                console.error('Erro ao carregar clientes:', error);
-                this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar clientes', life: 3000 });
-            }
-        });
-    }
-
-    loadBrands(clientId: string) {
-        if (!clientId) {
-            this.brands = [];
-            return;
-        }
-        this.brandService.getBrands().subscribe({
-            next: (data) => {
-                this.brands = data.list.filter(b => b.id_client === clientId);
-            },
-            error: (error) => {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Erro',
-                    detail: 'Erro ao carregar marcas',
-                    life: 3000
-                });
-            }
-        });
     }
 
     loadCategories() {
@@ -259,42 +394,6 @@ export class ProductView implements OnInit {
                 });
             }
         });
-    }
-
-    onClientChange(event: any) {
-        const clientId = event.value;
-        if (clientId) {
-            this.brandService.getBrands().subscribe({
-                next: (brands) => {
-                    this.brands = brands.list.filter(brand => brand.id_client === clientId);
-                },
-                error: (error) => {
-                    console.error('Erro ao carregar marcas:', error);
-                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar marcas', life: 3000 });
-                }
-            });
-        } else {
-            this.brands = [];
-        }
-        this.product.id_brand = '';
-    }
-
-    onCategoryChange(event: any) {
-        const categoryId = event.value;
-        if (categoryId) {
-            this.subCategoryService.getSubCategories().subscribe({
-                next: (subcategories) => {
-                    this.subcategories = subcategories.list.filter(subcategory => subcategory.id_category === categoryId);
-                },
-                error: (error) => {
-                    console.error('Erro ao carregar subcategorias:', error);
-                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar subcategorias', life: 3000 });
-                }
-            });
-        } else {
-            this.subcategories = [];
-        }
-        this.product.id_subcategory = '';
     }
 
     openNew() {
