@@ -22,7 +22,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ProductService } from '../../../service/product.service';
-import { ProductResponse} from '../../../models/product.model';
+import { ProductResponse } from '../../../models/product.model';
 import { CompanyService } from '../../../service/company.service';
 import { BrandService } from '../../../service/brand.service';
 import { CompanyResponse } from '../../../models/company.model';
@@ -36,8 +36,6 @@ import { mergeMap, map } from 'rxjs/operators';
 import { ProductRequest } from '../../../models/product.model';
 import { Column, ExportColumn } from '../../../models/global.model';
 import { LOCALE_ID } from '@angular/core';
-
-
 
 // Registrar o locale
 registerLocaleData(localePt);
@@ -67,12 +65,12 @@ registerLocaleData(localePt);
     ],
     templateUrl: './product-view.component.html',
     providers: [
-        MessageService, 
-        ProductService, 
-        CompanyService, 
-        BrandService, 
-        CategoryService, 
-        SubCategoryService, 
+        MessageService,
+        ProductService,
+        CompanyService,
+        BrandService,
+        CategoryService,
+        SubCategoryService,
         ConfirmationService,
         { provide: LOCALE_ID, useValue: 'pt-BR' }
     ]
@@ -80,15 +78,10 @@ registerLocaleData(localePt);
 export class ProductView implements OnInit {
     productDialog: boolean = false;
     isEditing: boolean = false;
-
     products = signal<ProductResponse[]>([]);
-
     product!: ProductResponse;
-
     selectedProducts!: ProductResponse[] | null;
-
     submitted: boolean = false;
-
     statuses!: any[];
 
     // Novas propriedades para variedades e preços
@@ -103,9 +96,7 @@ export class ProductView implements OnInit {
     }
 
     clients: CompanyResponse[] = [];
-
     brands: BrandResponse[] = [];
-
     categories: CategoryResponse[] = [];
     subcategories: SubCategoryResponse[] = [];
 
@@ -113,26 +104,9 @@ export class ProductView implements OnInit {
     selectedBrand: string = '';
     selectedCategory: string = '';
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     @ViewChild('dt') dt!: Table;
-
     exportColumns!: ExportColumn[];
-
     cols!: Column[];
-
     vl_floor_price: number = 0;
 
     constructor(
@@ -221,42 +195,19 @@ export class ProductView implements OnInit {
             this.product.st_status = 'ACTIVE';
             this.varietyList = [];
         }
-
-
-
-
-
-
-
-
-
     }
 
     loadClients() {
         this.companyService.getClients().subscribe({
-
             next: (clients) => {
                 this.clients = clients.list;
-
-
             },
             error: (error) => {
                 console.error('Erro ao carregar clientes:', error);
                 this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar clientes', life: 3000 });
-
             }
         });
     }
-
-
-
-
-
-
-
-
-
-
 
     loadBrands(clientId: string) {
         if (!clientId) {
@@ -276,13 +227,6 @@ export class ProductView implements OnInit {
                 });
             }
         });
-
-
-
-
-
-
-
     }
 
     loadCategories() {
@@ -319,10 +263,6 @@ export class ProductView implements OnInit {
 
     onClientChange(event: any) {
         const clientId = event.value;
-
-
-
-
         if (clientId) {
             this.brandService.getBrands().subscribe({
                 next: (brands) => {
@@ -333,14 +273,6 @@ export class ProductView implements OnInit {
                     this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar marcas', life: 3000 });
                 }
             });
-
-
-
-
-
-
-
-
         } else {
             this.brands = [];
         }
@@ -386,7 +318,6 @@ export class ProductView implements OnInit {
         // Carregar lista de variedades do JSON
         try {
             const parsedVarieties = product.st_variety ? JSON.parse(product.st_variety) : [];
-            // Filtrar apenas variedades não deletadas ou manter o status existente
             this.varietyList = parsedVarieties.map((v: any) => ({
                 ...v,
                 status: v.status || 'active'
@@ -408,14 +339,6 @@ export class ProductView implements OnInit {
                     this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar marcas', life: 3000 });
                 }
             });
-
-
-
-
-
-
-
-
         }
 
         // Carregar categoria e subcategoria
@@ -655,57 +578,4 @@ export class ProductView implements OnInit {
             this.messageService.add({ severity: 'info', summary: 'Selecionado', detail: 'Variedade selecionada para edição', life: 3000 });
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
