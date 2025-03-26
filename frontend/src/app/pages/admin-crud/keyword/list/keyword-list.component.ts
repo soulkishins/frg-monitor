@@ -132,11 +132,10 @@ export class KeywordList implements OnInit {
 
     ngOnInit() {
         this.filterChange.pipe(
-            debounceTime(500), // Espera 500ms para evitar chamadas excessivas
-            distinctUntilChanged(),
-            switchMap(value => value)
-        ).subscribe(response => {
-            this.dt.reset();
+            debounceTime(500),
+            distinctUntilChanged()
+        ).subscribe(() => {
+            this.loadKeywordData();
         });         
     }
 
