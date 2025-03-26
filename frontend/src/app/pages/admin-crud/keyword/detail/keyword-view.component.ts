@@ -238,11 +238,21 @@ export class KeywordView implements OnInit {
 
     onBrandChange(event: any) {
         const selectedBrand = this.brands.find(brand => brand.id_brand === event.value);
-        const selectedClient = this.clients.find(client => client.id === selectedBrand?.id_client);
-        if (selectedBrand && selectedClient) {
+        const selectedClientObj = this.filteredClients.find(c => c.value === this.selectedClient);
+        
+        if (selectedBrand && selectedClientObj) {
             this.keyword.brand = {
                 ...selectedBrand,
-                client: selectedClient
+                client: {
+                    id: selectedClientObj.value,
+                    st_name: selectedClientObj.label,
+                    st_document: '',
+                    st_status: 'active',
+                    dt_created: new Date().toISOString(),
+                    st_created_by: '',
+                    dt_modified: null,
+                    st_modified_by: null
+                }
             };
             
             // Carregar produtos da marca selecionada
