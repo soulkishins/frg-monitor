@@ -23,7 +23,7 @@ import { CategoryService } from '../../../../pages/service/category.service';
 import { CategoryResponse } from '../../../../pages/models/category.model';
 import { SubCategoryService } from '../../../../pages/service/sub-category.service';
 import { SubCategoryResponse } from '../../../../pages/models/sub-category.model';
-import { forkJoin } from 'rxjs';
+import { debounceTime, distinctUntilChanged, forkJoin, Subject, switchMap, takeUntil } from 'rxjs';
 import { SubCategoryRequest } from '../../../../pages/models/sub-category.model';
 import { Column, ExportColumn } from '../../../../pages/models/global.model';
 
@@ -75,6 +75,17 @@ export class SubCategoryView implements OnInit {
 
     cols!: Column[];
 
+    page: {
+        total: number;
+        limit: number;
+        offset: number;
+        sort?: string;
+    } = {total: 0, limit: 50, offset: 0, sort: 'st_category'};
+
+    private searchSubject = new Subject<string>();
+    private destroy$ = new Subject<void>();
+    loading: boolean = false;    
+
     constructor(
         private router: Router,
         private route: ActivatedRoute,
@@ -100,10 +111,33 @@ export class SubCategoryView implements OnInit {
                 this.subCategory = {} as SubCategoryResponse;
             }
         });
+
+        this.searchSubject.pipe(
+            takeUntil(this.destroy$),
+            debounceTime(300),
+            distinctUntilChanged(),
+            switchMap(query => {
+                this.loading = true;
+                return this.categoryService.getCategories({
+                    "st_category": query,
+                    "page.limit": this.page.limit,
+                    "page.sort": "st_category.asc"
+                });
+            })
+        ).subscribe({
+            next: (categories) => {
+                this.categories.set(categories.list);
+                this.loading = false;
+            },
+            error: (error) => {
+                console.error('Erro ao buscar categorias:', error);
+                this.loading = false;
+            }
+        });
     }
 
     loadCategories() {
-        this.categoryService.getCategories().subscribe(
+        this.categoryService.getCategories({"page.limit": this.page.limit,"page.sort": "st_category.asc"}).subscribe(
             (data) => {
                 this.categories.set(data.list);
             },
@@ -122,6 +156,9 @@ export class SubCategoryView implements OnInit {
         this.subCategoryService.getSubCategory(id).subscribe(
             (data) => {
                 this.subCategory = data;
+                if (data.category?.st_category) {
+                    this.filterCategories({ filter: data.category.st_category });
+                }
             },
             (error) => {
                 this.messageService.add({
@@ -207,6 +244,11 @@ export class SubCategoryView implements OnInit {
                 );
             }
         });
+    }
+
+    ngOnDestroy() {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     deleteSelectedSubCategories() {
@@ -305,4 +347,10 @@ export class SubCategoryView implements OnInit {
             }
         }
     }
+
+    filterCategories(event: any) {
+        const query = event.filter.toLowerCase();
+        this.searchSubject.next(query);
+    }
+
 }
