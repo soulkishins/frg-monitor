@@ -24,6 +24,11 @@ class ClientBrandCrud(Crud):
                 (ClientBrand.st_brand.ilike(f"%{filters['st_brand']}%"))
             )
         else:
+            if 'search_global' in filters:
+                where.append(
+                    (Client.st_name.ilike(f"%{filters['search_global']}%")) |
+                    (ClientBrand.st_brand.ilike(f"%{filters['search_global']}%"))
+                )
             if 'st_client_name' in filters:
                 where.append(Client.st_name.ilike(f"%{filters['st_client_name']}%"))
             if 'st_brand' in filters:

@@ -54,6 +54,12 @@ class KeywordCrud(Crud):
                 (Client.st_name.ilike(f"%{filters['st_client']}%")) 
             )
         else:
+            if 'search_global' in filters:
+                where.append(
+                    (Keyword.st_keyword.ilike(f"%{filters['search_global']}%")) |
+                    (ClientBrand.st_brand.ilike(f"%{filters['search_global']}%")) |
+                    (Client.st_name.ilike(f"%{filters['search_global']}%")) 
+                )
             if 'brand' in indexes:
                 where.append(Keyword.id_brand == indexes['brand'])
             if 'st_keyword' in filters:

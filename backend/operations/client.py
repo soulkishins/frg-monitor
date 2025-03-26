@@ -17,6 +17,11 @@ class ClientCrud(Crud):
                 (Client.st_document.ilike(f"%{filters['st_document']}%"))
             )
         else:
+            if 'search_global' in filters:
+                where.append(
+                    (Client.st_name.ilike(f"%{filters['search_global']}%")) |
+                    (Client.st_document.ilike(f"%{filters['search_global']}%"))
+                )
             if 'st_name' in filters:
                 where.append(Client.st_name.ilike(f"%{filters['st_name']}%"))
             if 'st_document' in filters:

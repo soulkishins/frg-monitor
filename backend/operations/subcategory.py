@@ -24,6 +24,11 @@ class SubcategoryCrud(Crud):
                 (Subcategory.st_subcategory.ilike(f"%{filters['st_subcategory']}%"))
             )
         else:
+            if 'search_global' in filters:
+                where.append(
+                    (Category.st_category.ilike(f"%{filters['search_global']}%")) |
+                    (Subcategory.st_subcategory.ilike(f"%{filters['search_global']}%"))
+                )
             if 'category' in indexes:
                 where.append(Subcategory.id_category == indexes['category'])
             if 'st_subcategory' in filters:
