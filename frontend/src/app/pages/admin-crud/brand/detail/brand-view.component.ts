@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MessageService } from 'primeng/api';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -12,6 +12,7 @@ import { Brand } from '../../../../pages/models/brand.model';
 import { CompanyService } from '../../../../pages/service/company.service';
 import { CompanyResponse } from '../../../../pages/models/company.model';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subject, debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs';
 
 @Component({
     selector: 'app-brand-view',
@@ -28,7 +29,7 @@ import { ActivatedRoute, Router } from '@angular/router';
     templateUrl: './brand-view.component.html',
     providers: [MessageService, BrandService, CompanyService]
 })
-export class BrandView implements OnInit {
+export class BrandView implements OnInit, OnDestroy {
     brandDialog: boolean = false;
     isEditing: boolean = false;
     brand: Brand = {
@@ -41,6 +42,18 @@ export class BrandView implements OnInit {
     submitted: boolean = false;
     statuses!: any[];
     clients: any[] = [];
+    filteredClients: any[] = [];
+
+    page: {
+        total: number;
+        limit: number;
+        offset: number;
+        sort?: string;
+    } = {total: 0, limit: 50, offset: 0, sort: 'st_name'};
+
+    private searchSubject = new Subject<string>();
+    private destroy$ = new Subject<void>();
+    loading: boolean = false;
 
     constructor(
         private brandService: BrandService,
@@ -52,13 +65,14 @@ export class BrandView implements OnInit {
 
     ngOnInit() {
         // Carregar os dados iniciais (clientes e status)
-        this.companyService.getClients().subscribe({
+        this.companyService.getClients({"page.limit": this.page.limit,"page.sort": "st_name.asc"}).subscribe({
             next: (companies) => {
                 // Configurar clientes para o dropdown
                 this.clients = companies.list.map((company: CompanyResponse) => ({
                     label: company.st_name,
                     value: company.id
                 }));
+                this.filteredClients = [...this.clients];
 
                 // Após carregar os clientes, verifica se é edição
                 const brandId = this.route.snapshot.paramMap.get('id');
@@ -73,6 +87,10 @@ export class BrandView implements OnInit {
                                 client_id: response.id_client,
                                 client_name: response.client.st_name
                             };
+                            // Após carregar a marca, filtrar o cliente correspondente
+                            if (this.brand.client_name) {
+                                this.filterClients({ filter: this.brand.client_name });
+                            }
                         },
                         error: (error) => {
                             this.messageService.add({
@@ -110,6 +128,38 @@ export class BrandView implements OnInit {
             { label: 'Ativo', value: 'ACTIVE' },
             { label: 'Inativo', value: 'INACTIVE' }
         ];
+
+        // Configurar o debounce para busca de clientes
+        this.searchSubject.pipe(
+            takeUntil(this.destroy$),
+            debounceTime(300),
+            distinctUntilChanged(),
+            switchMap(query => {
+                this.loading = true;
+                return this.companyService.getClients({ 
+                    "st_name": query, 
+                    "page.limit": this.page.limit, 
+                    "page.sort": "st_name.asc" 
+                });
+            })
+        ).subscribe({
+            next: (companies) => {
+                this.filteredClients = companies.list.map((company: CompanyResponse) => ({
+                    label: company.st_name,
+                    value: company.id
+                }));
+                this.loading = false;
+            },
+            error: (error) => {
+                console.error('Erro ao buscar clientes:', error);
+                this.loading = false;
+            }
+        });
+    }
+
+    ngOnDestroy() {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     openNew() {
@@ -241,5 +291,10 @@ export class BrandView implements OnInit {
             default:
                 return status;
         }
+    }
+
+    filterClients(event: any) {
+        const query = event.filter.toLowerCase();
+        this.searchSubject.next(query);
     }
 }
