@@ -149,7 +149,9 @@ export class SubCategoryList implements OnInit {
         const params: any = {};
         params['page.limit'] = event.rows;
         params['page.offset'] = event.first;
-        params['page.sort'] = `${event.sortField || this.page.sort}${event.sortOrder !== -1 ? '.asc' : '.desc'}`;
+
+        const baseSort = (event.sortField || this.page.sort).replace(/\.(asc|desc)$/, '');
+        params['page.sort'] = `${baseSort}${event.sortOrder === 1 ? '.asc' : '.desc'}`;
 
         if (this.searchTerm) {
             params['search_global'] = this.searchTerm;
