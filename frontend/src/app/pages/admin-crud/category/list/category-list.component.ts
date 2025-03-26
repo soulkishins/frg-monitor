@@ -67,7 +67,6 @@ export class CategoryList implements OnInit {
     searchTerm: string = '';
     loading: boolean = false;
 
-
     category!: CategoryResponse;
 
     selectedCategories!: CategoryResponse[] | null;
@@ -130,17 +129,19 @@ export class CategoryList implements OnInit {
     }
 
     ngOnInit() {
-        //this.loadBrandData();
         this.filterChange.pipe(
-            debounceTime(750), // Espera 500ms para evitar chamadas excessivas
+            debounceTime(500), // Espera 500ms para evitar chamadas excessivas
             distinctUntilChanged(),
             switchMap(value => value)
         ).subscribe(response => {
-            this.loadCategoryData();
+            this.dt.reset();
         });        
     }
 
     loadCategoryData(event?: any) {
+        if (this.loading) {
+            return;
+        }
 
         if (!event) {
             event = {first: this.page.offset, rows: this.page.limit};
@@ -192,7 +193,7 @@ export class CategoryList implements OnInit {
         
         this.filterChange.emit(value);
         if (value === '') {
-            this.loadCategoryData();
+            this.dt.reset();
         }
     }
 

@@ -132,11 +132,11 @@ export class KeywordList implements OnInit {
 
     ngOnInit() {
         this.filterChange.pipe(
-            debounceTime(750), // Espera 500ms para evitar chamadas excessivas
+            debounceTime(500), // Espera 500ms para evitar chamadas excessivas
             distinctUntilChanged(),
             switchMap(value => value)
         ).subscribe(response => {
-            this.loadKeywordData();
+            this.dt.reset();
         });         
     }
 
@@ -195,7 +195,7 @@ export class KeywordList implements OnInit {
         
         this.filterChange.emit(value);
         if (value === '') {
-            this.loadKeywordData();
+            this.dt.reset();
         }
     }
 

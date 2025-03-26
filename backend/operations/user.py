@@ -163,7 +163,9 @@ class UserCrud(Crud):
         return (contains_eager(User.attributes),)
 
     def filter_by_pk(self, indexes) -> list:
-        return (User.id == indexes['user'],)
+        if 'user' in indexes:
+            return (User.id == indexes['user'],)
+        return (User.id == indexes['id_user'],)
 
     def filter_by(self, indexes, filters) -> list:
         where = []

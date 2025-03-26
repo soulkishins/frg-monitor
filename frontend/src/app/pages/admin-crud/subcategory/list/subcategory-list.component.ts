@@ -128,15 +128,19 @@ export class SubCategoryList implements OnInit {
 
     ngOnInit() {
         this.filterChange.pipe(
-            debounceTime(750), // Espera 500ms para evitar chamadas excessivas
+            debounceTime(500), // Espera 500ms para evitar chamadas excessivas
             distinctUntilChanged(),
             switchMap(value => value)
         ).subscribe(response => {
-            this.loadSubCategoryData();
+            this.dt.reset();
         });        
     }
 
     loadSubCategoryData(event?: any) {
+        if (this.loading) {
+            return;
+        }
+
         if (!event) {
             event = {first: this.page.offset, rows: this.page.limit};
         }
@@ -190,7 +194,7 @@ export class SubCategoryList implements OnInit {
         
         this.filterChange.emit(value);
         if (value === '') {
-            this.loadSubCategoryData();
+            this.dt.reset();
         }
     }
 

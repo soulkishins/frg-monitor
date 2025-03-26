@@ -126,15 +126,18 @@ export class BrandList implements OnInit {
 
     ngOnInit() {
         this.filterChange.pipe(
-            debounceTime(750), // Espera 500ms para evitar chamadas excessivas
+            debounceTime(500), // Espera 500ms para evitar chamadas excessivas
             distinctUntilChanged(),
             switchMap(value => value)
         ).subscribe(response => {
-            this.loadBrandData();
+            this.dt.reset();
         });
     }
 
     loadBrandData(event?: any) {
+        if (this.loading) {
+            return;
+        }
 
         if (!event) {
             event = {first: this.page.offset, rows: this.page.limit};
@@ -196,7 +199,7 @@ export class BrandList implements OnInit {
         
         this.filterChange.emit(value);
         if (value === '') {
-            this.loadBrandData();
+            this.dt.reset();
         }
     }
 
