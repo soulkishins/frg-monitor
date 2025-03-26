@@ -18,17 +18,17 @@
         <div class="flex flex-col gap-6 p-4">
             <div>
                 <label for="client" class="block font-bold mb-3">Cliente *</label>
-                <p-select [(ngModel)]="selectedClient" name="selectedClient" inputId="client" [options]="filteredClients" optionLabel="st_name" optionValue="id" 
-                    placeholder="Selecione um Cliente" (onChange)="onClientChange($event)" [required]="true" [style]="{'width': '100%'}"
-                    [filter]="true" (onFilter)="filterClients($event)" [loading]="loading" />
+                <p-select [(ngModel)]="selectedClient" name="selectedClient" inputId="client" [options]="clients" optionLabel="st_name" optionValue="id" 
+                    placeholder="Selecione um Cliente" (onChange)="onClientChange($event)" [required]="true" [style]="{'width': '100%'}" />
+
                 <small class="text-red-500" *ngIf="submitted && !selectedClient">Cliente é obrigatório.</small>
             </div>
 
             <div>
                 <label for="brand" class="block font-bold mb-3">Marca *</label>
-                <p-select [(ngModel)]="product.id_brand" name="id_brand" inputId="brand" [options]="filteredBrands" optionLabel="st_brand" optionValue="id_brand" 
-                    placeholder="Selecione uma Marca" [required]="true" [disabled]="!selectedClient" [style]="{'width': '100%'}"
-                    [filter]="true" (onFilter)="filterBrands($event)" [loading]="loadingBrands" />
+                <p-select [(ngModel)]="product.id_brand" name="id_brand" inputId="brand" [options]="brands" optionLabel="st_brand" optionValue="id_brand" 
+                    placeholder="Selecione uma Marca" [required]="true" [disabled]="!selectedClient" [style]="{'width': '100%'}" />
+
                 <small class="text-red-500" *ngIf="submitted && !product.id_brand">Marca é obrigatória.</small>
             </div>
 
@@ -115,4 +115,3 @@
             <p-button type="submit" label="Salvar" icon="pi pi-check" />
         </div>
     </form>
-</div>
