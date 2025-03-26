@@ -32,3 +32,15 @@ class ClientBrandCrud(Crud):
             where.append(ClientBrand.st_status == filters['st_status'])
 
         return where + super().filter_by(indexes, filters)
+
+    def get_orderby(self, orderby: str):
+        if not orderby:
+            return ClientBrand.dt_created.desc()
+        order = orderby.split('.')
+        if order[0] == 'st_client':
+            return Client.st_name.asc() if len(order) == 1 or order[1] == 'asc' else Client.st_name.desc()
+        if len(order) == 1:
+            return getattr(ClientBrand, order[0]).asc()
+        if order[1] == 'desc':
+            return getattr(ClientBrand, order[0]).desc()
+        return getattr(ClientBrand, order[0]).asc()

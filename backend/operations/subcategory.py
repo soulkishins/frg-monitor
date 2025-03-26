@@ -32,3 +32,15 @@ class SubcategoryCrud(Crud):
             where.append(Subcategory.st_status == filters['st_status'])
 
         return where + super().filter_by(indexes, filters)
+
+    def get_orderby(self, orderby: str):
+        if not orderby:
+            return Subcategory.dt_created.desc()
+        order = orderby.split('.')
+        if len(order) == 3 and order[0] == 'category' and order[1] == 'st_category':
+            return Category.st_category.asc() if order[2] == 'asc' else Category.st_category.desc()
+        if len(order) == 1:
+            return getattr(Subcategory, order[0]).asc()
+        if order[1] == 'desc':
+            return getattr(Subcategory, order[0]).desc()
+        return getattr(Subcategory, order[0]).asc()

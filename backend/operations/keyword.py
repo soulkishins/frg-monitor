@@ -36,10 +36,10 @@ class KeywordCrud(Crud):
         return deleted
     
     def get_joins(self, indexes, filters) -> list:
-        return (Keyword.brand,)
+        return (Keyword.brand,ClientBrand.client)
     
     def get_options(self) -> list:
-        return (contains_eager(Keyword.brand),)
+        return (contains_eager(Keyword.brand).contains_eager(ClientBrand.client),)
 
     def filter_by_pk(self, indexes) -> list:
         return (Keyword.id_keyword == indexes['keyword'],)
@@ -152,3 +152,17 @@ class KeywordCrud(Crud):
             print(f"Schedule não encontrado: {e}")
         # Retorna o status 200
         return 200, None
+
+    def get_orderby(self, orderby: str):
+        if not orderby:
+            return Keyword.dt_created.desc()
+        order = orderby.split('.')
+        if len(order) == 3 and order[0] == 'brand' and order[1] == 'st_brand':
+            return ClientBrand.st_brand.asc() if order[2] == 'asc' else ClientBrand.st_brand.desc()
+        if len(order) == 4 and order[0] == 'brand' and order[1] == 'client':
+            return Client.st_name.asc() if order[3] == 'asc' else Client.st_name.desc()            
+        if len(order) == 1:
+            return getattr(Keyword, order[0]).asc()
+        if order[1] == 'desc':
+            return getattr(Keyword, order[0]).desc()
+        return getattr(Keyword, order[0]).asc()
