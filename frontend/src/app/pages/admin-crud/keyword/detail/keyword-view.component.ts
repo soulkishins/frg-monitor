@@ -6,7 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { InputTextModule } from 'primeng/inputtext';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { KeywordService } from '../../../service/keyword.service';
 import { CompanyService } from '../../../service/company.service';
@@ -17,6 +17,7 @@ import { CompanyResponse } from '../../../models/company.model';
 import { BrandResponse } from '../../../models/brand.model';
 import { ProductResponse } from '../../../models/product.model';
 import { ActivatedRoute, Router } from '@angular/router';
+import { debounceTime, distinctUntilChanged, Subject, switchMap, takeUntil } from 'rxjs';
 
 interface ProductVariety {
     seq: string;
@@ -41,7 +42,7 @@ interface ProcessedProduct extends ProductResponse {
         ToastModule,
         ToolbarModule,
         InputTextModule,
-        DropdownModule,
+        SelectModule,
         TableModule
     ],
     templateUrl: './keyword-view.component.html',
@@ -63,6 +64,19 @@ export class KeywordView implements OnInit {
         { label: 'Inativo', value: 'inactive' }
     ];
 
+    filteredClients: any[] = [];
+    page: {
+        total: number;
+        limit: number;
+        offset: number;
+        sort?: string;
+    } = {total: 0, limit: 50, offset: 0, sort: 'st_name'};
+
+    private searchSubject = new Subject<string>();
+    private searchBrandSubject = new Subject<string>();
+    private destroy$ = new Subject<void>();
+    loading: boolean = false;    
+
     constructor(
         private keywordService: KeywordService,
         private companyService: CompanyService,
@@ -79,10 +93,7 @@ export class KeywordView implements OnInit {
             st_status: 'active'
         } as KeywordResponse;
         
-        this.loadClients();
-        this.loadProdutos();
-        
-        // Obter o ID da rota
+        // Obter o ID da rota primeiro
         this.route.params.subscribe(params => {
             const keywordId = params['id'];
             if (keywordId && keywordId !== 'novo') {
@@ -90,45 +101,133 @@ export class KeywordView implements OnInit {
                 this.loadKeyword(keywordId);
             }
         });
+
+        // Configuração do search para clientes
+        this.searchSubject.pipe(
+            takeUntil(this.destroy$),
+            debounceTime(300),
+            distinctUntilChanged(),
+            switchMap(query => {
+                this.loading = true;
+                return this.companyService.getClients({ 
+                    "st_name": query, 
+                    "page.limit": this.page.limit, 
+                    "page.sort": "st_name.asc" 
+                });
+            })
+        ).subscribe({
+            next: (companies) => {
+                this.filteredClients = companies.list.map((company: CompanyResponse) => ({
+                    label: company.st_name,
+                    value: company.id
+                }));
+                this.loading = false;
+            },
+            error: (error) => {
+                console.error('Erro ao buscar clientes:', error);
+                this.loading = false;
+            }
+        });
+
+        // Configuração do search para marcas
+        this.searchBrandSubject.pipe(
+            takeUntil(this.destroy$),
+            debounceTime(300),
+            distinctUntilChanged(),
+            switchMap(query => {
+                this.loading = true;
+                const selectedClientObj = this.filteredClients.find(c => c.value === this.selectedClient);
+                if (selectedClientObj) {
+                    return this.brandService.getBrands({
+                        "st_brand": query,
+                        "st_client_name": selectedClientObj.label,
+                        "page.limit": this.page.limit,
+                        "page.sort": "st_brand.asc"
+                    });
+                }
+                return [];
+            })
+        ).subscribe({
+            next: (data) => {
+                this.brands = data.list;
+                this.loading = false;
+            },
+            error: (error) => {
+                console.error('Erro ao buscar marcas:', error);
+                this.loading = false;
+            }
+        });
+
+        // Carregar clientes iniciais
+        this.loadInitialClients();
+        this.loadProdutos();
     }
 
-    loadClients() {
-        this.companyService.getClients().subscribe(
-            (response) => {
-                if (response && Array.isArray(response.list)) {
-                    this.clients = response.list;
+    ngOnDestroy() {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    loadInitialClients() {
+        this.loading = true;
+        this.companyService.getClients({
+            "page.limit": this.page.limit,
+            "page.sort": "st_name.asc"
+        }).subscribe({
+            next: (companies) => {
+                this.filteredClients = companies.list.map((company: CompanyResponse) => ({
+                    label: company.st_name,
+                    value: company.id
+                }));
+                this.loading = false;
+                
+                // Se estiver editando e tiver um cliente selecionado, carrega as marcas
+                if (this.isEditing && this.selectedClient) {
+                    const selectedClientObj = this.filteredClients.find(c => c.value === this.selectedClient);
+                    if (selectedClientObj) {
+                        this.loadBrandsByClientName(selectedClientObj.label);
+                    }
                 }
             },
-            (error) => {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Erro',
-                    detail: 'Erro ao carregar clientes',
-                    life: 3000
-                });
+            error: (error) => {
+                console.error('Erro ao carregar clientes:', error);
+                this.loading = false;
             }
-        );
+        });
+    }
+
+    loadBrandsByClientName(clientName: string) {
+        this.loading = true;
+        this.brandService.getBrands({
+            "st_client_name": clientName,
+            "page.limit": this.page.limit,
+            "page.sort": "st_brand.asc"
+        }).subscribe({
+            next: (data) => {
+                this.brands = data.list;
+                this.loading = false;
+            },
+            error: (error) => {
+                console.error('Erro ao carregar marcas:', error);
+                this.loading = false;
+            }
+        });
+    }
+
+    filterBrands(event: any) {
+        const query = event.filter.toLowerCase();
+        this.searchBrandSubject.next(query);
     }
 
     onClientChange(event: any) {
         const clientId = event.value;
         if (clientId) {
-            this.brandService.getBrands().subscribe({
-                next: (brands) => {
-                    this.brands = brands.list.filter(brand => brand.id_client === clientId);
-                    this.keyword.brand = null as any;
-                    this.filtrarProdutos();
-                },
-                error: (error) => {
-                    console.error('Erro ao carregar marcas:', error);
-                    this.messageService.add({ 
-                        severity: 'error', 
-                        summary: 'Erro', 
-                        detail: 'Erro ao carregar marcas', 
-                        life: 3000 
-                    });
-                }
-            });
+            const selectedClientObj = this.filteredClients.find(c => c.value === clientId);
+            if (selectedClientObj) {
+                this.loadBrandsByClientName(selectedClientObj.label);
+            }
+            this.keyword.brand = null as any;
+            this.filtrarProdutos();
         } else {
             this.brands = [];
             this.keyword.brand = null as any;
@@ -219,7 +318,10 @@ export class KeywordView implements OnInit {
                 // Carregar cliente e marca
                 if (this.keyword.brand?.client) {
                     this.selectedClient = this.keyword.brand.client.id;
-                    this.loadBrands(this.selectedClient);
+                    const selectedClientObj = this.filteredClients.find(c => c.value === this.selectedClient);
+                    if (selectedClientObj) {
+                        this.loadBrandsByClientName(selectedClientObj.label);
+                    }
 
                     // Carregar produtos da marca selecionada
                     if (this.keyword.id_brand) {
@@ -307,7 +409,7 @@ export class KeywordView implements OnInit {
             this.brands = [];
             return;
         }
-        this.brandService.getBrands().subscribe({
+        this.brandService.getBrands({"page.limit": this.page.limit,"page.sort": "st_brand.asc"}).subscribe({
             next: (data) => {
                 this.brands = data.list.filter(b => b.id_client === clientId);
             },
@@ -399,5 +501,10 @@ export class KeywordView implements OnInit {
                 );
             }
         }
+    }
+
+    filterClients(event: any) {
+        const query = event.filter.toLowerCase();
+        this.searchSubject.next(query);
     }
 }

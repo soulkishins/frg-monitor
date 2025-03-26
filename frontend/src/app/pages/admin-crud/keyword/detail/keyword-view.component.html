@@ -26,29 +26,32 @@
 
             <div>
                 <label for="status" class="block font-bold mb-3">Status *</label>
-                <p-dropdown [options]="statusOptions" [(ngModel)]="keyword.st_status" name="st_status"
-                    optionLabel="label" optionValue="value" [style]="{'width': '100%'}"
+                <p-select [(ngModel)]="keyword.st_status" name="st_status" inputId="status" 
+                    [options]="statusOptions" optionLabel="label" optionValue="value" 
+                    placeholder="Selecione um Status" [style]="{'width': '100%'}"
                     [ngClass]="{ 'ng-invalid ng-dirty': submitted && !keyword.st_status }">
-                </p-dropdown>
+                </p-select>
                 <small class="text-red-500" *ngIf="submitted && !keyword.st_status">Status é obrigatório.</small>
             </div>
 
             <div class="flex gap-4">
                 <div class="flex-1">
                     <label for="client" class="block font-bold mb-3">Cliente</label>
-                    <p-dropdown [options]="clients" [(ngModel)]="selectedClient" name="selectedClient"
-                        optionLabel="st_name" optionValue="id" placeholder="Selecione um cliente"
-                        (onChange)="onClientChange($event)" [style]="{'width': '100%'}"
-                        [disabled]="isEditing">
-                    </p-dropdown>
+                    <p-select [(ngModel)]="selectedClient" name="selectedClient" inputId="client"
+                        [options]="filteredClients" optionLabel="label" optionValue="value" 
+                        placeholder="Selecione um cliente" [style]="{'width': '100%'}"
+                        (onChange)="onClientChange($event)" [disabled]="isEditing"
+                        [filter]="true" (onFilter)="filterClients($event)" [loading]="loading">
+                    </p-select>
                 </div>
                 <div class="flex-1">
                     <label for="brand" class="block font-bold mb-3">Marca</label>
-                    <p-dropdown [options]="brands" [(ngModel)]="keyword.id_brand" name="id_brand"
-                        optionLabel="st_brand" optionValue="id_brand" placeholder="Selecione uma marca"
-                        [disabled]="!selectedClient || isEditing" [style]="{'width': '100%'}"
-                        (onChange)="onBrandChange($event)">
-                    </p-dropdown>
+                    <p-select [(ngModel)]="keyword.id_brand" name="id_brand" inputId="brand"
+                        [options]="brands" optionLabel="st_brand" optionValue="id_brand" 
+                        placeholder="Selecione uma marca" [style]="{'width': '100%'}"
+                        [disabled]="!selectedClient || isEditing" (onChange)="onBrandChange($event)"
+                        [filter]="true" (onFilter)="filterBrands($event)" [loading]="loading">
+                    </p-select>
                 </div>
             </div>
         </div>
