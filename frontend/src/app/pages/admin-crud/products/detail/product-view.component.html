@@ -19,7 +19,8 @@
             <div>
                 <label for="client" class="block font-bold mb-3">Cliente *</label>
                 <p-select [(ngModel)]="selectedClient" name="selectedClient" inputId="client" [options]="filteredClients" optionLabel="label" optionValue="value" 
-                    placeholder="Selecione um Cliente" (onChange)="onClientChange($event)" (onFilter)="filterClients($event)" [filter]="true" [required]="true" [style]="{'width': '100%'}" />
+                    placeholder="Selecione um Cliente" (onChange)="onClientChange($event)" (onFilter)="filterClients($event)" [filter]="true" [required]="true" [style]="{'width': '100%'}" 
+                    [loading]="loading"/>
 
                 <small class="text-red-500" *ngIf="submitted && !selectedClient">Cliente é obrigatório.</small>
             </div>
@@ -27,7 +28,7 @@
             <div>
                 <label for="brand" class="block font-bold mb-3">Marca *</label>
                 <p-select [(ngModel)]="product.id_brand" name="id_brand" inputId="brand" [options]="brands" optionLabel="st_brand" optionValue="id_brand" 
-                    placeholder="Selecione uma Marca" (onFilter)="filterBrands($event)" [filter]="true" [required]="true" [disabled]="!selectedClient" [style]="{'width': '100%'}" />
+                    placeholder="Selecione uma Marca" (onFilter)="filterBrands($event)" [filter]="true" [required]="true" [disabled]="!selectedClient" [style]="{'width': '100%'}" [loading]="loading"/>
 
                 <small class="text-red-500" *ngIf="submitted && !product.id_brand">Marca é obrigatória.</small>
             </div>
@@ -35,14 +36,14 @@
             <div>
                 <label for="category" class="block font-bold mb-3">Categoria *</label>
                 <p-select [(ngModel)]="selectedCategory" name="selectedCategory" inputId="category" [options]="categories" optionLabel="st_category" optionValue="id_category" 
-                    placeholder="Selecione uma Categoria" (onChange)="onCategoryChange($event)" [required]="true" [style]="{'width': '100%'}" />
+                    placeholder="Selecione uma Categoria" (onChange)="onCategoryChange($event)" (onFilter)="filterCategories($event)" [filter]="true" [required]="true" [style]="{'width': '100%'}" [loading]="loading"/>
                 <small class="text-red-500" *ngIf="submitted && !selectedCategory">Categoria é obrigatória.</small>
             </div>
 
             <div>
                 <label for="subcategory" class="block font-bold mb-3">Subcategoria *</label>
                 <p-select [(ngModel)]="product.id_subcategory" name="id_subcategory" inputId="subcategory" [options]="subcategories" optionLabel="st_subcategory" optionValue="id_subcategory" 
-                    placeholder="Selecione uma Subcategoria" [required]="true" [disabled]="!selectedCategory" [style]="{'width': '100%'}" />
+                    placeholder="Selecione uma Subcategoria" (onFilter)="filterSubcategories($event)" [filter]="true" [required]="true" [disabled]="!selectedCategory" [style]="{'width': '100%'}" [loading]="loading"/>
                 <small class="text-red-500" *ngIf="submitted && !product.id_subcategory">Subcategoria é obrigatória.</small>
             </div>
 

@@ -109,6 +109,8 @@ export class ProductView implements OnInit {
     // Propriedades para busca e carregamento
     private searchSubject = new Subject<string>();
     private searchBrandSubject = new Subject<string>();
+    private searchCategorySubject = new Subject<string>();
+    private searchSubcategorySubject = new Subject<string>();
     private destroy$ = new Subject<void>();
     loading: boolean = false;
     filteredClients: any[] = [];
@@ -197,8 +199,60 @@ export class ProductView implements OnInit {
             }
         });
 
+        // Configuração do search para categorias
+        this.searchCategorySubject.pipe(
+            takeUntil(this.destroy$),
+            debounceTime(300),
+            distinctUntilChanged(),
+            switchMap(query => {
+                this.loading = true;
+                return this.categoryService.getCategories({
+                    "st_category": query,
+                    "page.limit": this.page.limit,
+                    "page.sort": "st_category.asc"
+                });
+            })
+        ).subscribe({
+            next: (data) => {
+                this.categories = data.list;
+                this.loading = false;
+            },
+            error: (error) => {
+                console.error('Erro ao buscar categorias:', error);
+                this.loading = false;
+            }
+        });
+
+        // Configuração do search para subcategorias
+        this.searchSubcategorySubject.pipe(
+            takeUntil(this.destroy$),
+            debounceTime(300),
+            distinctUntilChanged(),
+            switchMap(query => {
+                this.loading = true;
+                if (this.selectedCategory) {
+                    return this.subCategoryService.getSubCategories({
+                        "st_subcategory": query,
+                        "id_category": this.selectedCategory,
+                        "page.limit": this.page.limit,
+                        "page.sort": "st_subcategory.asc"
+                    });
+                }
+                return [];
+            })
+        ).subscribe({
+            next: (data) => {
+                this.subcategories = data.list;
+                this.loading = false;
+            },
+            error: (error) => {
+                console.error('Erro ao buscar subcategorias:', error);
+                this.loading = false;
+            }
+        });
+
         this.loadInitialClients();
-        this.loadCategories();
+        this.loadInitialCategories();
 
         this.statuses = [
             { label: 'Ativo', value: 'ACTIVE' },
@@ -297,15 +351,7 @@ export class ProductView implements OnInit {
     onCategoryChange(event: any) {
         const categoryId = event.value;
         if (categoryId) {
-            this.subCategoryService.getSubCategories().subscribe({
-                next: (subcategories) => {
-                    this.subcategories = subcategories.list.filter(subcategory => subcategory.id_category === categoryId);
-                },
-                error: (error) => {
-                    console.error('Erro ao carregar subcategorias:', error);
-                    this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar subcategorias', life: 3000 });
-                }
-            });
+            this.loadSubcategoriesByCategory(categoryId);
         } else {
             this.subcategories = [];
         }
@@ -344,7 +390,7 @@ export class ProductView implements OnInit {
                     // Carregar categoria e subcategoria
                     if (this.product.subcategory?.category) {
                         this.selectedCategory = this.product.subcategory.category.id_category;
-                        this.loadSubcategories(this.selectedCategory);
+                        this.loadSubcategoriesByCategory(this.selectedCategory);
                     }
                     
                     this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Produto carregado', life: 3000 });
@@ -364,36 +410,49 @@ export class ProductView implements OnInit {
         }
     }
 
-    loadCategories() {
-        this.categoryService.getCategories().subscribe({
-            next: (categories) => {
-                this.categories = categories.list;
+    loadInitialCategories() {
+        this.loading = true;
+        this.categoryService.getCategories({
+            "page.limit": this.page.limit,
+            "page.sort": "st_category.asc"
+        }).subscribe({
+            next: (data) => {
+                this.categories = data.list;
+                this.loading = false;
+                
+                // Se estiver editando e tiver uma categoria selecionada, carrega as subcategorias
+                if (this.isEditing && this.selectedCategory) {
+                    this.loadSubcategoriesByCategory(this.selectedCategory);
+                }
             },
             error: (error) => {
                 console.error('Erro ao carregar categorias:', error);
-                this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar categorias', life: 3000 });
+                this.loading = false;
             }
         });
     }
 
-    loadSubcategories(categoryId: string) {
-        if (!categoryId) {
-            this.subcategories = [];
-            return;
+    loadSubcategoriesByCategory(categoryId: string) {
+        this.loading = true;
+        // Encontra a categoria selecionada para obter seu nome
+        const selectedCategory = this.categories.find(c => c.id_category === categoryId);
+        if (selectedCategory) {
+            this.subCategoryService.getSubCategories({
+                "st_category_name": selectedCategory.st_category,
+                "st_subcategory": "",
+                "page.limit": this.page.limit,
+                "page.sort": "st_subcategory.asc"
+            }).subscribe({
+                next: (data) => {
+                    this.subcategories = data.list;
+                    this.loading = false;
+                },
+                error: (error) => {
+                    console.error('Erro ao carregar subcategorias:', error);
+                    this.loading = false;
+                }
+            });
         }
-        this.subCategoryService.getSubCategories().subscribe({
-            next: (data) => {
-                this.subcategories = data.list.filter(sc => sc.id_category === categoryId);
-            },
-            error: (error) => {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Erro',
-                    detail: 'Erro ao carregar subcategorias',
-                    life: 3000
-                });
-            }
-        });
     }
 
     openNew() {
@@ -675,6 +734,34 @@ export class ProductView implements OnInit {
             this.currentPrice = variety.price;
             this.selectedVarietyIndex = index;
             this.messageService.add({ severity: 'info', summary: 'Selecionado', detail: 'Variedade selecionada para edição', life: 3000 });
+        }
+    }
+
+    filterCategories(event: any) {
+        const query = event.filter.toLowerCase();
+        this.searchCategorySubject.next(query);
+    }   
+
+    filterSubcategories(event: any) {
+        const query = event.filter.toLowerCase();
+        // Encontra a categoria selecionada para obter seu nome
+        const selectedCategory = this.categories.find(c => c.id_category === this.selectedCategory);
+        if (selectedCategory) {
+            this.subCategoryService.getSubCategories({
+                "st_category_name": selectedCategory.st_category,
+                "st_subcategory": query,
+                "page.limit": this.page.limit,
+                "page.sort": "st_subcategory.asc"
+            }).subscribe({
+                next: (data) => {
+                    this.subcategories = data.list;
+                    this.loading = false;
+                },
+                error: (error) => {
+                    console.error('Erro ao buscar subcategorias:', error);
+                    this.loading = false;
+                }
+            });
         }
     }
 }
