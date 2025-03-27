@@ -18,11 +18,9 @@ class SubcategoryCrud(Crud):
     def filter_by(self, indexes, filters) -> list:
         where = []
 
-        if 'st_category' in filters and 'st_subcategory' in filters:
-            where.append(
-                (Category.st_category.ilike(f"%{filters['st_category']}%")) |
-                (Subcategory.st_subcategory.ilike(f"%{filters['st_subcategory']}%"))
-            )
+        if 'st_category_name' in filters and 'st_subcategory' in filters:
+            where.append((Category.st_category.ilike(f"%{filters['st_category_name']}%")))
+            where.append((Subcategory.st_subcategory.ilike(f"%{filters['st_subcategory']}%")))
         else:
             if 'search_global' in filters:
                 where.append(

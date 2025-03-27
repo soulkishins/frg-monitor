@@ -19,10 +19,8 @@ class ClientBrandCrud(Crud):
         where = []
 
         if 'st_client_name' in filters and 'st_brand' in filters:
-            where.append(
-                (Client.st_name.ilike(f"%{filters['st_client_name']}%")) |
-                (ClientBrand.st_brand.ilike(f"%{filters['st_brand']}%"))
-            )
+            where.append((Client.st_name.ilike(f"%{filters['st_client_name']}%")))
+            where.append((ClientBrand.st_brand.ilike(f"%{filters['st_brand']}%")))
         else:
             if 'search_global' in filters:
                 where.append(

@@ -11,21 +11,15 @@ class ClientCrud(Crud):
     def filter_by(self, indexes, filters) -> list:
         where = []
 
-        if 'st_name' in filters and 'st_document' in filters:
+        if 'search_global' in filters:
             where.append(
-                (Client.st_name.ilike(f"%{filters['st_name']}%")) |
-                (Client.st_document.ilike(f"%{filters['st_document']}%"))
+                (Client.st_name.ilike(f"%{filters['search_global']}%")) |
+                (Client.st_document.ilike(f"%{filters['search_global']}%"))
             )
-        else:
-            if 'search_global' in filters:
-                where.append(
-                    (Client.st_name.ilike(f"%{filters['search_global']}%")) |
-                    (Client.st_document.ilike(f"%{filters['search_global']}%"))
-                )
-            if 'st_name' in filters:
-                where.append(Client.st_name.ilike(f"%{filters['st_name']}%"))
-            if 'st_document' in filters:
-                where.append(Client.st_document.ilike(f"%{filters['st_document']}%"))
+        if 'st_name' in filters:
+            where.append(Client.st_name.ilike(f"%{filters['st_name']}%"))
+        if 'st_document' in filters:
+            where.append(Client.st_document.ilike(f"%{filters['st_document']}%"))
         if 'st_status' in filters:
             where.append(Client.st_status == filters['st_status'])
 

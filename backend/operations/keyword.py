@@ -47,25 +47,18 @@ class KeywordCrud(Crud):
     def filter_by(self, indexes, filters) -> list:
         where = []
 
-        if 'st_keyword' in filters and 'st_brand' in filters and 'st_client' in filters:
+        if 'search_global' in filters:
             where.append(
-                (Keyword.st_keyword.ilike(f"%{filters['st_keyword']}%")) |
-                (ClientBrand.st_brand.ilike(f"%{filters['st_brand']}%")) |
-                (Client.st_name.ilike(f"%{filters['st_client']}%")) 
+                (Keyword.st_keyword.ilike(f"%{filters['search_global']}%")) |
+                (ClientBrand.st_brand.ilike(f"%{filters['search_global']}%")) |
+                (Client.st_name.ilike(f"%{filters['search_global']}%")) 
             )
-        else:
-            if 'search_global' in filters:
-                where.append(
-                    (Keyword.st_keyword.ilike(f"%{filters['search_global']}%")) |
-                    (ClientBrand.st_brand.ilike(f"%{filters['search_global']}%")) |
-                    (Client.st_name.ilike(f"%{filters['search_global']}%")) 
-                )
-            if 'brand' in indexes:
-                where.append(Keyword.id_brand == indexes['brand'])
-            if 'st_keyword' in filters:
-                where.append(Keyword.st_keyword.ilike(f"%{filters['st_keyword']}%"))
-            if 'st_product' in filters:
-                where.append(Keyword.st_product.ilike(f"%{filters['st_product']}%"))
+        if 'brand' in indexes:
+            where.append(Keyword.id_brand == indexes['brand'])
+        if 'st_keyword' in filters:
+            where.append(Keyword.st_keyword.ilike(f"%{filters['st_keyword']}%"))
+        if 'st_product' in filters:
+            where.append(Keyword.st_product.ilike(f"%{filters['st_product']}%"))
         if 'st_status' in filters:
             where.append(Keyword.st_status == filters['st_status'])
 
