@@ -390,7 +390,7 @@ export class ProductView implements OnInit {
                     // Carregar categoria e subcategoria
                     if (this.product.subcategory?.category) {
                         this.selectedCategory = this.product.subcategory.category.id_category;
-                        this.loadSubcategoriesByCategory(this.selectedCategory);
+                        this.loadSubcategoriesByCategory(this.selectedCategory, this.product.subcategory.st_subcategory);
                     }
                     
                     this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Produto carregado', life: 3000 });
@@ -432,14 +432,14 @@ export class ProductView implements OnInit {
         });
     }
 
-    loadSubcategoriesByCategory(categoryId: string) {
+    loadSubcategoriesByCategory(categoryId: string, subcategoryName: string = '') {
         this.loading = true;
         // Encontra a categoria selecionada para obter seu nome
         const selectedCategory = this.categories.find(c => c.id_category === categoryId);
         if (selectedCategory) {
             this.subCategoryService.getSubCategories({
                 "st_category_name": selectedCategory.st_category,
-                "st_subcategory": "",
+                "st_subcategory": subcategoryName,
                 "page.limit": this.page.limit,
                 "page.sort": "st_subcategory.asc"
             }).subscribe({
