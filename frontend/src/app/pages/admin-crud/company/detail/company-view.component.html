@@ -23,16 +23,33 @@
             </div>
 
             <div>
-                <label for="identication" class="block font-bold mb-3">CNPJ</label>
+                <label class="block font-bold mb-3">Tipo de Pessoa</label>
+                <div class="flex gap-4">
+                    <div class="flex items-center">
+                        <p-radioButton name="personType" value="PF" formControlName="personType" [inputId]="'pf'"></p-radioButton>
+                        <label [for]="'pf'" class="ml-2">Pessoa Física</label>
+                    </div>
+                    <div class="flex items-center">
+                        <p-radioButton name="personType" value="PJ" formControlName="personType" [inputId]="'pj'"></p-radioButton>
+                        <label [for]="'pj'" class="ml-2">Pessoa Jurídica</label>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label for="identication" class="block font-bold mb-3">{{ companyForm.get('personType')?.value === 'PF' ? 'CPF' : 'CNPJ' }}</label>
                 <input type="text" pInputText id="identication" formControlName="identification" (input)="validateCompanyIdentification()" [readonly]="isEditing" required [style]="{'width':'100%'}" />
                 <small class="text-red-500" *ngIf="companyForm.get('identification')?.errors?.['required'] && companyForm.get('identification')?.touched">
-                    CNPJ é obrigatório
+                    {{ companyForm.get('personType')?.value === 'PF' ? 'CPF' : 'CNPJ' }} é obrigatório
+                </small>
+                <small class="text-red-500" *ngIf="companyForm.get('identification')?.errors?.['invalidCpf'] && companyForm.get('identification')?.touched">
+                    CPF inválido
                 </small>
                 <small class="text-red-500" *ngIf="companyForm.get('identification')?.errors?.['invalidCnpj'] && companyForm.get('identification')?.touched">
                     CNPJ inválido
                 </small>
                 <small class="text-red-500" *ngIf="companyForm.get('identification')?.errors?.['duplicated'] && companyForm.get('identification')?.touched">
-                    CNPJ já cadastrado
+                    {{ companyForm.get('personType')?.value === 'PF' ? 'CPF' : 'CNPJ' }} já cadastrado
                 </small>
             </div>
 

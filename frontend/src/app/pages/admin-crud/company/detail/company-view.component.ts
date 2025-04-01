@@ -103,6 +103,7 @@ export class CompanyView implements OnInit {
             id: [null],
             status: ['ACTIVE', Validators.required],
             name: ['', Validators.required],
+            personType: ['PJ', Validators.required],
             identification: ['', [Validators.required]]
         });
     }
@@ -130,7 +131,8 @@ export class CompanyView implements OnInit {
                     id: company.id,
                     name: company.st_name,
                     identification: company.st_document,
-                    status: company.st_status
+                    status: company.st_status,
+                    personType: company.st_document.length === 11 ? 'PF' : 'PJ'
                 });
                 this.isEditing = true;
             },
@@ -363,22 +365,25 @@ export class CompanyView implements OnInit {
 
     validateCompanyIdentification() {
         const identification = this.companyForm.get('identification')?.value;
+        const personType = this.companyForm.get('personType')?.value;
+        
         if (!identification) return;
 
-        const isValid = this.validateCNPJ(identification);
-        if (!isValid) {
-            this.companyForm.get('identification')?.setErrors({ invalidCnpj: true });
-            return;
+        if (personType === 'PF') {
+            if (identification.length !== 11) {
+                this.companyForm.get('identification')?.setErrors({ 'invalidCpf': true });
+                return;
+            }
+            // Aqui você pode adicionar a validação completa de CPF se necessário
+        } else {
+            if (identification.length !== 14) {
+                this.companyForm.get('identification')?.setErrors({ 'invalidCnpj': true });
+                return;
+            }
+            // Aqui você pode adicionar a validação completa de CNPJ se necessário
         }
 
-        // Verificar CNPJ duplicado apenas se for válido
-        const isDuplicated = this.companies().some(
-            company => company.identification === identification && company.id !== this.companyForm.get('id')?.value
-        );
-
-        if (isDuplicated) {
-            this.companyForm.get('identification')?.setErrors({ duplicated: true });
-        }
+        this.companyForm.get('identification')?.setErrors(null);
     }
 
     saveCompany() {

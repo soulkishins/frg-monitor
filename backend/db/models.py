@@ -1,5 +1,5 @@
 from db.db import get_current_user as user
-from sqlalchemy import Column, String, FLOAT, TIMESTAMP, ForeignKey, func
+from sqlalchemy import Column, String, FLOAT, TIMESTAMP, ForeignKey, func, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import as_declarative, relationship
 import uuid
@@ -121,9 +121,10 @@ class Client(Base, Audit):
     st_name = Column(String, nullable=False)
     st_document = Column(String, nullable=False, unique=True)
     st_status = Column(String, nullable=False)
+    bl_pj = Column(Boolean, nullable=False, default=True)
 
     def _json_fields(self):
-        return ["id", "st_name", "st_document", "st_status"] + super()._json_fields()
+        return ["id", "st_name", "st_document", "st_status", "bl_pj"] + super()._json_fields()
     
     def _json_fields_advertisement(self):
         return ["st_name", "st_document"]
