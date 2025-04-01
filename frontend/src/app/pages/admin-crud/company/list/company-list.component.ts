@@ -266,7 +266,8 @@ export class CompanyList implements OnInit {
                 const companyRequest: CompanyRequest = {
                     st_name: company.name!,
                     st_document: company.identification!.replace(/[^\d]/g, ''),
-                    st_status: 'INACTIVE'
+                    st_status: 'INACTIVE',
+                    bl_pj: company.personType === 'PJ'
                 };
 
                 this.companyService.putClient(company.id!, companyRequest).subscribe({
@@ -447,7 +448,8 @@ export class CompanyList implements OnInit {
         const companyRequest: CompanyRequest = {
             st_name: this.company.name.trim(),
             st_document: this.company.identification.replace(/[^\d]/g, ''), // Remove caracteres não numéricos do CNPJ
-            st_status: this.company.status || 'ACTIVE'
+            st_status: this.company.status || 'ACTIVE',
+            bl_pj: this.company.personType === 'PJ'
         };
 
         if (this.company.id) {

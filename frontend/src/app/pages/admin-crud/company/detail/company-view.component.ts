@@ -132,7 +132,7 @@ export class CompanyView implements OnInit {
                     name: company.st_name,
                     identification: company.st_document,
                     status: company.st_status,
-                    personType: company.st_document.length === 11 ? 'PF' : 'PJ'
+                    personType: company.bl_pj ? 'PJ' : 'PF'
                 });
                 this.isEditing = true;
             },
@@ -250,7 +250,8 @@ export class CompanyView implements OnInit {
                 const companyRequest: CompanyRequest = {
                     st_name: company.name!,
                     st_document: company.identification!.replace(/[^\d]/g, ''),
-                    st_status: 'INACTIVE'
+                    st_status: 'INACTIVE',
+                    bl_pj: company.personType === 'PJ'
                 };
 
                 this.companyService.putClient(company.id!, companyRequest).subscribe({
@@ -397,7 +398,8 @@ export class CompanyView implements OnInit {
         const companyRequest: CompanyRequest = {
             st_name: formValue.name,
             st_document: formValue.identification.replace(/[^\d]/g, ''),
-            st_status: formValue.status.toUpperCase()
+            st_status: formValue.status.toUpperCase(),
+            bl_pj: formValue.personType === 'PJ'
         };
 
         if (formValue.id) {
