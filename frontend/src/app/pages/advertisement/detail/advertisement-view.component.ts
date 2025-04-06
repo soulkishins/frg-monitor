@@ -116,6 +116,12 @@ export class AdvertisementDetail implements OnInit {
                                     return product.product;
                                 }
                             );
+                            const details = JSON.parse(advertisement.st_details as string);
+                            if (details.details?.originalPrice) {
+                                advertisement.db_original_price = details.details.originalPrice.toString().replace(".", ",");
+                            } else {
+                                advertisement.db_original_price = advertisement.db_price;
+                            }
                         },
                         error: (error: any) => {
                             console.log(error);

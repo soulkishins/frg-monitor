@@ -26,7 +26,7 @@
         <p-button icon="pi pi-tag" severity="info" rounded text pTooltip="Revisão Manual" tooltipPosition="top" (onClick)="invalidateAdvertisement()" />
     </ng-template>
     <p-fluid>
-        <div class="grid grid-cols-4 gap-4">
+        <div class="grid grid-cols-5 gap-4">
             <div>
                 <p-iftalabel>
                     <p-select [(ngModel)]="advertisement.st_status" inputId="st_status" [options]="statuses" optionLabel="label" styleClass="w-full" readonly="true"/>
@@ -51,8 +51,14 @@
                     <label for="db_price">Preço</label>
                 </p-iftalabel>
             </div>
+            <div>
+                <p-iftalabel>
+                    <p-inputnumber [(ngModel)]="advertisement.db_original_price" mode="currency" inputId="db_original_price" currency="BRL" locale="pt-BR" readonly="true"/>
+                    <label for="db_original_price">Preço Original</label>
+                </p-iftalabel>
+            </div>
 
-            <div class="col-span-2">
+            <div class="col-span-3">
                 <p-iftalabel>
                     <input pInputText id="st_name" [(ngModel)]="client.st_name"  readonly="true"/>
                     <label for="st_name">Cliente</label>

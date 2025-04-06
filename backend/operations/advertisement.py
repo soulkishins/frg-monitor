@@ -55,9 +55,9 @@ class AdvertisementCrud(Crud):
         if 'st_seller' in filters:
             where.append(VW_Advertisement.st_seller.ilike(f"%{filters['st_seller']}%"))
         if 'st_price_min' in filters:
-            where.append(VW_Advertisement.db_price >= filters['st_price_min'])
+            where.append(VW_Advertisement.db_price >= float(filters['st_price_min']))
         if 'st_price_max' in filters:
-            where.append(VW_Advertisement.db_price <= filters['st_price_max'])
+            where.append(VW_Advertisement.db_price <= float(filters['st_price_max']))
         if 'st_status' in filters:
             where.append(VW_Advertisement.st_status == filters['st_status'])
 

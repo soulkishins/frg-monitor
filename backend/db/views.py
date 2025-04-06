@@ -19,6 +19,7 @@ class VW_Advertisement(Base):
     st_seller = Column(String)
     st_title = Column(String)
     db_price = Column(FLOAT)
+    db_original_price = Column(FLOAT)
     st_status = Column(String)
 
     def _json_fields(self):
@@ -33,5 +34,6 @@ class VW_Advertisement(Base):
             "st_seller",
             "st_title",
             "db_price",
+            "db_original_price",
             "st_status"
         ]

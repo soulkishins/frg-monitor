@@ -155,6 +155,10 @@
                 Preço
                 <p-sortIcon field="db_price" />
             </th>
+            <th pSortableColumn="db_original_price" style="min-width: 12rem">
+                Preço Original
+                <p-sortIcon field="db_original_price" />
+            </th>
             <th pSortableColumn="st_plataform" style="min-width: 10rem">
                 Plataforma
                 <p-sortIcon field="st_plataform" />
@@ -189,6 +193,7 @@
             <td>{{ advertisement.st_title }}</td>
             <td>{{ advertisement.st_seller }}</td>
             <td>{{ advertisement.db_price | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}</td>
+            <td>{{ advertisement.db_original_price | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}</td>
             <td>{{ advertisement.st_plataform }}</td>
             <td>{{ advertisement.st_plataform_id }}</td>
             <td>{{ advertisement.st_name }}</td>
