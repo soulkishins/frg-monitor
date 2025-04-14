@@ -6,6 +6,7 @@ import os
 from datetime import datetime
 import random
 
+user_pool_region = os.getenv('user_pool_region')
 user_pool_id = os.getenv('user_pool_id')
 
 class UserCrud(Crud):
@@ -21,7 +22,7 @@ class UserCrud(Crud):
 
         try:
             # Inicializa o cliente do Cognito
-            cognito = boto3.client('cognito-idp', region_name='sa-east-1')
+            cognito = boto3.client('cognito-idp', region_name=user_pool_region)
             
             # Gera uma senha para o usuário
             password = 'Frg@' + datetime.now().strftime('%Y') + '!' + str(random.randint(1000, 9999))
@@ -74,7 +75,7 @@ class UserCrud(Crud):
         try:
             # Atualiza os atributos do usuário no Cognito
             if record:
-                cognito = boto3.client('cognito-idp', region_name='sa-east-1')
+                cognito = boto3.client('cognito-idp', region_name=user_pool_region)
                 
                 # Busca o sub do usuário
                 cognito_sub = next(
@@ -109,7 +110,7 @@ class UserCrud(Crud):
         try:
             # Desativa o usuário no Cognito
             if record:
-                cognito = boto3.client('cognito-idp', region_name='sa-east-1')
+                cognito = boto3.client('cognito-idp', region_name=user_pool_region)
                 
                 # Busca o sub do usuário
                 cognito_sub = next(

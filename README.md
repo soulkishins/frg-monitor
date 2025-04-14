@@ -141,6 +141,6 @@ Este projeto está licenciado sob a [MIT License](LICENSE).
 
 ```bash
 
-ssh -i "near.pem" -L 5432:matrix-db.czxtws3erove.sa-east-1.rds.amazonaws.com:5432 ec2-user@ec2-54-233-36-111.sa-east-1.compute.amazonaws.com
+ssh -i "default-frg.pem" -L 5432:pricemonitor.chkseu6cka53.sa-east-1.rds.amazonaws.com:5432 ec2-user@15.228.237.208
 
 ```

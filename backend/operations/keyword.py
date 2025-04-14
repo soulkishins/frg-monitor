@@ -7,6 +7,7 @@ import json
 import os
 
 crawler_sqs = os.getenv('crawler_sqs')
+scheduler_region = os.getenv('scheduler_region')
 scheduler_role_arn = os.getenv('scheduler_role_arn')
 scheduler_cron = os.getenv('scheduler_cron')
 
@@ -66,7 +67,7 @@ class KeywordCrud(Crud):
     
     def get_schedule(self, indexes, filters, body) -> tuple[int, dict]:
         # Inicializa o cliente do EventBridge Schedule
-        client = boto3.client('scheduler', region_name='sa-east-1')
+        client = boto3.client('scheduler', region_name=scheduler_region)
 
         # Busca Schedule
         response = client.get_schedule(Name=indexes['keyword'])
@@ -76,7 +77,7 @@ class KeywordCrud(Crud):
     def create_schedule(self, indexes, filters, record) -> tuple[int, dict]:
         
         # Inicializa o cliente do EventBridge Schedule
-        client = boto3.client('scheduler', region_name='sa-east-1')
+        client = boto3.client('scheduler', region_name=scheduler_region)
            
         # Busca Schedule
         try:
@@ -143,7 +144,7 @@ class KeywordCrud(Crud):
     
     def delete_schedule(self, indexes) -> tuple[int, dict]:
         # Inicializa o cliente do EventBridge Schedule
-        client = boto3.client('scheduler', region_name='sa-east-1')
+        client = boto3.client('scheduler', region_name=scheduler_region)
         # Exclui o schedule
         try:
             client.delete_schedule(Name=indexes['keyword'])
