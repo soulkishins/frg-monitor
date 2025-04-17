@@ -3,17 +3,40 @@ import * as cheerio from 'cheerio';
 import { ScrapingError } from "../errors";
 import { IMLPage, IMLAdvertisementUrl, IPagination, IMLAdvertisement } from "../base/types";
 import { MLParser } from "./ml-parser";
-import { exit } from "process";
 
 export class MLScraper {
+    headers = {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        //'Accept-Encoding': 'gzip, deflate, br, zstd',
+        'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,zh-HK;q=0.6,zh-SG;q=0.5,zh;q=0.4',
+        'Cache-Control': 'max-age=0',
+        'Referer': 'https://www.mercadolivre.com.br/',
+        'Device-Memory': '8',
+        'Downlink': '10',
+        'Dpr': '1',
+        'Ect': '4g',
+        'Priority': 'u=0, i',
+        'Rtt': '50',
+        'Sec-Ch-Ua': '"Google Chrome";v="135", "Not-A.Brand";v="8", "Chromium";v="135"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"Windows"',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36',
+        'Viewport-Width': '1920'
+    };
+
     constructor(private readonly parser: MLParser) {}
 
     public async searchAdvertisements(keyword: string): Promise<IMLPage> {
         try {
             const searchUrl = `https://lista.mercadolivre.com.br/${encodeURIComponent(keyword)}`;
-            const response = await axios.get(searchUrl, {timeout: 5000});
+            const response = await axios.get(searchUrl, {headers: this.headers, timeout: 5000});
 
-            //console.log('searchAdvertisements', response.data);
+            console.log('searchAdvertisements', response.data);
             const $ = cheerio.load(response.data);
             
             return {
@@ -28,25 +51,27 @@ export class MLScraper {
     private extractAdvertisementsFromPage($: cheerio.CheerioAPI): IMLAdvertisementUrl[] {
         const advertisements: IMLAdvertisementUrl[] = [];
         const advertisementsJson = $('script[type=application/ld+json]').text();
-        const advertisementsJsonParsed = JSON.parse(advertisementsJson);
-
-        /*
-        $('.ui-search-result__wrapper').each((i, elem) => {
-            const title = $(elem).find('.poly-component__title').text().trim();
-            const price = $(elem).find('.poly-component__price').text().trim();
-            const link = $(elem).find('.poly-component__title').attr('href') || '';
-            advertisements.push({ title, price, link });
-        });
-        */
-
-        const page = advertisementsJsonParsed['@graph'].find((item: any) => item['@type'] === 'SearchResultsPage');
-        advertisementsJsonParsed['@graph'].forEach((item: any) => {
-            if (item['@type'] === 'Product') {
-                advertisements.push({ title: item.name, price: item.offers.price, link: item.offers.url });
-            }
-        });
-        console.log('Page', page, advertisements);
-
+        try {
+            const advertisementsJsonParsed = JSON.parse(advertisementsJson);
+            /*
+            $('.ui-search-result__wrapper').each((i, elem) => {
+                const title = $(elem).find('.poly-component__title').text().trim();
+                const price = $(elem).find('.poly-component__price').text().trim();
+                const link = $(elem).find('.poly-component__title').attr('href') || '';
+                advertisements.push({ title, price, link });
+            });
+            */
+            const page = advertisementsJsonParsed['@graph'].find((item: any) => item['@type'] === 'SearchResultsPage');
+            advertisementsJsonParsed['@graph'].forEach((item: any) => {
+                if (item['@type'] === 'Product') {
+                    advertisements.push({ title: item.name, price: item.offers.price, link: item.offers.url });
+                }
+            });
+            console.log('Page', page, advertisements);
+        } catch (error) {
+            console.log('advertisementsJson', advertisementsJson);
+            throw new ScrapingError('Falha ao extrair anúncios', error as Error);
+        }
         return advertisements;
     }
 
@@ -72,7 +97,7 @@ export class MLScraper {
                 return { advertisements: [], pages: [] };
             }
 
-            const response = await axios.get(nextPageUrl, {timeout: 5000});
+            const response = await axios.get(nextPageUrl, {headers: this.headers, timeout: 5000});
             //console.log('nextPage', response.data);
             const $ = cheerio.load(response.data);
             

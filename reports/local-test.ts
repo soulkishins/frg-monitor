@@ -1,9 +1,9 @@
 import { handler } from './main';
 
 process.env.APP_REGION = 'sa-east-1';
-process.env.DB_SCHEMA = 'invoices';
-process.env.RDS_SECRET_NAME = 'matrix/db/local';
-process.env.S3_BUCKET_NAME = 'matrix-notas';
+process.env.DB_SCHEMA = 'pricemonitor';
+process.env.RDS_SECRET_NAME = 'prod/db/pricemonitor';
+process.env.S3_BUCKET_NAME = 'frg-price-monitor-data';
 process.env.TZ = 'America/Sao_Paulo';
 
 handler({

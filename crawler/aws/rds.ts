@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { DatabaseConfig, IAdvertisement, IAdvertisementHistory, IAdvertisementProduct } from '../base/types';
+import { DatabaseConfig, IAdvertisement, IAdvertisementHistory, IAdvertisementProduct, IKeyword } from '../base/types';
 
 export class AdvertisementManager {
     private pool: Pool;
@@ -100,7 +100,42 @@ export class AdvertisementManager {
         
         const values = [
             data.id_advertisement, data.st_status,
-            data.st_action, data.st_history, data.st_ml_json
+            data.st_action, data.st_history, data.st_status == 'ERROR' ? data.st_ml_json : null
+        ];
+
+        await this.pool.query(query, values);
+    }
+
+    async updateStatistics(params: IKeyword): Promise<void> {
+        const query = `
+            insert into tb_scheduler_statistics(
+                id_scheduler, dt_created, nr_pages, nr_total, nr_processed, nr_created, nr_updated, nr_error, nr_manual_revision, nr_reported, nr_already_reported
+            ) values (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+            ) on conflict (id_scheduler, dt_created) do update set
+                nr_pages = tb_scheduler_statistics.nr_pages + EXCLUDED.nr_pages,
+                nr_total = tb_scheduler_statistics.nr_total + EXCLUDED.nr_total,
+                nr_processed = tb_scheduler_statistics.nr_processed + EXCLUDED.nr_processed,
+                nr_created = tb_scheduler_statistics.nr_created + EXCLUDED.nr_created,
+                nr_updated = tb_scheduler_statistics.nr_updated + EXCLUDED.nr_updated,
+                nr_error = tb_scheduler_statistics.nr_error + EXCLUDED.nr_error,
+                nr_manual_revision = tb_scheduler_statistics.nr_manual_revision + EXCLUDED.nr_manual_revision,
+                nr_reported = tb_scheduler_statistics.nr_reported + EXCLUDED.nr_reported,
+                nr_already_reported = tb_scheduler_statistics.nr_already_reported + EXCLUDED.nr_already_reported
+        `;
+        
+        const values = [
+            params.scheduler_id,
+            params.datetime,
+            params.statistics.nr_pages || 0,
+            params.statistics.nr_total || 0,
+            params.statistics.nr_processed || 0,
+            params.statistics.nr_created || 0,
+            params.statistics.nr_updated || 0,
+            params.statistics.nr_error || 0,
+            params.statistics.nr_manual_revision || 0,
+            params.statistics.nr_reported || 0,
+            params.statistics.nr_already_reported || 0
         ];
 
         await this.pool.query(query, values);

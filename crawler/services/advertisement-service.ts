@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ServiceError } from "../errors";
 import { AdvertisementManager } from "../aws/rds";
-import { IAdvertisement, IClientBrandProduct, IMLAdvertisement, IMLPage } from "../base/types";
+import { IAdvertisement, IKeyword, IMLAdvertisement, IMLPage } from "../base/types";
 import { MLScraper } from "./ml-scraper";
 
 export class AdvertisementService {
@@ -10,27 +10,36 @@ export class AdvertisementService {
         private readonly adManager: AdvertisementManager
     ) {}
 
-    public async searchAndSaveAdvertisements(params: {
-        id_keyword: string;
-        keyword: string;
-        idBrand: string;
-        brandProducts: IClientBrandProduct[];
-    }): Promise<void> {
+    public async searchAndSaveAdvertisements(params: IKeyword): Promise<void> {
         try {
-            let page = await this.scraper.searchAdvertisements(params.keyword);
-            
+            params.statistics = {
+                nr_pages: 0,
+                nr_total: 0,
+                nr_processed: 0,
+                nr_created: 0,
+                nr_updated: 0,
+                nr_error: 0,
+                nr_manual_revision: 0,
+                nr_reported: 0,
+                nr_already_reported: 0
+            };
+
+            let page = await this.scraper.searchAdvertisements(params.keyword);            
             while (page.advertisements.length > 0) {
+                params.statistics.nr_pages += 1;
                 await this.processAdvertisements(page, params);
                 page = await this.scraper.nextPage(page);
             }
         } catch (error) {
             throw new ServiceError('Falha ao processar anúncios', error as Error);
+        } finally {
+            await this.adManager.updateStatistics(params);
         }
     }
 
     private async processAdvertisements(
         page: IMLPage,
-        params: { id_keyword: string; keyword: string; idBrand: string; brandProducts: IClientBrandProduct[] }
+        params: IKeyword
     ): Promise<void> {
         const advertisements = await this.scraper.readAdvertisements(page);
 
@@ -41,21 +50,34 @@ export class AdvertisementService {
 
     private async processAdvertisement(
         advertisement: IMLAdvertisement,
-        params: { id_keyword: string; keyword: string; idBrand: string; brandProducts: IClientBrandProduct[] }
+        params: IKeyword
     ): Promise<void> {
         const existingAd = await this.adManager.getAdvertisementByPlataform(
             advertisement.st_plataform,
             advertisement.st_plataform_id,
             advertisement.st_url,
-            params.idBrand
+            params.brand_id
         );
 
+        params.statistics.nr_total += 1;
+        params.statistics.nr_processed += 1;
+
+        if (advertisement.st_status === 'ERROR') {
+            params.statistics.nr_error += 1;
+        }
+
+        if (existingAd && existingAd.st_status === 'REPORTED') {
+            params.statistics.nr_already_reported += 1;
+        }
+
         advertisement.id_advertisement = existingAd?.id_advertisement || uuidv4();
-        advertisement.id_brand = params.idBrand;
+        advertisement.id_brand = params.brand_id;
 
         if (existingAd) {
+            params.statistics.nr_updated += 1;
             await this.updateExistingAdvertisement(existingAd, advertisement, params);
         } else {
+            params.statistics.nr_created += 1;
             await this.createNewAdvertisement(advertisement, params);
         }
     }
@@ -63,16 +85,16 @@ export class AdvertisementService {
     private async updateExistingAdvertisement(
         existingAd: IAdvertisement,
         newAd: IMLAdvertisement,
-        params: { id_keyword: string; keyword: string; brandProducts: IClientBrandProduct[] }
+        params: IKeyword
     ): Promise<void> {
         await this.adManager.updateAdvertisement(existingAd, newAd);
         await Promise.all([
             this.adManager.addKeyword({
                 id_advertisement: existingAd.id_advertisement,
-                id_keyword: params.id_keyword,
+                id_keyword: params.keyword_id,
                 st_keyword: params.keyword
             }),
-            ...params.brandProducts.map(product => 
+            ...params.products.map(product => 
                 this.adManager.addProduct({
                     ...product,
                     id_advertisement: existingAd.id_advertisement
@@ -84,17 +106,17 @@ export class AdvertisementService {
 
     private async createNewAdvertisement(
         advertisement: IMLAdvertisement,
-        params: { id_keyword: string; keyword: string; brandProducts: IClientBrandProduct[] }
+        params: IKeyword
     ): Promise<void> {
         const adId = await this.adManager.createAdvertisement(advertisement);
         
         await Promise.all([
             this.adManager.addKeyword({
                 id_advertisement: adId,
-                id_keyword: params.id_keyword,
+                id_keyword: params.keyword_id,
                 st_keyword: params.keyword
             }),
-            ...params.brandProducts.map(product => 
+            ...params.products.map(product => 
                 this.adManager.addProduct({
                     ...product,
                     id_advertisement: adId
@@ -112,6 +134,9 @@ export class AdvertisementService {
     ): Promise<void> {
         const ml_json = advertisement.ml_json || {};
         delete advertisement.ml_json;
+        if (status === 'ERROR' && advertisement.st_status === 'NEW') {
+            status = 'NEW';
+        }
         await this.adManager.addHistory({
             id_advertisement: adId,
             st_status: status || 'NEW',

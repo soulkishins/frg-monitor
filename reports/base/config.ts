@@ -26,7 +26,7 @@ export class ConfigManager {
 
     private constructor() {
         this.secretsManager = new SecretsManager({
-            region: process.env.APP_REGION || 'sa-east-1'
+            region: process.env.APP_REGION
         });
     }
 
@@ -56,7 +56,11 @@ export class ConfigManager {
         }
 
         try {
-            const dbSecret = await this.fetchSecret(process.env.RDS_SECRET_NAME || 'prod/db/pricemonitor');
+            const dbSecretName = process.env.RDS_SECRET_NAME;
+            if (!dbSecretName) {
+                throw new Error('RDS_SECRET_NAME não encontrado');
+            }
+            const dbSecret = await this.fetchSecret(dbSecretName);
 
             this.config = {
                 database: {
@@ -65,11 +69,11 @@ export class ConfigManager {
                     database: dbSecret.dbname,
                     password: dbSecret.password,
                     port: parseInt(dbSecret.port || '5432'),
-                    schema: dbSecret.schema || process.env.DB_SCHEMA || 'pricemonitor'
+                    schema: dbSecret.schema || process.env.DB_SCHEMA
                 },
                 aws: {
-                    region: process.env.APP_REGION || 'sa-east-1',
-                    bucketName: process.env.S3_BUCKET_NAME || 'frg-price-monitor-data'
+                    region: process.env.APP_REGION as string,
+                    bucketName: process.env.S3_BUCKET_NAME as string
                 }
             };
 

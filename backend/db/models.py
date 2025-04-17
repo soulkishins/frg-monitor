@@ -1,5 +1,5 @@
 from db.db import get_current_user as user
-from sqlalchemy import Column, String, FLOAT, TIMESTAMP, ForeignKey, func, Boolean
+from sqlalchemy import Column, String, FLOAT, TIMESTAMP, ForeignKey, func, Boolean, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import as_declarative, relationship
 import uuid
@@ -221,15 +221,16 @@ class AdvertisementProduct(Base, Audit):
     id_product = Column(UUID(as_uuid=True), ForeignKey(os.getenv("db_schema") + ".tb_client_brand_product.id_product"), primary_key=True, onupdate=None)
     st_varity_seq = Column(String, nullable=False, primary_key=True, onupdate=None)
     st_varity_name = Column(String, nullable=False, onupdate=None)
+    en_status = Column(String, nullable=False, default='NR')
 
     advertisement = relationship("Advertisement", lazy=True)
     product = relationship("ClientBrandProduct", lazy=True)
 
     def _json_fields(self):
-        return ["id_advertisement", "id_product", "st_varity_seq", "st_varity_name", "product"] + super()._json_fields()
+        return ["id_advertisement", "id_product", "st_varity_seq", "st_varity_name", "en_status", "product"] + super()._json_fields()
 
     def _json_fields_advertisement(self):
-        return ["st_varity_seq", "st_varity_name", "product"]
+        return ["st_varity_seq", "st_varity_name", "en_status", "product"]
 
 class AdvertisementHistory(Base, Audit):
     __tablename__ = "tb_advertisement_history"
@@ -257,3 +258,44 @@ class AdvertisementExport(Base):
 
     def _json_fields(self):
         return ["st_key", "dt_created", "st_status"]
+
+class Scheduler(Base, Audit):
+    __tablename__ = "tb_scheduler"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, onupdate=None)
+    id_keyword = Column(UUID(as_uuid=True), ForeignKey(os.getenv("db_schema") + ".tb_keyword.id_keyword"), nullable=False)
+    st_platform = Column(String, nullable=False)
+    st_cron = Column(String, nullable=False)
+    dt_last_execution = Column(TIMESTAMP)
+    
+    statistics = relationship("SchedulerStatistics", back_populates="scheduler", lazy=True)
+
+    def _json_fields(self):
+        return ["id", "id_keyword", "st_platform", "st_cron", "dt_last_execution"] + super()._json_fields()
+    
+    def _json_fields_scheduler(self):
+        return ["id", "id_keyword", "st_platform", "st_cron", "dt_last_execution", "statistics"]
+
+class SchedulerStatistics(Base):
+    __tablename__ = "tb_scheduler_statistics"
+    
+    id_scheduler = Column(UUID(as_uuid=True), ForeignKey(os.getenv("db_schema") + ".tb_scheduler.id"), primary_key=True)
+    dt_created = Column(TIMESTAMP, primary_key=True, default=func.current_timestamp())
+    nr_pages = Column(Integer, nullable=False)
+    nr_total = Column(Integer, nullable=False)
+    nr_processed = Column(Integer, nullable=False)
+    nr_created = Column(Integer, nullable=False)
+    nr_updated = Column(Integer, nullable=False)
+    nr_error = Column(Integer, nullable=False)
+    nr_manual_revision = Column(Integer, nullable=False)
+    nr_reported = Column(Integer, nullable=False)
+    nr_already_reported = Column(Integer, nullable=False)
+    
+    scheduler = relationship("Scheduler", back_populates="statistics", lazy=True)
+
+    def _json_fields(self):
+        return [
+            "id_scheduler", "dt_created", "nr_pages", "nr_total",
+            "nr_processed", "nr_created", "nr_updated", "nr_error",
+            "nr_manual_revision", "nr_reported", "nr_already_reported"
+        ]

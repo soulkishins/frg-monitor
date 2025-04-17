@@ -82,6 +82,9 @@ def get_crud_service(operation_name, user, session):
     if operation_name == "dashboard":
         from operations.dashboard import Dashboard
         return Dashboard(user, session)
+    if operation_name == "scheduler":
+        from operations.scheduler import SchedulerCrud
+        return SchedulerCrud(user, session)
     return None
 
 def return_value(status_code, body, *, headers = None, json_transform = None):

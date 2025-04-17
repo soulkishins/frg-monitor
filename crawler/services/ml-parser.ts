@@ -5,6 +5,29 @@ import { IMLAdvertisement, IMLAdvertisementUrl, PreloadedState, ProductInfo, Pho
 
 export class MLParser {
     private static readonly PRELOADED_STATE_REGEX = /window\.__PRELOADED_STATE__\s*=\s*({[\s\S]*?});/;
+    headers = {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        //'Accept-Encoding': 'gzip, deflate, br, zstd',
+        'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,zh-HK;q=0.6,zh-SG;q=0.5,zh;q=0.4',
+        'Cache-Control': 'max-age=0',
+        'Referer': 'https://www.mercadolivre.com.br/',
+        'Device-Memory': '8',
+        'Downlink': '10',
+        'Dpr': '1',
+        'Ect': '4g',
+        'Priority': 'u=0, i',
+        'Rtt': '50',
+        'Sec-Ch-Ua': '"Google Chrome";v="135", "Not-A.Brand";v="8", "Chromium";v="135"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"Windows"',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36',
+        'Viewport-Width': '1920'
+    };
 
     constructor(private readonly uploader: S3Uploader) {}
 
@@ -34,24 +57,17 @@ export class MLParser {
         return url.substring(0, url.indexOf('#'));
     }
 
+    // Função para aguardar um tempo aleatório entre min e max milissegundos
+    private sleep(min = 1500, max = 4000) {
+        const delay = Math.floor(Math.random() * (max - min + 1)) + min;
+        return new Promise(resolve => setTimeout(resolve, delay));
+    }
+
     private async requestData(url: string): Promise<AdvertisementResponse> {
         try {
+            await this.sleep();
             const response = await axios.get(url, {
-                headers: {
-                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-                    'accept-language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,zh-HK;q=0.6,zh-SG;q=0.5,zh;q=0.4',
-                    'cache-control': 'max-age=0',
-                    'sec-ch-ua': '"Not A(Brand";v="8", "Chromium";v="132", "Google Chrome";v="132"',
-                    'sec-ch-ua-mobile': '?0',
-                    'sec-ch-ua-platform': '"Windows"',
-                    'sec-fetch-dest': 'document',
-                    'sec-fetch-mode': 'navigate',
-                    'sec-fetch-site': 'none',
-                    'sec-fetch-user': '?1',
-                    'upgrade-insecure-requests': '1',
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36',
-                    'viewport-width': '1536'
-                },
+                headers: this.headers,
                 timeout: 5000,
                 maxRedirects: 10
             });

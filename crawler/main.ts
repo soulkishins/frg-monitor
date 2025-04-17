@@ -8,12 +8,12 @@ import { AdvertisementService } from './services/advertisement-service';
 export const handler = async (event: any) => {
     try {
         for (const record of event.Records) {
-            console.log('Iniciando crawler...', JSON.stringify(event));
+            console.log('Iniciando crawler...');
+            
+            console.log('Dados recebidos:', record.body);
             // Extrair dados da mensagem SQS
             const messageBody = JSON.parse(record.body);
 
-            console.log('Dados recebidos:', JSON.stringify(messageBody));
-            
             console.log('Carregando configurações...');
             // Carregar configurações do Secrets Manager
             const configManager = ConfigManager.getInstance();

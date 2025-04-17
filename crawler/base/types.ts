@@ -22,6 +22,30 @@ export interface IMLAdvertisement extends IBaseAdvertisement {
 // Estende a interface base
 export interface IAdvertisement extends IBaseAdvertisement {}
 
+export interface IKeyword {
+    scheduler_id: string;
+    cron: string;
+    platform: string;
+    datetime: string;
+    keyword_id: string;
+    keyword: string;
+    brand_id: string;
+    products: IClientBrandProduct[];
+    statistics: IStatistics;
+}
+
+export interface IStatistics {
+    nr_pages: number;
+    nr_total: number;
+    nr_processed: number;
+    nr_created: number;
+    nr_updated: number;
+    nr_error: number;
+    nr_manual_revision: number;
+    nr_reported: number;
+    nr_already_reported: number;
+}
+
 // Interface base para produtos
 export interface IBaseProduct {
     id_product?: string;
