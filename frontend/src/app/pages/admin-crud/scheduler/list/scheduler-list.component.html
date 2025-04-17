@@ -1,0 +1,70 @@
+<p-toast />
+
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+    </ng-template>
+
+    <ng-template #end>
+        <p-button label="Exportar" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+    </ng-template>
+</p-toolbar>
+
+<p-table
+    #dt
+    [value]="schedulers()"
+    [totalRecords]="page.total"
+    [columns]="cols"
+    [paginator]="true"
+    [tableStyle]="{ 'min-width': '75rem' }"
+    [(selection)]="selectedSchedulers"
+    [rowHover]="true"
+    dataKey="id_keyword"
+    currentPageReportTemplate="Mostrando {first} até {last} de {totalRecords} agendamentos"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[50, 100, 200, 300]"
+    [lazy]="true"
+    (onLazyLoad)="loadSchedulerData($event)"
+    [(rows)]="page.limit"
+    [lazyLoadOnInit]="true"
+    [loading]="loading"
+>
+    <ng-template #caption>
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="pi pi-clock"></i>
+                <span class="font-bold">Gestão de Agendamentos</span>
+            </div>
+            <p-iconfield>
+                <p-inputicon styleClass="pi pi-search" />
+                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
+            </p-iconfield>
+        </div>
+    </ng-template>
+    <ng-template #header>
+        <tr>
+            <th pSortableColumn="st_keyword" style="min-width:16rem">
+                Palavra-chave
+                <p-sortIcon field="st_keyword" />
+            </th>
+            <th pSortableColumn="st_status" style="min-width:10rem">
+                Status
+                <p-sortIcon field="st_status" />
+            </th>
+            <th style="min-width: 9rem"></th>
+        </tr>
+    </ng-template>
+    <ng-template #body let-scheduler>
+        <tr>
+            <td>{{ scheduler.st_keyword }}</td>
+            <td>
+                <p-tag [value]="scheduler.st_status === 'active' ? 'Ativo' : 'Inativo'"
+                       [severity]="scheduler.st_status === 'active' ? 'success' : 'danger'" />
+            </td>
+            <td>
+                <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editScheduler(scheduler)" />
+            </td>
+        </tr>
+    </ng-template>
+</p-table>
+
+<p-confirmdialog [style]="{ width: '450px' }" />
