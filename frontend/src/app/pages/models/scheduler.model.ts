@@ -12,6 +12,7 @@ export interface SchedulerKeyword {
 }
 
 export interface SchedulerRequest {
+    id_keyword: string;
     st_platform: string;
     st_cron: string;
 }

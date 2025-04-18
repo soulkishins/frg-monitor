@@ -25,5 +25,9 @@ export class SchedulerService {
   putScheduler(scheduler: SchedulerRequest, schedulerId: string): Observable<Page<SchedulerKeyword>> {
     return this.http.put<Page<SchedulerKeyword>>(`${this.baseUrl}/${schedulerId}`, scheduler);
   }
+
+  postScheduler(scheduler: SchedulerRequest): Observable<Page<SchedulerKeyword>> {
+    return this.http.post<Page<SchedulerKeyword>>(`${this.baseUrl}`, scheduler);
+  }
   
 }

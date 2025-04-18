@@ -97,38 +97,6 @@ export class SchedulerView implements OnInit {
     loadScheduler(id: string) {
         this.schedulerService.getSchedulerByKeyword({ id_keyword: id }).subscribe({
             next: (data: Page<SchedulerKeyword>) => {
-                this.scheduler.platform = data.list[0].st_platform;
-                
-                // Processa o st_cron (minutos_horas_dia)
-                const [minutes, hours, dayOfWeek] = data.list[0].st_cron.split('_').map(Number);
-                
-                // Configura o horário de execução
-                const executionTime = new Date();
-                executionTime.setHours(hours, minutes, 0, 0);
-                this.scheduler.executionTime = executionTime;
-                
-                // Configura os dias da semana
-                if (dayOfWeek === 0) {
-                    // Se for 0, marca todos os dias
-                    this.scheduler.monday = true;
-                    this.scheduler.tuesday = true;
-                    this.scheduler.wednesday = true;
-                    this.scheduler.thursday = true;
-                    this.scheduler.friday = true;
-                    this.scheduler.saturday = true;
-                    this.scheduler.sunday = true;
-                } else {
-                    // Caso contrário, marca apenas o dia específico
-                    this.scheduler.monday = dayOfWeek === 2;
-                    this.scheduler.tuesday = dayOfWeek === 3;
-                    this.scheduler.wednesday = dayOfWeek === 4;
-                    this.scheduler.thursday = dayOfWeek === 5;
-                    this.scheduler.friday = dayOfWeek === 6;
-                    this.scheduler.saturday = dayOfWeek === 7;
-                    this.scheduler.sunday = dayOfWeek === 1;
-                }
-
-                // Adiciona os dados à tabela
                 this.schedulers = data.list;
             },
             error: (error) => {
@@ -204,32 +172,59 @@ export class SchedulerView implements OnInit {
         return ranges.join(',');
     }
 
+    private resetFormFields() {
+        this.scheduler = {
+            st_keyword: this.scheduler.st_keyword,
+            st_status: this.scheduler.st_status,
+            platform: '',
+            executionTime: new Date(),
+            monday: false,
+            tuesday: false,
+            wednesday: false,
+            thursday: false,
+            friday: false,
+            saturday: false,
+            sunday: false
+        };
+        this.submitted = false;
+    }
+
     save() {
-        if (!this.editingScheduler) {
+        this.submitted = true;
+
+        if (!this.scheduler.platform || !this.scheduler.executionTime || !this.hasSelectedDay()) {
             return;
         }
 
-        const schedulerRequest: SchedulerRequest = {    
+        const schedulerRequest: SchedulerRequest = {
+            id_keyword: this.id ?? '',
             st_platform: this.scheduler.platform,
             st_cron: `${this.scheduler.executionTime.getMinutes()}_${this.scheduler.executionTime.getHours()}_${this.getFormattedDaysForCron()}`
         };
 
-        this.schedulerService.putScheduler(schedulerRequest, this.editingScheduler.id).subscribe({
+        const observable = this.editingScheduler 
+            ? this.schedulerService.putScheduler(schedulerRequest, this.editingScheduler.id)
+            : this.schedulerService.postScheduler(schedulerRequest);
+
+        observable.subscribe({
             next: (data: Page<SchedulerKeyword>) => {
                 this.messageService.add({
                     severity: 'success',
                     summary: 'Sucesso',
-                    detail: 'Agendamento salvo com sucesso',
+                    detail: this.editingScheduler ? 'Agendamento atualizado com sucesso' : 'Agendamento criado com sucesso',
                     life: 3000
                 });
                 this.loadScheduler(this.id ?? '');
-                this.cancelEdit();
+                if (this.editingScheduler) {
+                    this.cancelEdit();
+                }
+                this.resetFormFields();
             },
             error: (error) => {
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Erro',
-                    detail: 'Erro ao salvar agendamento',
+                    detail: this.editingScheduler ? 'Erro ao atualizar agendamento' : 'Erro ao criar agendamento',
                     life: 3000
                 });
             }
