@@ -193,7 +193,8 @@ class Advertisement(Base, Audit):
     st_vendor = Column(String, nullable=False)
     st_details = Column(String)
     st_status = Column(String, nullable=False)
-    
+    bl_reconcile = Column(Boolean, nullable=False, default=False)
+
     brand = relationship("ClientBrand", lazy=True)
     products = relationship("AdvertisementProduct", back_populates="advertisement", lazy=True)
     history = relationship("AdvertisementHistory", back_populates="advertisement", lazy=True)
@@ -221,6 +222,7 @@ class AdvertisementProduct(Base, Audit):
     id_product = Column(UUID(as_uuid=True), ForeignKey(os.getenv("db_schema") + ".tb_client_brand_product.id_product"), primary_key=True, onupdate=None)
     st_varity_seq = Column(String, nullable=False, primary_key=True, onupdate=None)
     st_varity_name = Column(String, nullable=False, onupdate=None)
+    nr_quantity = Column(Integer, nullable=True)
     en_status = Column(String, nullable=False, default='NR')
 
     advertisement = relationship("Advertisement", lazy=True)
@@ -231,6 +233,12 @@ class AdvertisementProduct(Base, Audit):
 
     def _json_fields_advertisement(self):
         return ["st_varity_seq", "st_varity_name", "en_status", "product"]
+
+    def _json_fields_resume(self):
+        return ["id_product", "st_varity_seq", "st_varity_name", "en_status"]
+    
+    def __str__(self):
+        return json.dumps(self.to_custom_dict('_json_fields_resume'), default=str, indent=4)
 
 class AdvertisementHistory(Base, Audit):
     __tablename__ = "tb_advertisement_history"

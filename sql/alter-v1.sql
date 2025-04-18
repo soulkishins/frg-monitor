@@ -31,7 +31,9 @@ create table if not exists tb_scheduler_statistics (
 	constraint pk_scheduler_statistics primary key (id_scheduler, dt_created)
 );
 
-ALTER TABLE pricemonitorhml.tb_advertisement_product ADD en_status varchar DEFAULT 'NR' NOT NULL;
+ALTER TABLE tb_advertisement ADD bl_reconcile boolean default false NOT NULL;
+ALTER TABLE tb_advertisement_product ADD nr_quantity int NULL;
+ALTER TABLE tb_advertisement_product ADD en_status varchar DEFAULT 'NR' NOT NULL;
+COMMENT ON COLUMN tb_advertisement_product.en_status IS 'AR | NR | AI | MI | MR | ER';
 
-COMMENT ON COLUMN pricemonitorhml.tb_advertisement_product.en_status IS 'AR | NR | AI | MI | MR | ER';
 

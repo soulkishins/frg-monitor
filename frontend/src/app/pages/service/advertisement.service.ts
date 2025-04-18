@@ -70,7 +70,9 @@ export class AdvertisementService {
         { label: 'Erro de Leitura', value: 'ERROR', color: 'danger' },
         { label: 'Para Denuciar', value: 'REPORT', color: 'warn' },
         { label: 'Denuciado', value: 'REPORTED', color: 'secondary' },
-        { label: 'Revisão Manual', value: 'INVALIDATE', color: 'contrast' },
+        { label: 'Para Revisão', value: 'MANUAL', color: 'contrast' },
+        { label: 'Revisado', value: 'REVIEWED', color: 'contrast' },
+        { label: 'Invalidado', value: 'INVALIDATE', color: 'contrast' },
     ];
     if (all) {
       return [

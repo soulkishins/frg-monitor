@@ -26,8 +26,8 @@ def extract_products(advertisement, product_list) -> list[dict]:
                     {
                         "type": "text",
                         "text": """extraia os produtos existentes no anúncio.
-Retorne uma lista com os produtos encontrados, com os campos st_product_name, st_brand_name, e caso o produto exista na base de dados os campos id_product, id_variety da base de dados referente ao produto localizado.
-Não retorne nada além do json."""
+Retorne uma lista com os produtos encontrados, com os campos st_brand_name, st_product_name, st_variety_name e nr_quantity, caso o produto exista na base de dados preencha os campos id_product, id_variety referente ao produto localizado.
+Não retorne nada além do json no formato [{"st_product_name": "string", "st_brand_name": "string", "st_variety_name": "string", "nr_quantity": "number", "id_product": "string", "id_variety": "[string, string, ...]"}, ...]."""
                     }
                 ]
             }]
