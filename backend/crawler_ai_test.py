@@ -23,8 +23,8 @@ result = lambda_handler(
    {
       "Records": [
          {
-            "body": "[\"0c250efc-337a-4d07-87e1-574d180c0492\"]"
-            #"body": "[\"00298bda-e59a-4c44-908e-e1a5ae845822\"]"
+            #"body": "[\"0c250efc-337a-4d07-87e1-574d180c0492\"]"
+            "body": "[\"00298bda-e59a-4c44-908e-e1a5ae845822\"]"
          }
       ]
    },
