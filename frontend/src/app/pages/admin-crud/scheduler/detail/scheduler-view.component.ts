@@ -353,4 +353,26 @@ export class SchedulerView implements OnInit {
         this.scheduler.saturday = false;
         this.scheduler.sunday = false;
     }
+
+    deleteScheduler(scheduler: SchedulerKeyword) {
+        this.schedulerService.deleteScheduler(scheduler.id).subscribe({
+            next: () => {
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Sucesso',
+                    detail: 'Agendamento excluído com sucesso',
+                    life: 3000
+                });
+                this.loadScheduler(this.id ?? '');
+            },
+            error: (error: any) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: 'Erro ao excluir agendamento',
+                    life: 3000
+                });
+            }
+        });
+    }
 }

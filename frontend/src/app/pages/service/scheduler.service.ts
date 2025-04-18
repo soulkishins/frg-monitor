@@ -29,5 +29,9 @@ export class SchedulerService {
   postScheduler(scheduler: SchedulerRequest): Observable<Page<SchedulerKeyword>> {
     return this.http.post<Page<SchedulerKeyword>>(`${this.baseUrl}`, scheduler);
   }
+
+  deleteScheduler(schedulerId: string): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/${schedulerId}`);
+  }
   
 }

@@ -52,9 +52,9 @@ class SchedulerCrud(Crud):
     def update(self, indexes, data) -> Scheduler:
         original = super().read(indexes)
         original_cron = original.st_cron
-        original_schedule_name = f'{original.st_platform}_{original.st_cron}'
+        original_schedule_name = self.replace_schedule_name(original.st_platform, original.st_cron)
         updated = super().update(indexes, data)
-        updated_schedule_name = f'{updated.st_platform}_{updated.st_cron}'
+        updated_schedule_name = self.replace_schedule_name(updated.st_platform, updated.st_cron)
         if updated:
             self._session.flush()
             self.create_schedule(updated)
@@ -104,7 +104,7 @@ class SchedulerCrud(Crud):
         return 200, response
     
     def create_schedule(self, record: Scheduler):           
-        schedule_name = f'{record.st_platform}_{record.st_cron}'
+        schedule_name = self.replace_schedule_name(record.st_platform, record.st_cron)
         cron_parts = record.st_cron.split('_')
         scheduler_cron = f'cron({cron_parts[0]} {cron_parts[1]} ? * {cron_parts[2] if cron_parts[2] != "0" else "*"} *)'
         
@@ -235,3 +235,17 @@ class SchedulerCrud(Crud):
             from {os.getenv("db_schema")}.tb_scheduler 
             where id_keyword = '{indexes['id_keyword']}'
         """
+
+    @staticmethod
+    def replace_schedule_name(schedule_name: str, cron: str) -> str:
+        return f'{schedule_name}_{cron.replace(",", "_")}'
+    
+    def delete(self, indexes) -> tuple[int, dict]:
+        scheduler = self._session.query(Scheduler).filter(Scheduler.id == indexes['scheduler']).one()
+        self._session.query(SchedulerStatistics).filter(SchedulerStatistics.id_scheduler == scheduler.id).delete()
+        original_schedule_name = SchedulerCrud.replace_schedule_name(scheduler.st_platform, scheduler.st_cron)
+        if self._session.query(Scheduler).filter(Scheduler.st_cron == scheduler.st_cron, Scheduler.id != scheduler.id).count() == 0:
+            self.delete_schedule(original_schedule_name)
+        self._session.delete(scheduler)
+        self._session.flush()
+        return scheduler
