@@ -85,6 +85,9 @@ def get_crud_service(operation_name, user, session):
     if operation_name == "scheduler":
         from operations.scheduler import SchedulerCrud
         return SchedulerCrud(user, session)
+    if operation_name == "advertisement_product":
+        from operations.advertisement_product import AdvertisementProductCrud
+        return AdvertisementProductCrud(user, session)
     return None
 
 def return_value(status_code, body, *, headers = None, json_transform = None):

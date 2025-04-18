@@ -46,11 +46,15 @@ export interface ClientBrandProduct {
     subcategory: Subcategory;
     db_price?: number;
     st_variety_name?: string;
+    nr_quantity?: number;
+    st_status?: string;
 }
 
 export interface AdvertisementProduct {
     st_varity_seq: string;
     st_varity_name: string;
+    en_status: string;
+    nr_quantity: number;
     product: ClientBrandProduct;
 }
 
@@ -104,4 +108,13 @@ export interface AdvertisementHistory {
 export interface AdvertisementExport {
     id_export: string;
     st_status: string;
+}
+
+export interface AdvertisementProductPostRequest {
+    id_advertisement: string;
+    id_product: string;
+    st_varity_seq: string;
+    st_varity_name: string;
+    en_status: string;
+    nr_quantity: number;
 }
