@@ -127,12 +127,15 @@ export class CompanyView implements OnInit {
     loadCompany(id: string) {
         this.companyService.getClient(id).subscribe({
             next: (company: CompanyResponse) => {
+                const personType = company.bl_pj ? 'PJ' : 'PF';
+                const maskedDocument = this.applyMask(company.st_document, personType);
+                
                 this.companyForm.patchValue({
                     id: company.id,
                     name: company.st_name,
-                    identification: company.st_document,
+                    identification: maskedDocument,
                     status: company.st_status,
-                    personType: company.bl_pj ? 'PJ' : 'PF'
+                    personType: personType
                 });
                 this.isEditing = true;
             },
@@ -387,6 +390,38 @@ export class CompanyView implements OnInit {
         this.companyForm.get('identification')?.setErrors(null);
     }
 
+    applyMask(value: string, personType: string): string {
+        if (!value) return '';
+        const numbers = value.replace(/\D/g, '');
+        
+        if (personType === 'PF') {
+            return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+        } else {
+            return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+        }
+    }
+
+    removeMask(value: string): string {
+        return value ? value.replace(/\D/g, '') : '';
+    }
+
+    onPersonTypeChange() {
+        const identification = this.companyForm.get('identification')?.value;
+        const personType = this.companyForm.get('personType')?.value;
+        
+        if (identification) {
+            const maskedValue = this.applyMask(this.removeMask(identification), personType);
+            this.companyForm.get('identification')?.setValue(maskedValue);
+        }
+    }
+
+    onIdentificationInput(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const personType = this.companyForm.get('personType')?.value;
+        const maskedValue = this.applyMask(input.value, personType);
+        this.companyForm.get('identification')?.setValue(maskedValue, { emitEvent: false });
+    }
+
     saveCompany() {
         this.submitted = true;
 
@@ -397,7 +432,7 @@ export class CompanyView implements OnInit {
         const formValue = this.companyForm.value;
         const companyRequest: CompanyRequest = {
             st_name: formValue.name,
-            st_document: formValue.identification.replace(/[^\d]/g, ''),
+            st_document: this.removeMask(formValue.identification),
             st_status: formValue.status.toUpperCase(),
             bl_pj: formValue.personType === 'PJ'
         };

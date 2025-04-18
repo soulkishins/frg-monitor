@@ -28,6 +28,7 @@ export class AppMenu {
                     { label: 'Sub Categoria', icon: 'pi pi-fw pi-bookmark', routerLink: ['/cadastro/subcategoria'] },
                     { label: 'Produto', icon: 'pi pi-fw pi-box', routerLink: ['/cadastro/produto'] },
                     { label: 'Palavra-chave', icon: 'pi pi-fw pi-tags', routerLink: ['/cadastro/palavra-chave'] },
+                    { label: 'Agendamento', icon: 'pi pi-fw pi-clock', routerLink: ['/cadastro/agendador'] },
                 ]
             },
             {

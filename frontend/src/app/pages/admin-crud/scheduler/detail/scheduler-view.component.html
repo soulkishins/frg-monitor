@@ -1,0 +1,122 @@
+<p-toast />
+
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+        <div class="flex items-center gap-2">
+            <i class="pi pi-calendar"></i>
+            <span class="font-bold">Gestão de Agendamentos - {{ id === 'novo' ? 'Novo Agendamento' : 'Editar Agendamento' }}</span>
+        </div>
+    </ng-template>
+
+    <ng-template #end>
+        <p-button label="Voltar" icon="pi pi-arrow-left" severity="secondary" (click)="cancel()" />
+    </ng-template>
+</p-toolbar>
+
+<div class="card">
+    <form (ngSubmit)="save()">
+        <div class="flex flex-col gap-6 p-4">
+            <div>
+                <label for="keyword" class="block font-bold mb-3">Palavra-chave *</label>
+                <input pInputText id="keyword" [(ngModel)]="scheduler.st_keyword" name="st_keyword"
+                    [ngClass]="{ 'ng-invalid ng-dirty': submitted && !scheduler.st_keyword }"
+                    [style]="{'width': '100%'}" [disabled]="id !== 'novo'" />
+                <small class="text-red-500" *ngIf="submitted && !scheduler.st_keyword">Palavra-chave é obrigatória.</small>
+            </div>
+
+            <div class="flex flex-row gap-4">
+                <div class="flex-1">
+                    <label for="platform" class="block font-bold mb-3">Plataforma *</label>
+                    <p-dropdown id="platform" [options]="platforms" [(ngModel)]="scheduler.platform" name="platform"
+                        [ngClass]="{ 'ng-invalid ng-dirty': submitted && !scheduler.platform }"
+                        [style]="{'width': '100%'}" placeholder="Selecione a plataforma">
+                    </p-dropdown>
+                    <small class="text-red-500" *ngIf="submitted && !scheduler.platform">Plataforma é obrigatória.</small>
+                </div>
+
+                <div class="flex-1">
+                    <label for="executionTime" class="block font-bold mb-3">Hora de Execução *</label>
+                    <p-calendar id="executionTime" [(ngModel)]="scheduler.executionTime" name="executionTime"
+                        [ngClass]="{ 'ng-invalid ng-dirty': submitted && !scheduler.executionTime }"
+                        [style]="{'width': '100%'}" [timeOnly]="true" [showTime]="true" [hourFormat]="'24'"
+                        placeholder="Selecione a hora">
+                    </p-calendar>
+                    <small class="text-red-500" *ngIf="submitted && !scheduler.executionTime">Hora de execução é obrigatória.</small>
+                </div>
+
+                <div class="flex-1">
+                    <label class="block font-bold mb-3">Dias da Semana *</label>
+                    <div class="flex flex-wrap gap-2">
+                        <div class="flex align-items-center">
+                            <p-checkbox [(ngModel)]="scheduler.monday" name="monday" [binary]="true" inputId="monday"></p-checkbox>
+                            <label for="monday" class="ml-2">Seg</label>
+                        </div>
+                        <div class="flex align-items-center">
+                            <p-checkbox [(ngModel)]="scheduler.tuesday" name="tuesday" [binary]="true" inputId="tuesday"></p-checkbox>
+                            <label for="tuesday" class="ml-2">Ter</label>
+                        </div>
+                        <div class="flex align-items-center">
+                            <p-checkbox [(ngModel)]="scheduler.wednesday" name="wednesday" [binary]="true" inputId="wednesday"></p-checkbox>
+                            <label for="wednesday" class="ml-2">Qua</label>
+                        </div>
+                        <div class="flex align-items-center">
+                            <p-checkbox [(ngModel)]="scheduler.thursday" name="thursday" [binary]="true" inputId="thursday"></p-checkbox>
+                            <label for="thursday" class="ml-2">Qui</label>
+                        </div>
+                        <div class="flex align-items-center">
+                            <p-checkbox [(ngModel)]="scheduler.friday" name="friday" [binary]="true" inputId="friday"></p-checkbox>
+                            <label for="friday" class="ml-2">Sex</label>
+                        </div>
+                        <div class="flex align-items-center">
+                            <p-checkbox [(ngModel)]="scheduler.saturday" name="saturday" [binary]="true" inputId="saturday"></p-checkbox>
+                            <label for="saturday" class="ml-2">Sáb</label>
+                        </div>
+                        <div class="flex align-items-center">
+                            <p-checkbox [(ngModel)]="scheduler.sunday" name="sunday" [binary]="true" inputId="sunday"></p-checkbox>
+                            <label for="sunday" class="ml-2">Dom</label>
+                        </div>
+                    </div>
+                    <small class="text-red-500" *ngIf="submitted && !hasSelectedDay()">Selecione pelo menos um dia da semana.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-2 p-4 border-t-1">
+            <p-button type="submit" label="Salvar" icon="pi pi-check" />
+        </div>
+    </form>
+</div>
+
+<div class="card mt-4">
+    <p-table [value]="[scheduler]" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Plataforma</th>
+                <th>Hora</th>
+                <th>Dias da Semana</th>
+                <th style="width: 100px">Ações</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-item>
+            <tr>
+                <td>{{ item.platform }}</td>
+                <td>{{ item.executionTime | date:'HH:mm' }}</td>
+                <td>
+                    <span *ngIf="item.monday">Seg</span>
+                    <span *ngIf="item.tuesday">, Ter</span>
+                    <span *ngIf="item.wednesday">, Qua</span>
+                    <span *ngIf="item.thursday">, Qui</span>
+                    <span *ngIf="item.friday">, Sex</span>
+                    <span *ngIf="item.saturday">, Sáb</span>
+                    <span *ngIf="item.sunday">, Dom</span>
+                </td>
+                <td>
+                    <div class="flex gap-2">
+                        <p-button icon="pi pi-pencil" styleClass="p-button-sm p-button-text"></p-button>
+                        <p-button icon="pi pi-trash" styleClass="p-button-sm p-button-text p-button-danger"></p-button>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>

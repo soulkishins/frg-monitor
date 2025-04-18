@@ -26,11 +26,11 @@
                 <label class="block font-bold mb-3">Tipo de Pessoa</label>
                 <div class="flex gap-4">
                     <div class="flex items-center">
-                        <p-radioButton name="personType" value="PF" formControlName="personType" [inputId]="'pf'"></p-radioButton>
+                        <p-radioButton name="personType" value="PF" formControlName="personType" [inputId]="'pf'" (onClick)="onPersonTypeChange()"></p-radioButton>
                         <label [for]="'pf'" class="ml-2">Pessoa Física</label>
                     </div>
                     <div class="flex items-center">
-                        <p-radioButton name="personType" value="PJ" formControlName="personType" [inputId]="'pj'"></p-radioButton>
+                        <p-radioButton name="personType" value="PJ" formControlName="personType" [inputId]="'pj'" (onClick)="onPersonTypeChange()"></p-radioButton>
                         <label [for]="'pj'" class="ml-2">Pessoa Jurídica</label>
                     </div>
                 </div>
@@ -38,7 +38,7 @@
 
             <div>
                 <label for="identication" class="block font-bold mb-3">{{ companyForm.get('personType')?.value === 'PF' ? 'CPF' : 'CNPJ' }}</label>
-                <input type="text" pInputText id="identication" formControlName="identification" (input)="validateCompanyIdentification()" [readonly]="isEditing" required [style]="{'width':'100%'}" />
+                <input type="text" pInputText id="identication" formControlName="identification" (input)="onIdentificationInput($event)" [readonly]="isEditing" required [style]="{'width':'100%'}" />
                 <small class="text-red-500" *ngIf="companyForm.get('identification')?.errors?.['required'] && companyForm.get('identification')?.touched">
                     {{ companyForm.get('personType')?.value === 'PF' ? 'CPF' : 'CNPJ' }} é obrigatório
                 </small>

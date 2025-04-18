@@ -10,6 +10,7 @@ export default [
     { path: 'produto', loadChildren: () => import('./products/product.routes'), canMatch: [canMatchGuard] },
     { path: 'usuario', loadChildren: () => import('./users/user.routes'), canMatch: [canMatchGuard] },
     { path: 'palavra-chave', loadChildren: () => import('./keyword/keyword.routes'), canMatch: [canMatchGuard] },
+    { path: 'agendador', loadChildren: () => import('./scheduler/scheduler.routes'), canMatch: [canMatchGuard] },
     { path: 'perfil', component: Profile, canMatch: [canMatchGuard] },
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;
