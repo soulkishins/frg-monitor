@@ -1,7 +1,8 @@
 from ai.bedrock import extract_products
 from db.db import DB, set_current_user
-from db.models import ClientBrandProduct, ClientBrand, Subcategory, Advertisement, AdvertisementProduct, AdvertisementHistory
+from db.models import ClientBrandProduct, ClientBrand, Subcategory, Advertisement, AdvertisementProduct, AdvertisementHistory, SchedulerStatistics
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import func, update
 from datetime import datetime
 import json
 import traceback
@@ -114,80 +115,73 @@ def ai_included_products(advertisement: Advertisement, products_extracted: list[
             })
     return products_included
 
-def extract_products_from_advertisement(advertisement_id: str):
-    db = DB()
-    set_current_user('crawler_ai')
+def extract_products_from_advertisement(session: Session, advertisement: Advertisement):
+    try:
+        product_list = lookup_products(session, advertisement)
+        products_extracted = extract_products_by_ai(advertisement, product_list)
+        products_included = reconcile_products_from_advertisement(advertisement, products_extracted, product_list)
+        products_included += ai_included_products(advertisement, products_extracted, product_list)
 
-    with db:
-        session = db.session
+        print('Produtos Incluídos:')
+        print(json.dumps(products_included, default=str, indent=4))
 
-        advertisement = find_advertisement(session, advertisement_id)
-        if advertisement is None:
-            return
-
-        try:
-            product_list = lookup_products(session, advertisement)
-            products_extracted = extract_products_by_ai(advertisement, product_list)
-            products_included = reconcile_products_from_advertisement(advertisement, products_extracted, product_list)
-            products_included += ai_included_products(advertisement, products_extracted, product_list)
-
-            print('Produtos Incluídos:')
-            print(json.dumps(products_included, default=str, indent=4))
-
-            st_status = ADVERTISEMENT_STATUS_NEW
-            for product_extracted in products_extracted:
-                if not product_extracted['reconciled']:
-                    st_status = ADVERTISEMENT_STATUS_MANUAL
-                    break
+        st_status = ADVERTISEMENT_STATUS_NEW
+        for product_extracted in products_extracted:
+            if not product_extracted['reconciled']:
+                st_status = ADVERTISEMENT_STATUS_MANUAL
+                break
+    
+        if len(products_included) == 0:
+            st_status = ADVERTISEMENT_STATUS_INVALIDATE
         
-            if len(products_included) == 0:
-                st_status = ADVERTISEMENT_STATUS_INVALIDATE
-            
-            if st_status == ADVERTISEMENT_STATUS_NEW:
-                price = 0
-                for product_included in products_included:
-                    price += product_included['price'] * product_included['extracted']['nr_quantity']
-
-                percentage = (advertisement.db_price / price) * 100
-                if percentage <= 70:
-                    st_status = ADVERTISEMENT_STATUS_MANUAL
-                elif percentage < 100:
-                    st_status = ADVERTISEMENT_STATUS_REPORT
-
+        if st_status == ADVERTISEMENT_STATUS_NEW:
+            price = 0
             for product_included in products_included:
-                if product_included['status'] == 'AI':
-                    session.add(product_included['included'])
-                else:
-                    product_included['included'].en_status = product_included['status']
-                    product_included['included'].nr_quantity = product_included['extracted']['nr_quantity']
-            advertisement.st_status = st_status
-            advertisement.bl_reconcile = True
+                price += product_included['price'] * product_included['extracted']['nr_quantity']
 
-            advertisementHistory = AdvertisementHistory(
-                id_advertisement=advertisement.id_advertisement,
-                dt_history=datetime.now(),
-                st_status=st_status,
-                st_action='CRAWLER_RECONCILE',
-                st_history=json.dumps(products_extracted, default=str)
-            )
-            session.add(advertisementHistory)
+            percentage = (advertisement.db_price / price) * 100
+            if percentage <= 70:
+                st_status = ADVERTISEMENT_STATUS_MANUAL
+            elif percentage < 100:
+                st_status = ADVERTISEMENT_STATUS_REPORT
 
-            print(f'Status do anúncio: {st_status}')
-            session.commit()
-        except Exception as e:
-            print(f'Erro ao processar anúncio {advertisement_id}: {e}')
-            session.rollback()
-            advertisement.st_status = ADVERTISEMENT_STATUS_MANUAL
-            advertisement.bl_reconcile = True
-            advertisementHistory = AdvertisementHistory(
-                id_advertisement=advertisement.id_advertisement,
-                dt_history=datetime.now(),
-                st_status=ADVERTISEMENT_STATUS_MANUAL,
-                st_action='CRAWLER_RECONCILE',
-                st_history=json.dumps({"error": str(e)}, default=str)
-            )
-            session.add(advertisementHistory)
-            session.commit()
+        for product_included in products_included:
+            if product_included['status'] == 'AI':
+                session.add(product_included['included'])
+            else:
+                product_included['included'].en_status = product_included['status']
+                product_included['included'].nr_quantity = product_included['extracted']['nr_quantity']
+        advertisement.st_status = st_status
+        advertisement.bl_reconcile = True
+
+        advertisementHistory = AdvertisementHistory(
+            id_advertisement=advertisement.id_advertisement,
+            dt_history=datetime.now(),
+            st_status=st_status,
+            st_action='CRAWLER_RECONCILE',
+            st_history=json.dumps(products_extracted, default=str)
+        )
+        session.add(advertisementHistory)
+
+        print(f'Status do anúncio: {st_status}')
+        session.commit()
+        
+        return True, st_status
+    except Exception as e:
+        print(f'Erro ao processar anúncio {advertisement.id_advertisement}: {e}')
+        session.rollback()
+        advertisement.st_status = ADVERTISEMENT_STATUS_MANUAL
+        advertisement.bl_reconcile = True
+        advertisementHistory = AdvertisementHistory(
+            id_advertisement=advertisement.id_advertisement,
+            dt_history=datetime.now(),
+            st_status=ADVERTISEMENT_STATUS_MANUAL,
+            st_action='CRAWLER_RECONCILE',
+            st_history=json.dumps({"error": str(e)}, default=str)
+        )
+        session.add(advertisementHistory)
+        session.commit()
+        return False, ADVERTISEMENT_STATUS_MANUAL
 
 def find_price(id_product: str, st_varity_seq: str, product_list: list[dict]) -> float:
     for product in product_list:
@@ -197,14 +191,62 @@ def find_price(id_product: str, st_varity_seq: str, product_list: list[dict]) ->
                     return variety['price']
     return 0.0
 
+def process_advertisements(data: dict):
+    db = DB()
+    set_current_user('crawler_ai')
+
+    count = len(data['advertisements'])
+    success = 0
+    error = 0
+    reported = 0
+    manual_revision = 0
+    print(f'Total de anúncios a processar: {count}')
+    while len(data['advertisements']) > 0:
+        advertisement_id = data['advertisements'].pop(0)
+        try:
+            with db:
+                session = db.session
+                advertisement = find_advertisement(session, advertisement_id)
+                if advertisement is None:
+                    error += 1
+                    continue
+                result = True
+                if not advertisement.bl_reconcile:
+                    result, st_status = extract_products_from_advertisement(session, advertisement)
+                success += 1 if result else 0
+                error += 0 if result else 1
+                if st_status == ADVERTISEMENT_STATUS_REPORT:
+                    reported += 1
+                elif st_status == ADVERTISEMENT_STATUS_MANUAL:
+                    manual_revision += 1
+        except Exception as e:
+            print(f'Erro ao processar anúncio {advertisement_id}: {e}')
+            error += 1
+
+    print(f'Total de anúncios processados com sucesso: {success}')
+    print(f'Total de anúncios processados com erro: {error}')
+    print(f'Total de anúncios restantes: {len(data["advertisements"])}')
+    
+    with db:
+        session = db.session
+        stmt = (
+            update(SchedulerStatistics)
+            .where(SchedulerStatistics.id_scheduler == data['scheduler_id'], SchedulerStatistics.dt_created == data['scheduler_date'])
+            .values(
+                nr_reconcile=SchedulerStatistics.nr_reconcile + count,
+                nr_reported=SchedulerStatistics.nr_reported + reported,
+                nr_manual_revision=SchedulerStatistics.nr_manual_revision + manual_revision
+            )
+        )
+        session.execute(stmt)
+        session.commit()
+
 def lambda_handler(event, context):
     try:
         for record in event["Records"]:
             data = json.loads(record["body"])
             print(f"Mensagem recebida: {data}")
-            for advertisement in data:
-                extract_products_from_advertisement(advertisement)
-
+            process_advertisements(data)
         return {"statusCode": 200, "body": "Mensagens processadas com sucesso"}
     except Exception as e:
         error_line = traceback.extract_tb(e.__traceback__)[-1].lineno

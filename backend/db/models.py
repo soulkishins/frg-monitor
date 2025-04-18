@@ -298,6 +298,8 @@ class SchedulerStatistics(Base):
     nr_manual_revision = Column(Integer, nullable=False)
     nr_reported = Column(Integer, nullable=False)
     nr_already_reported = Column(Integer, nullable=False)
+    nr_reconcile = Column(Integer, nullable=False)
+    en_status = Column(String, nullable=False)
     
     scheduler = relationship("Scheduler", back_populates="statistics", lazy=True)
 

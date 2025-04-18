@@ -3,6 +3,7 @@ process.env.APP_REGION = 'sa-east-1';
 process.env.DB_SCHEMA = 'pricemonitor';
 process.env.RDS_SECRET_NAME = 'local/db/pricemonitor';
 process.env.S3_BUCKET_NAME = 'frg-price-monitor-data';
+process.env.SQS_QUEUE_URL = 'https://sqs.sa-east-1.amazonaws.com/147997132513/price-monitor-crawler-ai';
 process.env.TZ = 'America/Sao_Paulo';
 
 import { handler } from './main';
@@ -13,21 +14,21 @@ handler({
         "messageId": "19dd0b57-b21e-4ac1-bd88-01bbb068cb78",
         "receiptHandle": "MessageReceiptHandle",
         "body": JSON.stringify({
-            "scheduler_id": "b3bd3c4d-7e6f-4500-9d3b-ab18d7c4911a",
-            "cron": "55_22_0",
-            "platform": "ML",
-            "datetime": "2025-04-17 01:55:48",
-            "keyword_id": "fda81d85-94f1-428f-85c1-0116246a3cc1",
-            "keyword": "AMPOLA SUPER DOSE RECONSTRUÇÃO 15ML",
-            "brand_id": "5512ab83-027f-45cf-bc8e-a92f0cc253ec",
-            "products": [
-                {
-                    "id_product": "a0adeda9-e30a-4fef-8a08-39272b34cd9b",
-                    "st_varity_seq": 1,
-                    "st_varity_name": "15ML",
-                    "db_price": 27.6
-                }
-            ]
+          "scheduler_id": "ea01587c-d246-404c-b4b5-34255b3e3788",
+          "cron": "15_15_0",
+          "platform": "ML",
+          "datetime": "2025-04-18 20:35:28",
+          "keyword_id": "aa6fac64-1e6a-4dda-80c5-6c02c2f4457b",
+          "keyword": "7897230305820",
+          "brand_id": "7f510ac5-5442-46a2-9bfd-ec6b482fda40",
+          "products": [
+            {
+              "id_product": "28c336c9-a6b0-4c2c-a9af-dc87f5046997",
+              "st_varity_seq": 1,
+              "st_varity_name": "5 g",
+              "db_price": 12.4
+            }
+          ]
         }),
         "attributes": {
           "ApproximateReceiveCount": "1",

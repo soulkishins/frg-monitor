@@ -6,7 +6,7 @@ export class UploadError extends Error {
 }
 
 export class ScrapingError extends Error {
-    constructor(message: string, public readonly originalError: Error) {
+    constructor(message: string, public readonly originalError: Error, public readonly type: 'P' | 'A') {
         super(`Scraping Error: ${message}`);
         this.name = 'ScrapingError';
     }

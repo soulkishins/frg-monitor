@@ -44,7 +44,7 @@ export class MLScraper {
                 pages: this.extractPaginationFromPage($)
             };
         } catch (error) {
-            throw new ScrapingError('Falha na busca de produtos', error as Error);
+            throw new ScrapingError('Falha na busca de produtos', error as Error, 'P');
         }
     }
 
@@ -70,7 +70,7 @@ export class MLScraper {
             console.log('Page', page, advertisements);
         } catch (error) {
             console.log('advertisementsJson', advertisementsJson);
-            throw new ScrapingError('Falha ao extrair anúncios', error as Error);
+            throw new ScrapingError('Falha ao extrair anúncios', error as Error, 'A');
         }
         return advertisements;
     }
@@ -106,7 +106,7 @@ export class MLScraper {
                 pages: this.extractPaginationFromPage($)
             };
         } catch (error) {
-            throw new ScrapingError('Falha ao buscar próxima página', error as Error);
+            throw new ScrapingError('Falha ao buscar próxima página', error as Error, 'P');
         }
     }
 
@@ -117,7 +117,7 @@ export class MLScraper {
             );
             return advertisements;
         } catch (error) {
-            throw new ScrapingError('Falha ao ler anúncios', error as Error);
+            throw new ScrapingError('Falha ao ler anúncios', error as Error, 'A');
         }
     }
 } 

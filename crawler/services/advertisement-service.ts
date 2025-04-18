@@ -1,13 +1,14 @@
 import { v4 as uuidv4 } from 'uuid';
-import { ServiceError } from "../errors";
+import { ScrapingError, ServiceError } from "../errors";
 import { AdvertisementManager } from "../aws/rds";
 import { IAdvertisement, IKeyword, IMLAdvertisement, IMLPage } from "../base/types";
 import { MLScraper } from "./ml-scraper";
-
+import { SQSService } from '../aws/sqs';
 export class AdvertisementService {
     constructor(
         private readonly scraper: MLScraper,
-        private readonly adManager: AdvertisementManager
+        private readonly adManager: AdvertisementManager,
+        private readonly sqsService: SQSService
     ) {}
 
     public async searchAndSaveAdvertisements(params: IKeyword): Promise<void> {
@@ -21,7 +22,9 @@ export class AdvertisementService {
                 nr_error: 0,
                 nr_manual_revision: 0,
                 nr_reported: 0,
-                nr_already_reported: 0
+                nr_already_reported: 0,
+                nr_reconcile: 0,
+                st_status: null
             };
 
             let page = await this.scraper.searchAdvertisements(params.keyword);            
@@ -30,7 +33,14 @@ export class AdvertisementService {
                 await this.processAdvertisements(page, params);
                 page = await this.scraper.nextPage(page);
             }
+
+            params.statistics.st_status = params.statistics.nr_error === 0 ? 'SE' : 'PE';
         } catch (error) {
+            if (error instanceof ScrapingError) {
+                params.statistics.st_status = error.type === 'P' ? 'EP' : 'ET';
+            } else {
+                params.statistics.st_status = 'GE';
+            }
             throw new ServiceError('Falha ao processar anúncios', error as Error);
         } finally {
             await this.adManager.updateStatistics(params);
@@ -46,6 +56,14 @@ export class AdvertisementService {
         await Promise.all(
             advertisements.map(advertisement => this.processAdvertisement(advertisement, params))
         );
+
+        const sqsAds = advertisements.map(ad => ad.id_advertisement);
+        const sqsMessage = {
+            messageBody: JSON.stringify({advertisements: sqsAds, scheduler_id: params.scheduler_id, scheduler_date: params.datetime})
+        };
+
+        const messageId = await this.sqsService.sendMessage(sqsMessage);
+        console.log('Message sent with ID:', messageId);
     }
 
     private async processAdvertisement(

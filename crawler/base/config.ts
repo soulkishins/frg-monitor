@@ -12,6 +12,7 @@ interface DatabaseConfig {
 interface AWSConfig {
     region: string;
     bucketName: string;
+    queueUrl: string;
 }
 
 interface AppConfig {
@@ -73,7 +74,8 @@ export class ConfigManager {
                 },
                 aws: {
                     region: process.env.APP_REGION as string,
-                    bucketName: process.env.S3_BUCKET_NAME as string
+                    bucketName: process.env.S3_BUCKET_NAME as string,
+                    queueUrl: process.env.SQS_QUEUE_URL as string
                 }
             };
 

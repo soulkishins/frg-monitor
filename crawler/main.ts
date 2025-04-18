@@ -4,7 +4,7 @@ import { S3Uploader } from './services/s3-uploader';
 import { MLParser } from './services/ml-parser';
 import { MLScraper } from './services/ml-scraper';
 import { AdvertisementService } from './services/advertisement-service';
-
+import { SQSService } from './aws/sqs';
 export const handler = async (event: any) => {
     try {
         for (const record of event.Records) {
@@ -25,11 +25,13 @@ export const handler = async (event: any) => {
             const uploader = new S3Uploader(config.aws);
             const parser = new MLParser(uploader);
             const scraper = new MLScraper(parser);
+            const sqsService = new SQSService(config.aws.region, config.aws.queueUrl);
             const adManager = new AdvertisementManager(config.database);
             
             const adService = new AdvertisementService(
                 scraper,
-                adManager
+                adManager,
+                sqsService
             );
             console.log('Serviços iniciados com sucesso.');
 

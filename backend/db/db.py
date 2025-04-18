@@ -37,7 +37,10 @@ class DB():
         return self._session
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self._session.commit()
+        if exc_type is not None:
+            self._session.rollback()
+        else:
+            self._session.commit()
         self._session.close()
 
     @property
