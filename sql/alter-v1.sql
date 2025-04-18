@@ -28,6 +28,8 @@ create table if not exists tb_scheduler_statistics (
 	nr_manual_revision int not null,
 	nr_reported int not null,
 	nr_already_reported int not null,
+	nr_reconcile int NOT NULL
+	en_status varchar not null,
 	constraint pk_scheduler_statistics primary key (id_scheduler, dt_created)
 );
 

@@ -44,6 +44,8 @@ export interface IStatistics {
     nr_manual_revision: number;
     nr_reported: number;
     nr_already_reported: number;
+    nr_reconcile: number;
+    st_status: 'SE' | 'EP' | 'ET' | 'PE' | 'GE' | null;
 }
 
 // Interface base para produtos
