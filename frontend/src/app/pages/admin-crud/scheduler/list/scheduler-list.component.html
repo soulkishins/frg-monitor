@@ -18,7 +18,7 @@
     [tableStyle]="{ 'min-width': '75rem' }"
     [(selection)]="selectedSchedulers"
     [rowHover]="true"
-    dataKey="id_keyword"
+    dataKey="id"
     currentPageReportTemplate="Mostrando {first} até {last} de {totalRecords} agendamentos"
     [showCurrentPageReport]="true"
     [rowsPerPageOptions]="[50, 100, 200, 300]"
@@ -57,8 +57,8 @@
         <tr>
             <td>{{ scheduler.st_keyword }}</td>
             <td>
-                <p-tag [value]="scheduler.st_status === 'active' ? 'Ativo' : 'Inativo'"
-                       [severity]="scheduler.st_status === 'active' ? 'success' : 'danger'" />
+                <p-tag [value]="scheduler.st_status === 'enable' ? 'Ativo' : 'Inativo'"
+                       [severity]="scheduler.st_status === 'enable' ? 'success' : 'danger'" />
             </td>
             <td>
                 <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editScheduler(scheduler)" />

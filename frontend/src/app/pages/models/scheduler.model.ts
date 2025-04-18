@@ -4,15 +4,15 @@ export interface SchedulerResponse {
     st_status: string;
 }
 
-export interface Scheduler {
-    id?: string;
-    name?: string;
-    identification?: string;
-    status?: string;
+export interface SchedulerKeyword {
+    id: string;
+    id_keyword: string;
+    st_platform: string;
+    st_cron: string;
 }
 
 export interface SchedulerRequest {
-    st_keyword: string;
-    st_status: string;
-    platform: string | number;
+    id_keyword: string;
+    st_platform: string;
+    st_cron: string;
 }

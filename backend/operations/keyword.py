@@ -3,7 +3,7 @@ from db.models import Keyword, ClientBrand, Client, Scheduler, SchedulerStatisti
 from sqlalchemy.orm import contains_eager
 import boto3
 import os
-
+from operations.scheduler import SchedulerCrud
 scheduler_region = os.getenv('scheduler_region')
 
 # Inicializa o cliente do EventBridge Schedule
@@ -16,7 +16,7 @@ class KeywordCrud(Crud):
         self._session.query(SchedulerStatistics).filter(SchedulerStatistics.id_scheduler.in_(self._session.query(Scheduler.id).filter(Scheduler.id_keyword == indexes['keyword']))).delete()
         schedulers = self._session.query(Scheduler).filter(Scheduler.id_keyword == indexes['keyword']).all()
         for scheduler in schedulers:
-            original_schedule_name = f'{scheduler.st_platform} - {scheduler.st_cron}'
+            original_schedule_name = SchedulerCrud.replace_schedule_name(scheduler.st_platform, scheduler.st_cron)
             if self._session.query(Scheduler).filter(Scheduler.st_cron == scheduler.st_cron, Scheduler.id != scheduler.id).count() == 0:
                 self.delete_schedule(original_schedule_name)
             self._session.delete(scheduler)

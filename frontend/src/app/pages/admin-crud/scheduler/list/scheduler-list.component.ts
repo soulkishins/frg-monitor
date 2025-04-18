@@ -23,7 +23,7 @@ import { Column, ExportColumn, Page } from '../../../models/global.model';
 import { Router, RouterModule } from '@angular/router';
 import { SchedulerService } from '../../../service/scheduler.service';
 import { SchedulerResponse } from '../../../models/scheduler.model';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
     selector: 'app-scheduler-list',
@@ -75,8 +75,8 @@ export class SchedulerList implements OnInit {
     submitted: boolean = false;
 
     statusOptions = [
-        { label: 'Ativo', value: 'active' },
-        { label: 'Inativo', value: 'inactive' }
+        { label: 'Ativo', value: 'enable' },
+        { label: 'Inativo', value: 'disable' }
     ];
 
     @ViewChild('dt') dt!: Table;
@@ -157,7 +157,13 @@ export class SchedulerList implements OnInit {
 
         this.schedulerService.getSchedulers(params).subscribe({
             next: (data: Page<SchedulerResponse>) => {
-                this.schedulers.set(data.list);   
+                this.selectedSchedulers = null;
+                const mappedData = data.list.map(item => ({
+                    ...item,
+                    keyword: item.st_keyword,
+                    status: item.st_status
+                }));
+                this.schedulers.set(mappedData);   
                 this.page = data.page;
             },
             error: (error) => {
@@ -175,10 +181,8 @@ export class SchedulerList implements OnInit {
         });
 
         this.cols = [
-            { field: 'st_keyword', header: 'Palavra-chave' },
-            { field: 'st_status', header: 'Status' },
-            { field: 'dt_created', header: 'Data Criação' },
-            { field: 'st_created_by', header: 'Criado por' }
+            { field: 'keyword', header: 'Palavra-chave' },
+            { field: 'status', header: 'Status' }
         ];
 
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
@@ -203,94 +207,9 @@ export class SchedulerList implements OnInit {
         this.router.navigate(['/cadastro/agendador/detalhe', scheduler.id_keyword]);
     }
 
-    deleteSelectedSchedulers() {
-        this.confirmationService.confirm({
-            message: 'Tem certeza que deseja excluir os agendamentos selecionados?',
-            header: 'Confirmar',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                if (this.selectedSchedulers) {
-                    const deletePromises = this.selectedSchedulers.map(scheduler => 
-                        this.schedulerService.deleteScheduler(scheduler.id_keyword).toPromise()
-                    );
-
-                    Promise.all(deletePromises)
-                        .then(() => {
-                            this.schedulers.set(this.schedulers().filter((val) => !this.selectedSchedulers?.includes(val)));
-                            this.selectedSchedulers = null;
-                            this.messageService.add({
-                                severity: 'success',
-                                summary: 'Sucesso',
-                                detail: 'Agendamentos Excluídos',
-                                life: 3000
-                            });
-                        })
-                        .catch(() => {
-                            this.messageService.add({
-                                severity: 'error',
-                                summary: 'Erro',
-                                detail: 'Erro ao excluir agendamentos',
-                                life: 3000
-                            });
-                        });
-                }
-            }
-        });
-    }
-
     hideDialog() {
         this.schedulerDialog = false;
         this.submitted = false;
-    }
-
-    deleteScheduler(scheduler: SchedulerResponse) {
-        this.confirmationService.confirm({
-            message: 'Tem certeza que deseja excluir o agendamento ' + scheduler.st_keyword + '?',
-            header: 'Confirmar',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                this.schedulerService.deleteScheduler(scheduler.id_keyword).subscribe(
-                    (response) => {
-                        this.schedulers.set(this.schedulers().filter((val) => val.id_keyword !== scheduler.id_keyword));
-                        this.scheduler = {} as SchedulerResponse;
-                        this.messageService.add({
-                            severity: 'success',
-                            summary: 'Sucesso',
-                            detail: 'Agendamento Excluído',
-                            life: 3000
-                        });
-                    },
-                    (error) => {
-                        this.messageService.add({
-                            severity: 'error',
-                            summary: 'Erro',
-                            detail: 'Erro ao excluir agendamento',
-                            life: 3000
-                        });
-                    }
-                );
-            }
-        });
-    }
-
-    findIndexById(id: string): number {
-        let index = -1;
-        for (let i = 0; i < this.schedulers().length; i++) {
-            if (this.schedulers()[i].id_keyword === id) {
-                index = i;
-                break;
-            }
-        }
-        return index;
-    }
-
-    createId(): string {
-        let id = '';
-        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        for (var i = 0; i < 5; i++) {
-            id += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return id;
     }
 
     navigateToSchedulers() {
@@ -298,6 +217,6 @@ export class SchedulerList implements OnInit {
     }
 
     getStatusLabel(status: string): string {
-        return status === 'active' ? 'Ativo' : 'Inativo';
+        return status === 'enable' ? 'Ativo' : 'Inativo';
     }
 }
