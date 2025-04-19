@@ -38,6 +38,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { Table } from 'primeng/table';
+import { isReactive } from '@angular/core/primitives/signals';
 
 registerLocaleData(localePt);
 
@@ -96,6 +97,8 @@ export class AdvertisementDetail implements OnInit {
 
     // Propriedades para o modal
     displayModal: boolean = false;
+    displayQuantityModal: boolean = false;
+    selectedProductForEdit: any = {};
     selectedProduct: ProductResponse | null = null;
     selectedVariety: Variety | null = null;
     quantity: number = 1;
@@ -112,7 +115,7 @@ export class AdvertisementDetail implements OnInit {
         nr_quantity: 0,
         en_status: ''
     };
-
+    
     constructor(
         public advertisementService: AdvertisementService,
         private messageService: MessageService,
@@ -452,5 +455,97 @@ export class AdvertisementDetail implements OnInit {
                 });
             }
         });
+    }
+
+    getActionProduct(status: string): any[] {
+        let dropdownActions = [];
+
+        if (status == 'MI') {
+            dropdownActions.push({ label: 'Delete', icon: 'pi pi-fw pi-trash' });
+        }
+        if (status == 'MR' || status == 'AR' || status == 'AI') {
+            dropdownActions.push({ label: 'Marcar Erro', icon: 'pi pi-fw pi-exclamation-triangle' });
+        }
+        if (status == 'NR' || status == 'ER') {
+            dropdownActions.push({ label: 'Marcar como Conciliação Manual', icon: 'pi pi-fw pi-user-edit' });
+        }
+
+        dropdownActions.push({ separator: true });
+        dropdownActions.push({ 
+            label: 'Trocar Quantidade', 
+            icon: 'pi pi-fw pi-refresh',
+            command: () => this.showQuantityModal()
+        });
+
+        return dropdownActions;
+    }
+
+    showQuantityModal() { 
+        console.log("showQuantityModal");
+        this.selectedProductForEdit = { ...this.dt?.selection };
+        this.displayQuantityModal = true;
+    }
+
+    saveQuantityChange() {
+        if (this.selectedProductForEdit && this.selectedProductForEdit.nr_quantity > 0) {
+            this.advertisementService.postAdvertisementProduct(this.advertisement.id_advertisement!, {
+                id_advertisement: this.advertisement.id_advertisement!,
+                id_product: this.selectedProductForEdit.id_product,
+                st_varity_seq: this.selectedProductForEdit.st_varity_seq,
+                st_varity_name: this.selectedProductForEdit.st_variety_name,
+                nr_quantity: this.selectedProductForEdit.nr_quantity,
+                en_status: this.selectedProductForEdit.st_status
+            }).subscribe({
+                next: () => {
+                    this.displayQuantityModal = false;
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Sucesso',
+                        detail: 'Quantidade atualizada com sucesso!',
+                        life: 3000
+                    });
+                    // Recarregar os produtos
+                    this.advertisementService.getAdvertisementProduct(this.advertisement.id_advertisement!).subscribe({
+                        next: (products: Page<AdvertisementProduct>) => {
+                            this.products = products.list?.map(
+                                product => {
+                                    product.product.st_variety = JSON.parse(product.product.st_variety as string);
+                                    const varieties = product.product.st_variety as Variety[];
+                                    product.product.st_variety_name = varieties.find((v: Variety) => v.seq == product.st_varity_seq)?.variety;
+                                    product.product.db_price = varieties.find((v: Variety) => v.seq == product.st_varity_seq)?.price;
+                                    product.product.nr_quantity = product.nr_quantity;
+                                    product.product.st_status = product.en_status;
+                                    return product.product;
+                                }
+                            );
+                        },
+                        error: (error: any) => {
+                            console.error('Erro ao recarregar os produtos:', error);
+                            this.messageService.add({
+                                severity: 'error',
+                                summary: 'Erro',
+                                detail: 'Erro ao recarregar os produtos',
+                                life: 3000
+                            });
+                        }
+                    });
+                },
+                error: (error: any) => {
+                    console.error('Erro ao atualizar quantidade:', error);
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Erro',
+                        detail: 'Erro ao atualizar a quantidade',
+                        life: 3000
+                    });
+                }
+            });
+        }
+    }
+
+    actionAdvertisementProductRow(product: any) {
+        if (this.dt) {
+            this.dt.selection = product;
+        }
     }
 }

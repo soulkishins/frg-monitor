@@ -28,6 +28,33 @@
     </ng-template>
 </p-dialog>
 
+<p-dialog header="Alterar Quantidade" [(visible)]="displayQuantityModal" [style]="{width: '450px'}" [modal]="true" [draggable]="false" [resizable]="false">
+    <div class="grid">
+        <div class="col-12 mb-3">
+            <p-iftalabel>
+                <input pInputText id="edit_st_product" [(ngModel)]="selectedProductForEdit.st_product" readonly="true"/>
+                <label for="edit_st_product">Produto</label>
+            </p-iftalabel>
+        </div>
+        <div class="col-12 mb-3">
+            <p-iftalabel>
+                <input pInputText id="edit_st_variety" [(ngModel)]="selectedProductForEdit.st_variety_name" readonly="true"/>
+                <label for="edit_st_variety">Variedade</label>
+            </p-iftalabel>
+        </div>
+        <div class="col-12 mb-3">
+            <p-iftalabel>
+                <p-inputnumber [(ngModel)]="selectedProductForEdit.nr_quantity" inputId="edit_quantity" [min]="1" styleClass="w-full"/>
+                <label for="edit_quantity">Quantidade</label>
+            </p-iftalabel>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <p-button label="Cancelar" icon="pi pi-times" (onClick)="displayQuantityModal = false" severity="secondary" />
+        <p-button label="Salvar" icon="pi pi-check" (onClick)="saveQuantityChange()" />
+    </ng-template>
+</p-dialog>
+
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
         <div class="flex items-center gap-2">
@@ -184,7 +211,7 @@
                     Status
                     <p-sortIcon field="st_status" />
                 </th>
-                <th style="min-width: 10rem">Ações</th>
+                <th style="min-width: 10rem"></th>
             </tr>
         </ng-template>
         <ng-template #body let-product>
@@ -197,9 +224,7 @@
                 <td>{{ getQuantity(product.nr_quantity) }}</td>
                 <td>{{ getStatusProduct(product.st_status) }}</td>
                 <td>
-                    <p-dropdown [options]="productActions" [(ngModel)]="product.st_status" 
-                        (onChange)="onProductStatusChange(product, $event.value)" 
-                        optionLabel="label" styleClass="w-full" [showClear]="false" />
+                    <p-splitbutton label="Ações" appendTo="body" (onClick)="actionAdvertisementProductRow(product.st_status)" [model]="getActionProduct(product.st_status)" />
                 </td>
             </tr>
         </ng-template>
