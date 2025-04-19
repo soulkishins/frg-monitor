@@ -95,9 +95,7 @@ export class AdvertisementDetail implements OnInit {
         { label: 'Manual', value: 'MA' }
     ];
 
-    // Propriedades para o modal
     displayModal: boolean = false;
-    displayQuantityModal: boolean = false;
     selectedProductForEdit: any = {};
     selectedProduct: ProductResponse | null = null;
     selectedVariety: Variety | null = null;
@@ -106,7 +104,9 @@ export class AdvertisementDetail implements OnInit {
     filteredProducts: ProductResponse[] = [];
     availableVarieties: any[] = [];
     loading: boolean = false;
-
+    isEditQuantityProduct: boolean = false;
+    titleModal: string = '';
+    editProduct: ClientBrandProduct | null = null;
     productSave: AdvertisementProductPostRequest = {
         id_advertisement: '',
         id_product: '',
@@ -262,7 +262,18 @@ export class AdvertisementDetail implements OnInit {
         });
     }
 
-    showModal() {
+    showModal(isEdit: boolean = false, product: ClientBrandProduct | null = null) {
+        if (isEdit) {
+            this.isEditQuantityProduct = true;
+            this.titleModal = 'Alterar Quantidade';
+            this.editProduct = product;
+            this.quantity = product?.nr_quantity || 0;
+        } else {
+            this.isEditQuantityProduct = false;
+            this.titleModal = 'Adicionar Produto';
+            this.quantity = 0;
+        }
+        
         this.displayModal = true;
         this.loadAvailableProducts();
     }
@@ -325,7 +336,15 @@ export class AdvertisementDetail implements OnInit {
         }
     }
 
-    postProduct() {
+    saveProduct() {
+        if (this.isEditQuantityProduct) {
+            this.updateQuantityProduct();
+        } else {
+            this.addProduct();
+        }
+    }
+
+    addProduct() {
         if (this.selectedProduct && this.selectedVariety && this.quantity > 0) {
             this.productSave.id_advertisement = this.advertisement.id_advertisement!;
             this.productSave.id_product = this.selectedProduct.id_product!;
@@ -376,6 +395,39 @@ export class AdvertisementDetail implements OnInit {
                 life: 3000
             });
         }
+    }
+
+    updateQuantityProduct() {
+        this.advertisementService.putAdvertisementProduct(this.advertisement.id_advertisement!, this.editProduct!.id_product!, this.editProduct!.st_variety_seq!, {
+            nr_quantity: this.quantity
+        }).subscribe({
+            next: () => {
+                this.advertisementService.getAdvertisementProduct(this.advertisement.id_advertisement!).subscribe({
+                    next: (products: Page<AdvertisementProduct>) => {
+                        this.products = products.list?.map(product => this.mapProduct(product));
+                    },
+                    error: (error: any) => {
+                        console.error('Erro ao recarregar os produtos:', error);
+                    }
+                });
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Sucesso',
+                    detail: 'Quantidade atualizada com sucesso!',
+                    life: 3000
+                });
+            },
+            error: (error: any) => {
+                console.error('Erro ao atualizar a quantidade do produto:', error);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: 'Erro ao atualizar a quantidade do produto',
+                    life: 3000
+                });
+            },
+            complete: () => { this.displayModal = false; }
+        });
     }
 
     getStatusProduct(status: string): string | undefined {
@@ -464,7 +516,7 @@ export class AdvertisementDetail implements OnInit {
         dropdownActions.push({
             label: 'Trocar Quantidade', 
             icon: 'pi pi-fw pi-refresh',
-            command: () => {this.showQuantityModal();}
+            command: () => {this.showModal(true,product);}
         });
 
         return dropdownActions;
@@ -472,60 +524,6 @@ export class AdvertisementDetail implements OnInit {
 
     clickActionProduct(event: any) {
         console.log(event);
-    }
-
-    showQuantityModal() { 
-        if (this.dt?.selection) {
-            this.selectedProductForEdit = { ...this.dt.selection };
-            this.displayQuantityModal = true;
-        }
-    }
-
-    saveQuantityChange() {
-        if (this.selectedProductForEdit && this.selectedProductForEdit.nr_quantity > 0) {
-            this.advertisementService.postAdvertisementProduct(this.advertisement.id_advertisement!, {
-                id_advertisement: this.advertisement.id_advertisement!,
-                id_product: this.selectedProductForEdit.id_product,
-                st_varity_seq: this.selectedProductForEdit.st_varity_seq,
-                st_varity_name: this.selectedProductForEdit.st_variety_name,
-                nr_quantity: this.selectedProductForEdit.nr_quantity,
-                en_status: this.selectedProductForEdit.st_status
-            }).subscribe({
-                next: () => {
-                    this.displayQuantityModal = false;
-                    this.messageService.add({
-                        severity: 'success',
-                        summary: 'Sucesso',
-                        detail: 'Quantidade atualizada com sucesso!',
-                        life: 3000
-                    });
-                    // Recarregar os produtos
-                    this.advertisementService.getAdvertisementProduct(this.advertisement.id_advertisement!).subscribe({
-                        next: (products: Page<AdvertisementProduct>) => {
-                            this.products = products.list?.map(product => this.mapProduct(product));
-                        },
-                        error: (error: any) => {
-                            console.error('Erro ao recarregar os produtos:', error);
-                            this.messageService.add({
-                                severity: 'error',
-                                summary: 'Erro',
-                                detail: 'Erro ao recarregar os produtos',
-                                life: 3000
-                            });
-                        }
-                    });
-                },
-                error: (error: any) => {
-                    console.error('Erro ao atualizar quantidade:', error);
-                    this.messageService.add({
-                        severity: 'error',
-                        summary: 'Erro',
-                        detail: 'Erro ao atualizar a quantidade',
-                        life: 3000
-                    });
-                }
-            });
-        }
     }
 
     actionAdvertisementProductRow(product: any) {

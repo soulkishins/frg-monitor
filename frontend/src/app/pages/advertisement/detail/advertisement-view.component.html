@@ -1,17 +1,17 @@
 <p-toast />
 <p-confirmdialog [style]="{ width: '450px' }" />
-<p-dialog header="Adicionar Produto" [(visible)]="displayModal" [style]="{width: '450px'}" [modal]="true" [draggable]="false" [resizable]="false">
+<p-dialog [header]="titleModal" [(visible)]="displayModal" [style]="{width: '450px'}" [modal]="true" [draggable]="false" [resizable]="false">
     <div class="grid">
-        <div class="col-12 mb-3">
+        <div class="col-12 mb-3" *ngIf="!isEditQuantityProduct">
             <p-iftalabel>
                 <p-select [(ngModel)]="selectedProduct" inputId="product" [options]="filteredProducts" optionLabel="st_product" styleClass="w-full" (onChange)="onProductChange()" 
-                    (onFilter)="filterProducts($event)" [filter]="true" placeholder="Selecione um Produto" [loading]="loading"/>
+                    (onFilter)="filterProducts($event)" [filter]="true" placeholder="Selecione um Produto" [loading]="loading" [disabled]="isEditQuantityProduct"/>
                 <label for="product">Produto</label>
             </p-iftalabel>
         </div>
-        <div class="col-12 mb-3">
+        <div class="col-12 mb-3" *ngIf="!isEditQuantityProduct">
             <p-iftalabel>
-                <p-select [(ngModel)]="selectedVariety" inputId="variety" [options]="availableVarieties" optionLabel="variety" styleClass="w-full"/>
+                <p-select [(ngModel)]="selectedVariety" inputId="variety" [options]="availableVarieties" optionLabel="variety" styleClass="w-full" [disabled]="isEditQuantityProduct"/>
                 <label for="variety">Variedade</label>
             </p-iftalabel>
         </div>
@@ -24,37 +24,9 @@
     </div>
     <ng-template pTemplate="footer">
         <p-button label="Cancelar" icon="pi pi-times" (onClick)="displayModal = false" severity="secondary" />
-        <p-button label="Salvar" icon="pi pi-check" (onClick)="postProduct()" />
+        <p-button label="Salvar" icon="pi pi-check" (onClick)="saveProduct()" />
     </ng-template>
 </p-dialog>
-
-<p-dialog header="Alterar Quantidade" [(visible)]="displayQuantityModal" [style]="{width: '450px'}" [modal]="true" [draggable]="false" [resizable]="false">
-    <div class="grid">
-        <div class="col-12 mb-3">
-            <p-iftalabel>
-                <p-select [(ngModel)]="selectedProductForEdit" inputId="edit_product" [options]="products" optionLabel="st_product" styleClass="w-full" readonly="true"/>
-                <label for="edit_product">Produto</label>
-            </p-iftalabel>
-        </div>
-        <div class="col-12 mb-3">
-            <p-iftalabel>
-                <p-select [(ngModel)]="selectedProductForEdit" inputId="edit_variety" [options]="products" optionLabel="st_variety_name" styleClass="w-full" readonly="true"/>
-                <label for="edit_variety">Variedade</label>
-            </p-iftalabel>
-        </div>
-        <div class="col-12 mb-3">
-            <p-iftalabel>
-                <p-inputnumber [(ngModel)]="selectedProductForEdit.nr_quantity" inputId="edit_quantity" [min]="1" styleClass="w-full"/>
-                <label for="edit_quantity">Quantidade</label>
-            </p-iftalabel>
-        </div>
-    </div>
-    <ng-template pTemplate="footer">
-        <p-button label="Cancelar" icon="pi pi-times" (onClick)="displayQuantityModal = false" severity="secondary" />
-        <p-button label="Salvar" icon="pi pi-check" (onClick)="saveQuantityChange()" />
-    </ng-template>
-</p-dialog>
-
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
         <div class="flex items-center gap-2">

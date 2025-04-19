@@ -8,7 +8,7 @@ import { CognitoService } from './cognito.service';
 
 export interface AdvertisementProductPutRequest {
   en_status?: string;
-  st_quantity?: number;
+  nr_quantity?: number;
 }
 
 @Injectable({
