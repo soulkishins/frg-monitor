@@ -38,7 +38,13 @@ export class AdvertisementService {
             params.statistics.st_status = params.statistics.nr_error === 0 ? 'SE' : 'PE';
         } catch (error) {
             if (error instanceof ScrapingError) {
-                params.statistics.st_status = error.type === 'P' ? 'EP' : 'ET';
+                if (error.type === 'P' && params.statistics.nr_pages > 0) {
+                    params.statistics.st_status = 'EP';
+                } else if (error.type === 'P' && params.statistics.nr_pages === 0) {
+                    params.statistics.st_status = 'ET';
+                } else {
+                    params.statistics.st_status = 'GE';
+                }
             } else {
                 params.statistics.st_status = 'GE';
             }

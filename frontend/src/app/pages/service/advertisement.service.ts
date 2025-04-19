@@ -94,8 +94,11 @@ export class AdvertisementService {
       { label: 'Anúncio Atualizado', value: 'CRAWLER_UPDATED' },
       { label: 'Marcado para Denúncia', value: 'USER_REPORT' },
       { label: 'Denúncia Exportada', value: 'USER_REPORTED' },
+      { label: 'Anúncio Em Revisão', value: 'USER_MANUAL' },
+      { label: 'Anúncio Revisado', value: 'USER_REVIEWED' },
+      { label: 'Anúncio Invalidado', value: 'USER_INVALIDATE' },
       { label: 'Denúncia Exportada Manual', value: 'USER_EXPORT' },
-      { label: 'Revisão Manual', value: 'USER_INVALIDATE' },
+      { label: 'Anúncio Conciliado', value: 'CRAWLER_RECONCILE' },
     ];
   }
 

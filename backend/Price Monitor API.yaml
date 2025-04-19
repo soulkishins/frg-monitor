@@ -2,7 +2,600 @@ openapi: "3.0.1"
 info:
   title: "Price Monitor API"
   version: "2025-02-08T16:59:15Z"
+servers:
+- url: "https://monitoramento-api.frgconsultoria.com"
 paths:
+  /dashboard:
+    get:
+      operationId: "dashboard.list"
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    options:
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /perfil:
+    get:
+      operationId: "user.read"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    options:
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'*'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /usuario:
+    get:
+      operationId: "user.list"
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    post:
+      operationId: "user.create"
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    options:
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /usuario/{user}:
+    get:
+      operationId: "user.read"
+      parameters:
+      - name: "user"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    put:
+      operationId: "user.update"
+      parameters:
+      - name: "user"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    delete:
+      operationId: "user.delete"
+      parameters:
+      - name: "user"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    options:
+      parameters:
+      - name: "user"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /categoria:
+    get:
+      operationId: "category.list"
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    post:
+      operationId: "category.create"
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    options:
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /categoria/{category}:
+    get:
+      operationId: "category.read"
+      parameters:
+      - name: "category"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    put:
+      operationId: "category.update"
+      parameters:
+      - name: "category"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    delete:
+      operationId: "category.delete"
+      parameters:
+      - name: "category"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    options:
+      parameters:
+      - name: "category"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /sub-categoria:
+    get:
+      operationId: "subcategory.list"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    post:
+      operationId: "subcategory.create"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    options:
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
   /sub-categoria/{subcategory}:
     get:
       operationId: "subcategory.read"
@@ -142,297 +735,6 @@ paths:
           application/json: "{\"statusCode\": 200}"
         passthroughBehavior: "when_no_match"
         type: "mock"
-  /produto/{product}:
-    get:
-      operationId: "client_brand_product.read"
-      parameters:
-      - name: "product"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "200":
-          description: "200 response"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: "string"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
-      x-amazon-apigateway-integration:
-        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-        passthroughBehavior: "when_no_match"
-        timeoutInMillis: 29000
-        contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
-    put:
-      operationId: "client_brand_product.update"
-      parameters:
-      - name: "product"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "200":
-          description: "200 response"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: "string"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
-      x-amazon-apigateway-integration:
-        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-        passthroughBehavior: "when_no_match"
-        timeoutInMillis: 29000
-        contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
-    delete:
-      operationId: "client_brand_product.delete"
-      parameters:
-      - name: "product"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "200":
-          description: "200 response"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: "string"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
-      x-amazon-apigateway-integration:
-        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
-        responses:
-          default:
-            statusCode: "200"
-        passthroughBehavior: "when_no_match"
-        timeoutInMillis: 29000
-        contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
-    options:
-      parameters:
-      - name: "product"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "200":
-          description: "200 response"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: "string"
-            Access-Control-Allow-Methods:
-              schema:
-                type: "string"
-            Access-Control-Allow-Headers:
-              schema:
-                type: "string"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      x-amazon-apigateway-integration:
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-        requestTemplates:
-          application/json: "{\"statusCode\": 200}"
-        passthroughBehavior: "when_no_match"
-        type: "mock"
-  /dashboard:
-    get:
-      operationId: "dashboard.list"
-      responses:
-        "200":
-          description: "200 response"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
-      x-amazon-apigateway-integration:
-        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
-        responses:
-          default:
-            statusCode: "200"
-        passthroughBehavior: "when_no_match"
-        timeoutInMillis: 29000
-        contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
-    options:
-      responses:
-        "200":
-          description: "200 response"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: "string"
-            Access-Control-Allow-Methods:
-              schema:
-                type: "string"
-            Access-Control-Allow-Headers:
-              schema:
-                type: "string"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      x-amazon-apigateway-integration:
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-        requestTemplates:
-          application/json: "{\"statusCode\": 200}"
-        passthroughBehavior: "when_no_match"
-        type: "mock"
-  /anuncio/imagem:
-    get:
-      parameters:
-      - name: "plataform_id"
-        in: "query"
-        required: true
-        schema:
-          type: "string"
-      - name: "plataform"
-        in: "query"
-        required: true
-        schema:
-          type: "string"
-      - name: "file"
-        in: "query"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "200":
-          description: "200 response"
-          headers:
-            Accept-Ranges:
-              schema:
-                type: "string"
-            Access-Control-Expose-Headers:
-              schema:
-                type: "string"
-            Access-Control-Allow-Origin:
-              schema:
-                type: "string"
-            Content-Range:
-              schema:
-                type: "string"
-            Content-Length:
-              schema:
-                type: "string"
-            Date:
-              schema:
-                type: "string"
-            Content-Type:
-              schema:
-                type: "string"
-          content:
-            image/webp:
-              schema:
-                $ref: "#/components/schemas/Empty"
-            image/jpg:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      x-amazon-apigateway-integration:
-        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
-        httpMethod: "GET"
-        uri: "arn:aws:apigateway:sa-east-1:s3:path/frg-price-monitor-data/anuncios/{plataform}/{plataform_id}/{file}"
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Content-Range: "integration.response.header.Content-Range"
-              method.response.header.Access-Control-Expose-Headers: "'*'"
-              method.response.header.Content-Type: "integration.response.header.Content-Type"
-              method.response.header.Date: "integration.response.header.Date"
-              method.response.header.Content-Length: "integration.response.header.Content-Length"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Accept-Ranges: "integration.response.header.Accept-Ranges"
-        requestParameters:
-          integration.request.path.plataform: "method.request.querystring.plataform"
-          integration.request.path.file: "method.request.querystring.file"
-          integration.request.path.plataform_id: "method.request.querystring.plataform_id"
-        passthroughBehavior: "when_no_templates"
-        type: "aws"
-    options:
-      responses:
-        "200":
-          description: "200 response"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: "string"
-            Access-Control-Allow-Methods:
-              schema:
-                type: "string"
-            Access-Control-Allow-Headers:
-              schema:
-                type: "string"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      x-amazon-apigateway-integration:
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-        requestTemplates:
-          application/json: "{\"statusCode\": 200}"
-        passthroughBehavior: "when_no_match"
-        type: "mock"
   /cliente:
     get:
       operationId: "client.list"
@@ -520,111 +822,11 @@ paths:
           application/json: "{\"statusCode\": 200}"
         passthroughBehavior: "when_no_match"
         type: "mock"
-  /palavra-chave/{keyword}/marca/{brand}:
-    put:
-      operationId: "keyword.update"
-      parameters:
-      - name: "keyword"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      - name: "brand"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "200":
-          description: "200 response"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
-      x-amazon-apigateway-integration:
-        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
-        responses:
-          default:
-            statusCode: "200"
-        passthroughBehavior: "when_no_match"
-        timeoutInMillis: 29000
-        contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
-    post:
-      operationId: "keyword.create"
-      parameters:
-      - name: "keyword"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      - name: "brand"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "200":
-          description: "200 response"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
-      x-amazon-apigateway-integration:
-        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
-        responses:
-          default:
-            statusCode: "200"
-        passthroughBehavior: "when_no_match"
-        timeoutInMillis: 29000
-        contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
-    delete:
-      operationId: "keyword.delete"
-      parameters:
-      - name: "keyword"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      - name: "brand"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "200":
-          description: "200 response"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
-      x-amazon-apigateway-integration:
-        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
-        responses:
-          default:
-            statusCode: "200"
-        passthroughBehavior: "when_no_match"
-        timeoutInMillis: 29000
-        contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
-  /palavra-chave/{keyword}:
+  /cliente/{client}:
     get:
-      operationId: "keyword.read"
+      operationId: "client.read"
       parameters:
-      - name: "keyword"
+      - name: "client"
         in: "path"
         required: true
         schema:
@@ -632,6 +834,10 @@ paths:
       responses:
         "200":
           description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
           content:
             application/json:
               schema:
@@ -645,14 +851,16 @@ paths:
         responses:
           default:
             statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         timeoutInMillis: 29000
         contentHandling: "CONVERT_TO_TEXT"
         type: "aws_proxy"
     put:
-      operationId: "keyword.update"
+      operationId: "client.update"
       parameters:
-      - name: "keyword"
+      - name: "client"
         in: "path"
         required: true
         schema:
@@ -684,9 +892,9 @@ paths:
         contentHandling: "CONVERT_TO_TEXT"
         type: "aws_proxy"
     delete:
-      operationId: "keyword.delete"
+      operationId: "client.delete"
       parameters:
-      - name: "keyword"
+      - name: "client"
         in: "path"
         required: true
         schema:
@@ -719,150 +927,11 @@ paths:
         type: "aws_proxy"
     options:
       parameters:
-      - name: "keyword"
+      - name: "client"
         in: "path"
         required: true
         schema:
           type: "string"
-      responses:
-        "200":
-          description: "200 response"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: "string"
-            Access-Control-Allow-Methods:
-              schema:
-                type: "string"
-            Access-Control-Allow-Headers:
-              schema:
-                type: "string"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      x-amazon-apigateway-integration:
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-        requestTemplates:
-          application/json: "{\"statusCode\": 200}"
-        passthroughBehavior: "when_no_match"
-        type: "mock"
-  /palavra-chave:
-    get:
-      operationId: "keyword.list"
-      responses:
-        "200":
-          description: "200 response"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
-      x-amazon-apigateway-integration:
-        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
-        responses:
-          default:
-            statusCode: "200"
-        passthroughBehavior: "when_no_match"
-        timeoutInMillis: 29000
-        contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
-    put:
-      responses:
-        "200":
-          description: "200 response"
-          headers:
-            Accept-Ranges:
-              schema:
-                type: "string"
-            Access-Control-Expose-Headers:
-              schema:
-                type: "string"
-            Access-Control-Allow-Origin:
-              schema:
-                type: "string"
-            Content-Range:
-              schema:
-                type: "string"
-            Content-Length:
-              schema:
-                type: "string"
-            Date:
-              schema:
-                type: "string"
-            Content-Type:
-              schema:
-                type: "string"
-          content:
-            image/webp:
-              schema:
-                $ref: "#/components/schemas/Empty"
-            image/jpg:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
-      x-amazon-apigateway-integration:
-        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:sa-east-1:sqs:path//"
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Content-Range: "integration.response.header.Content-Range"
-              method.response.header.Access-Control-Expose-Headers: "'*'"
-              method.response.header.Content-Type: "integration.response.header.Content-Type"
-              method.response.header.Date: "integration.response.header.Date"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Content-Length: "integration.response.header.Content-Length"
-              method.response.header.Accept-Ranges: "integration.response.header.Accept-Ranges"
-        requestParameters:
-          integration.request.header.X-Amz-Target: "'AmazonSQS.SendMessage'"
-          integration.request.header.Content-Type: "'application/x-amz-json-1.0'"
-        requestTemplates:
-          application/json: "{\"QueueUrl\":\"https://sqs.sa-east-1.amazonaws.com/147997132513/price-monitor-crawler-ml\"\
-            ,\"MessageBody\":\"$util.escapeJavaScript($input.body)\"}"
-        passthroughBehavior: "when_no_templates"
-        type: "aws"
-    post:
-      operationId: "keyword.create"
-      responses:
-        "200":
-          description: "200 response"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: "string"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
-      x-amazon-apigateway-integration:
-        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-        passthroughBehavior: "when_no_match"
-        timeoutInMillis: 29000
-        contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
-    options:
       responses:
         "200":
           description: "200 response"
@@ -1205,11 +1274,349 @@ paths:
           application/json: "{\"statusCode\": 200}"
         passthroughBehavior: "when_no_match"
         type: "mock"
-  /anuncio/{advertisement}/historico:
+  /produto/{product}:
     get:
-      operationId: "advertisement.history"
+      operationId: "client_brand_product.read"
       parameters:
-      - name: "advertisement"
+      - name: "product"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    put:
+      operationId: "client_brand_product.update"
+      parameters:
+      - name: "product"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    delete:
+      operationId: "client_brand_product.delete"
+      parameters:
+      - name: "product"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    options:
+      parameters:
+      - name: "product"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /palavra-chave:
+    get:
+      operationId: "keyword.list"
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    put:
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Accept-Ranges:
+              schema:
+                type: "string"
+            Access-Control-Expose-Headers:
+              schema:
+                type: "string"
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Content-Range:
+              schema:
+                type: "string"
+            Content-Length:
+              schema:
+                type: "string"
+            Date:
+              schema:
+                type: "string"
+            Content-Type:
+              schema:
+                type: "string"
+          content:
+            image/webp:
+              schema:
+                $ref: "#/components/schemas/Empty"
+            image/jpg:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:sqs:path//"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Content-Range: "integration.response.header.Content-Range"
+              method.response.header.Access-Control-Expose-Headers: "'*'"
+              method.response.header.Content-Type: "integration.response.header.Content-Type"
+              method.response.header.Date: "integration.response.header.Date"
+              method.response.header.Content-Length: "integration.response.header.Content-Length"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Accept-Ranges: "integration.response.header.Accept-Ranges"
+        requestParameters:
+          integration.request.header.X-Amz-Target: "'AmazonSQS.SendMessage'"
+          integration.request.header.Content-Type: "'application/x-amz-json-1.0'"
+        requestTemplates:
+          application/json: "{\"QueueUrl\":\"https://sqs.sa-east-1.amazonaws.com/147997132513/price-monitor-crawler-ml\"\
+            ,\"MessageBody\":\"$util.escapeJavaScript($input.body)\"}"
+        passthroughBehavior: "when_no_templates"
+        type: "aws"
+    post:
+      operationId: "keyword.create"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    options:
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /palavra-chave/{keyword}:
+    get:
+      operationId: "keyword.read"
+      parameters:
+      - name: "keyword"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    put:
+      operationId: "keyword.update"
+      parameters:
+      - name: "keyword"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    delete:
+      operationId: "keyword.delete"
+      parameters:
+      - name: "keyword"
         in: "path"
         required: true
         schema:
@@ -1242,7 +1649,7 @@ paths:
         type: "aws_proxy"
     options:
       parameters:
-      - name: "advertisement"
+      - name: "keyword"
         in: "path"
         required: true
         schema:
@@ -1276,9 +1683,20 @@ paths:
           application/json: "{\"statusCode\": 200}"
         passthroughBehavior: "when_no_match"
         type: "mock"
-  /usuario:
-    get:
-      operationId: "user.list"
+  /palavra-chave/{keyword}/marca/{brand}:
+    put:
+      operationId: "keyword.update"
+      parameters:
+      - name: "keyword"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "brand"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
       responses:
         "200":
           description: "200 response"
@@ -1300,7 +1718,18 @@ paths:
         contentHandling: "CONVERT_TO_TEXT"
         type: "aws_proxy"
     post:
-      operationId: "user.create"
+      operationId: "keyword.create"
+      parameters:
+      - name: "keyword"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "brand"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
       responses:
         "200":
           description: "200 response"
@@ -1317,6 +1746,292 @@ paths:
         responses:
           default:
             statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+    delete:
+      operationId: "keyword.delete"
+      parameters:
+      - name: "keyword"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "brand"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+  /agendamento:
+    get:
+      operationId: "scheduler.list"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+    post:
+      operationId: "scheduler.create"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+    options:
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      x-amazon-apigateway-integration:
+        type: "mock"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+  /agendamento/{scheduler}:
+    get:
+      operationId: "scheduler.read"
+      parameters:
+      - name: "scheduler"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api-hml/invocations"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+    put:
+      operationId: "scheduler.update"
+      parameters:
+      - name: "scheduler"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+    delete:
+      operationId: "scheduler.delete"
+      parameters:
+      - name: "scheduler"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        type: "aws_proxy"
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+    options:
+      parameters:
+      - name: "scheduler"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      x-amazon-apigateway-integration:
+        type: "mock"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_match"
+  /anuncio:
+    get:
+      operationId: "advertisement.list"
+      responses:
+        "200":
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+      - PriceMonitorSSO: []
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         timeoutInMillis: 29000
         contentHandling: "CONVERT_TO_TEXT"
@@ -1351,9 +2066,8 @@ paths:
           application/json: "{\"statusCode\": 200}"
         passthroughBehavior: "when_no_match"
         type: "mock"
-  /perfil:
-    get:
-      operationId: "user.list"
+    patch:
+      operationId: "advertisement.upd_status"
       responses:
         "200":
           description: "200 response"
@@ -1361,60 +2075,6 @@ paths:
             Access-Control-Allow-Origin:
               schema:
                 type: "string"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
-      x-amazon-apigateway-integration:
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-        passthroughBehavior: "when_no_match"
-        timeoutInMillis: 29000
-        contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
-    options:
-      responses:
-        "200":
-          description: "200 response"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: "string"
-            Access-Control-Allow-Methods:
-              schema:
-                type: "string"
-            Access-Control-Allow-Headers:
-              schema:
-                type: "string"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      x-amazon-apigateway-integration:
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
-              method.response.header.Access-Control-Allow-Headers: "'*'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-        requestTemplates:
-          application/json: "{\"statusCode\": 200}"
-        passthroughBehavior: "when_no_match"
-        type: "mock"
-  /categoria:
-    get:
-      operationId: "category.list"
-      responses:
-        "200":
-          description: "200 response"
           content:
             application/json:
               schema:
@@ -1428,62 +2088,12 @@ paths:
         responses:
           default:
             statusCode: "200"
-        passthroughBehavior: "when_no_match"
-        timeoutInMillis: 29000
-        contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
-    post:
-      operationId: "category.create"
-      responses:
-        "200":
-          description: "200 response"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
-      x-amazon-apigateway-integration:
-        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
-        responses:
-          default:
-            statusCode: "200"
-        passthroughBehavior: "when_no_match"
-        timeoutInMillis: 29000
-        contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
-    options:
-      responses:
-        "200":
-          description: "200 response"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: "string"
-            Access-Control-Allow-Methods:
-              schema:
-                type: "string"
-            Access-Control-Allow-Headers:
-              schema:
-                type: "string"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      x-amazon-apigateway-integration:
-        responses:
-          default:
-            statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
-        requestTemplates:
-          application/json: "{\"statusCode\": 200}"
         passthroughBehavior: "when_no_match"
-        type: "mock"
+        timeoutInMillis: 29000
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
   /anuncio/{advertisement}:
     get:
       operationId: "advertisement.read"
@@ -1621,79 +2231,11 @@ paths:
           application/json: "{\"statusCode\": 200}"
         passthroughBehavior: "when_no_match"
         type: "mock"
-  /cliente/{client}:
+  /anuncio/{advertisement}/historico:
     get:
-      operationId: "client.read"
+      operationId: "advertisement.history"
       parameters:
-      - name: "client"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "200":
-          description: "200 response"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: "string"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
-      x-amazon-apigateway-integration:
-        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-        passthroughBehavior: "when_no_match"
-        timeoutInMillis: 29000
-        contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
-    put:
-      operationId: "client.update"
-      parameters:
-      - name: "client"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "200":
-          description: "200 response"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: "string"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
-      x-amazon-apigateway-integration:
-        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-        passthroughBehavior: "when_no_match"
-        timeoutInMillis: 29000
-        contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
-    delete:
-      operationId: "client.delete"
-      parameters:
-      - name: "client"
+      - name: "advertisement"
         in: "path"
         required: true
         schema:
@@ -1726,7 +2268,7 @@ paths:
         type: "aws_proxy"
     options:
       parameters:
-      - name: "client"
+      - name: "advertisement"
         in: "path"
         required: true
         schema:
@@ -1760,11 +2302,11 @@ paths:
           application/json: "{\"statusCode\": 200}"
         passthroughBehavior: "when_no_match"
         type: "mock"
-  /usuario/{user}:
+  /anuncio/{advertisement}/produto:
     get:
-      operationId: "user.read"
+      operationId: "advertisement_product.list"
       parameters:
-      - name: "user"
+      - name: "advertisement"
         in: "path"
         required: true
         schema:
@@ -1772,6 +2314,10 @@ paths:
       responses:
         "200":
           description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
           content:
             application/json:
               schema:
@@ -1780,19 +2326,21 @@ paths:
       - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        type: "aws_proxy"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
         responses:
           default:
             statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         timeoutInMillis: 29000
         contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
-    put:
-      operationId: "user.update"
+    post:
+      operationId: "advertisement_product.create"
       parameters:
-      - name: "user"
+      - name: "advertisement"
         in: "path"
         required: true
         schema:
@@ -1800,6 +2348,10 @@ paths:
       responses:
         "200":
           description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
           content:
             application/json:
               schema:
@@ -1808,46 +2360,20 @@ paths:
       - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        type: "aws_proxy"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
         responses:
           default:
             statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         timeoutInMillis: 29000
         contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
-    delete:
-      operationId: "user.delete"
-      parameters:
-      - name: "user"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "200":
-          description: "200 response"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
-      x-amazon-apigateway-integration:
-        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
-        responses:
-          default:
-            statusCode: "200"
-        passthroughBehavior: "when_no_match"
-        timeoutInMillis: 29000
-        contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
     options:
       parameters:
-      - name: "user"
+      - name: "advertisement"
         in: "path"
         required: true
         schema:
@@ -1870,50 +2396,32 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        type: "mock"
         responses:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
+              method.response.header.Access-Control-Allow-Headers: "'*'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         requestTemplates:
           application/json: "{\"statusCode\": 200}"
         passthroughBehavior: "when_no_match"
-        type: "mock"
-  /categoria/{category}:
-    get:
-      operationId: "category.read"
-      parameters:
-      - name: "category"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
-      responses:
-        "200":
-          description: "200 response"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
-      x-amazon-apigateway-integration:
-        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
-        responses:
-          default:
-            statusCode: "200"
-        passthroughBehavior: "when_no_match"
-        timeoutInMillis: 29000
-        contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
+  /anuncio/{advertisement}/produto/{product}/variedade/{varity-seq}:
     put:
-      operationId: "category.update"
+      operationId: "advertisement_product.update"
       parameters:
-      - name: "category"
+      - name: "product"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "advertisement"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "varity-seq"
         in: "path"
         required: true
         schema:
@@ -1921,6 +2429,10 @@ paths:
       responses:
         "200":
           description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
           content:
             application/json:
               schema:
@@ -1929,19 +2441,31 @@ paths:
       - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        type: "aws_proxy"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
         responses:
           default:
             statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         timeoutInMillis: 29000
         contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
     delete:
-      operationId: "category.delete"
+      operationId: "advertisement_product.delete"
       parameters:
-      - name: "category"
+      - name: "product"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "advertisement"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "varity-seq"
         in: "path"
         required: true
         schema:
@@ -1949,6 +2473,10 @@ paths:
       responses:
         "200":
           description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
           content:
             application/json:
               schema:
@@ -1957,18 +2485,30 @@ paths:
       - PriceMonitorSSO: []
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
+        type: "aws_proxy"
         httpMethod: "POST"
         uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
         responses:
           default:
             statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
         passthroughBehavior: "when_no_match"
         timeoutInMillis: 29000
         contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
     options:
       parameters:
-      - name: "category"
+      - name: "advertisement"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "product"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "varity-seq"
         in: "path"
         required: true
         schema:
@@ -1991,17 +2531,17 @@ paths:
               schema:
                 $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
+        type: "mock"
         responses:
           default:
             statusCode: "200"
             responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,OPTIONS,PUT'"
+              method.response.header.Access-Control-Allow-Headers: "'*'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
         requestTemplates:
           application/json: "{\"statusCode\": 200}"
         passthroughBehavior: "when_no_match"
-        type: "mock"
   /anuncio/relatorio:
     get:
       parameters:
@@ -2051,8 +2591,8 @@ paths:
               method.response.header.Access-Control-Expose-Headers: "'*'"
               method.response.header.Content-Type: "integration.response.header.Content-Type"
               method.response.header.Date: "integration.response.header.Date"
-              method.response.header.Content-Length: "integration.response.header.Content-Length"
               method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Content-Length: "integration.response.header.Content-Length"
               method.response.header.Accept-Ranges: "integration.response.header.Accept-Ranges"
         requestParameters:
           integration.request.path.file: "method.request.querystring.file"
@@ -2088,63 +2628,77 @@ paths:
           application/json: "{\"statusCode\": 200}"
         passthroughBehavior: "when_no_match"
         type: "mock"
-  /sub-categoria:
+  /anuncio/imagem:
     get:
-      operationId: "subcategory.list"
+      parameters:
+      - name: "plataform_id"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+      - name: "plataform"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+      - name: "file"
+        in: "query"
+        required: true
+        schema:
+          type: "string"
       responses:
         "200":
           description: "200 response"
           headers:
+            Accept-Ranges:
+              schema:
+                type: "string"
+            Access-Control-Expose-Headers:
+              schema:
+                type: "string"
             Access-Control-Allow-Origin:
               schema:
                 type: "string"
+            Content-Range:
+              schema:
+                type: "string"
+            Content-Length:
+              schema:
+                type: "string"
+            Date:
+              schema:
+                type: "string"
+            Content-Type:
+              schema:
+                type: "string"
           content:
-            application/json:
+            image/webp:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
+            image/jpg:
+              schema:
+                $ref: "#/components/schemas/Empty"
       x-amazon-apigateway-integration:
         credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
+        httpMethod: "GET"
+        uri: "arn:aws:apigateway:sa-east-1:s3:path/frg-price-monitor-data/anuncios/{plataform}/{plataform_id}/{file}"
         responses:
           default:
             statusCode: "200"
             responseParameters:
+              method.response.header.Content-Range: "integration.response.header.Content-Range"
+              method.response.header.Access-Control-Expose-Headers: "'*'"
+              method.response.header.Content-Type: "integration.response.header.Content-Type"
+              method.response.header.Date: "integration.response.header.Date"
               method.response.header.Access-Control-Allow-Origin: "'*'"
-        passthroughBehavior: "when_no_match"
-        timeoutInMillis: 29000
-        contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
-    post:
-      operationId: "subcategory.create"
-      responses:
-        "200":
-          description: "200 response"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: "string"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
-      x-amazon-apigateway-integration:
-        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-        passthroughBehavior: "when_no_match"
-        timeoutInMillis: 29000
-        contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
+              method.response.header.Content-Length: "integration.response.header.Content-Length"
+              method.response.header.Accept-Ranges: "integration.response.header.Accept-Ranges"
+        requestParameters:
+          integration.request.path.plataform: "method.request.querystring.plataform"
+          integration.request.path.file: "method.request.querystring.file"
+          integration.request.path.plataform_id: "method.request.querystring.plataform_id"
+        passthroughBehavior: "when_no_templates"
+        type: "aws"
     options:
       responses:
         "200":
@@ -2175,93 +2729,6 @@ paths:
           application/json: "{\"statusCode\": 200}"
         passthroughBehavior: "when_no_match"
         type: "mock"
-  /anuncio:
-    get:
-      operationId: "advertisement.list"
-      responses:
-        "200":
-          description: "200 response"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: "string"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
-      x-amazon-apigateway-integration:
-        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-        passthroughBehavior: "when_no_match"
-        timeoutInMillis: 29000
-        contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
-    options:
-      responses:
-        "200":
-          description: "200 response"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: "string"
-            Access-Control-Allow-Methods:
-              schema:
-                type: "string"
-            Access-Control-Allow-Headers:
-              schema:
-                type: "string"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      x-amazon-apigateway-integration:
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Methods: "'HEAD,GET,POST,PUT,DELETE,OPTIONS,PATCH'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-        requestTemplates:
-          application/json: "{\"statusCode\": 200}"
-        passthroughBehavior: "when_no_match"
-        type: "mock"
-    patch:
-      operationId: "advertisement.upd_status"
-      responses:
-        "200":
-          description: "200 response"
-          headers:
-            Access-Control-Allow-Origin:
-              schema:
-                type: "string"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Empty"
-      security:
-      - PriceMonitorSSO: []
-      x-amazon-apigateway-integration:
-        credentials: "arn:aws:iam::147997132513:role/PriceMonitorApiGateway"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:sa-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:sa-east-1:147997132513:function:price-monitor-api/invocations"
-        responses:
-          default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-        passthroughBehavior: "when_no_match"
-        timeoutInMillis: 29000
-        contentHandling: "CONVERT_TO_TEXT"
-        type: "aws_proxy"
   /anuncio/exportacao:
     post:
       responses:
@@ -2310,8 +2777,8 @@ paths:
               method.response.header.Access-Control-Expose-Headers: "'*'"
               method.response.header.Content-Type: "integration.response.header.Content-Type"
               method.response.header.Date: "integration.response.header.Date"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
               method.response.header.Content-Length: "integration.response.header.Content-Length"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
               method.response.header.Accept-Ranges: "integration.response.header.Accept-Ranges"
         requestParameters:
           integration.request.header.X-Amz-Target: "'AmazonSQS.SendMessage'"
@@ -2398,3 +2865,6 @@ x-amazon-apigateway-binary-media-types:
 - "image/webp"
 - "image/*"
 - "image/jpg"
+- "application/octet-stream"
+- "application/xslx"
+- "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

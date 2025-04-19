@@ -48,8 +48,10 @@
         </div>
     </ng-template>
     <ng-template #icons>
+        <p-button icon="pi pi-thumbs-up" severity="success" rounded text pTooltip="Revisado" tooltipPosition="top" (onClick)="reviewedAdvertisement()" />
         <p-button icon="pi pi-thumbs-down" severity="danger" rounded text pTooltip="Denunciar" tooltipPosition="top" (onClick)="reportAdvertisement()" />
-        <p-button icon="pi pi-tag" severity="info" rounded text pTooltip="Revisão Manual" tooltipPosition="top" (onClick)="invalidateAdvertisement()" />
+        <p-button icon="pi pi-tag" severity="info" rounded text pTooltip="Revisão Manual" tooltipPosition="top" (onClick)="toReviewAdvertisement()" />
+        <p-button icon="pi pi-trash" severity="secondary" rounded text pTooltip="Invalidação Manual" tooltipPosition="top" (onClick)="invalidateAdvertisement()" />
     </ng-template>
     <p-fluid>
         <div class="grid grid-cols-5 gap-4">

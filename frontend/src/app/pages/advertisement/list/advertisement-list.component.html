@@ -4,18 +4,36 @@
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
         <p-button 
+            label="Revisado"
+            icon="pi pi-thumbs-up"
+            severity="success"
+            outlined
+            class="mr-2"
+            [disabled]="!selectedAdvertisements || !selectedAdvertisements.length"
+            (onClick)="reviewedAdvertisement()"
+        />
+        <p-button
+            label="Em Revisão"
+            icon="pi pi-tag"
+            severity="info"
+            outlined
+            class="mr-2"
+            [disabled]="!selectedAdvertisements || !selectedAdvertisements.length"
+            (onClick)="toReviewAdvertisement()"
+        />
+        <p-button 
             label="Denunciar"
             icon="pi pi-thumbs-down"
-            severity="primary"
+            severity="danger"
             outlined
             class="mr-2"
             [disabled]="!selectedAdvertisements || !selectedAdvertisements.length"
             (onClick)="reportAdvertisements()"
         />
         <p-button
-            label="Revisão Manual"
-            icon="pi pi-tag"
-            severity="info"
+            label="Invalidar"
+            icon="pi pi-trash"
+            severity="secondary"
             outlined
             [disabled]="!selectedAdvertisements || !selectedAdvertisements.length"
             (onClick)="invalidateAdvertisements()"

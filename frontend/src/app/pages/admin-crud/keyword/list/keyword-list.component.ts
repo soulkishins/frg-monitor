@@ -305,10 +305,14 @@ export class KeywordList implements OnInit {
     startCrawler(keyword: KeywordResponse) {
         this.keywordService.startCrawler(
             {
-                id_keyword: keyword.id_keyword,
-                idBrand: keyword.id_brand,
+                scheduler_id: null,
+                cron: 'manual',
+                platform: 'ML',
+                datetime: null,
+                keyword_id: keyword.id_keyword,
+                brand_id: keyword.id_brand,
                 keyword: keyword.st_keyword,
-                brandProducts: JSON.parse(keyword.st_product)
+                products: JSON.parse(keyword.st_product)
             }
         ).subscribe({
             next: (response) => {

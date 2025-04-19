@@ -107,12 +107,13 @@ export class AdvertisementManager {
     }
 
     async updateStatistics(params: IKeyword): Promise<void> {
+        console.log('Incluindo/Atualizando estatisticas');
         const query = `
             insert into tb_scheduler_statistics(
                 id_scheduler, dt_created, nr_pages, nr_total, nr_processed, nr_created, nr_updated,
                 nr_error, nr_manual_revision, nr_reported, nr_already_reported, nr_invalidate, nr_reconcile, en_status
             ) values (
-                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
+                coalesce($1, '00000000-0000-0000-0000-000000000000'), coalesce($2, CURRENT_TIMESTAMP), $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
             ) on conflict (id_scheduler, dt_created) do update set
                 nr_pages = tb_scheduler_statistics.nr_pages + EXCLUDED.nr_pages,
                 nr_total = tb_scheduler_statistics.nr_total + EXCLUDED.nr_total,
@@ -129,8 +130,8 @@ export class AdvertisementManager {
             `;
         
         const values = [
-            params.scheduler_id,
-            params.datetime,
+            params.scheduler_id || null,
+            params.datetime || null,
             params.statistics.nr_pages || 0,
             params.statistics.nr_total || 0,
             params.statistics.nr_processed || 0,

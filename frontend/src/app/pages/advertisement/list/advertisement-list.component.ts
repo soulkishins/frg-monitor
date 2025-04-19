@@ -144,67 +144,63 @@ export class AdvertisementList implements OnInit {
         this.router.navigate(['/anuncio', 'detalhe', advertisement.id_advertisement]);
     }
 
-    reportAdvertisements() {
-        this.confirmationService.confirm({
-            message: 'Confirmar a denúncia dos anúncios selecionados?',
-            header: 'Confirmar Denúncia',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                this.advertisementService
-                .updateStatusAdvertisements(this.selectedAdvertisements.map(ad => ad.id_advertisement), 'REPORT')
-                .subscribe({
-                    next: () => {
-                        this.selectedAdvertisements = [];
-                        this.messageService.add({
-                            severity: 'success',
-                            summary: 'Denúncia Confirmada',
-                            detail: 'Anúncios atualizados com sucesso!',
-                            life: 3000
-                        });
-                    },
-                    error: (error: any) => {
-                        console.error('Erro ao denunciar os anúncios:', error);
-                        this.messageService.add({
-                            severity: 'error',
-                            summary: 'Erro',
-                            detail: 'Erro ao atualizar o status dos anúncios para Marcado para Denúncia',
-                            life: 3000
-                        });
-                    }
+    updateStatusAdvertisements(status: string, statusLabel: string, successMessage: string) {
+        this.advertisementService
+        .updateStatusAdvertisements(this.selectedAdvertisements.map(ad => ad.id_advertisement), status)
+        .subscribe({
+            next: () => {
+                this.messageService.add({
+                    severity: 'success',
+                    summary: successMessage,
+                    detail: 'Anúncios atualizados com sucesso!',
+                    life: 3000
+                });
+            },
+            error: (error: any) => {
+                console.error('Erro ao atualizar status dos anúncios:', error);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: `Erro ao atualizar o status dos anúncios para ${statusLabel}`,
+                    life: 3000
                 });
             }
         });
     }
 
+    reviewedAdvertisement() {
+        this.confirmationService.confirm({
+            message: 'Confirmar a revisão dos anúncios selecionados?',
+            header: 'Confirmar Revisão',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => this.updateStatusAdvertisements('REVIEWED', 'Revisado', 'Revisão Confirmada')
+        });
+    }
+
+    toReviewAdvertisement() {
+        this.confirmationService.confirm({
+            message: 'Confirmar a revisão dos anúncios selecionados?',
+            header: 'Confirmar Em Revisão',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => this.updateStatusAdvertisements('MANUAL', 'Em Revisão', 'Aguardando Revisão Confirmada')
+        });
+    }
+
+    reportAdvertisements() {
+        this.confirmationService.confirm({
+            message: 'Confirmar a denúncia dos anúncios selecionados?',
+            header: 'Confirmar Denúncia',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => this.updateStatusAdvertisements('REPORT', 'Marcado para Denúncia', 'Denúncia Confirmada')
+        });
+    }
+
     invalidateAdvertisements() {
         this.confirmationService.confirm({
-            message: 'Confirmar a revisão manual dos anúncios selecionados?',
-            header: 'Confirmar Revisão Manual',
+            message: 'Confirmar a invalidade dos anúncios selecionados?',
+            header: 'Confirmar Invalidação',
             icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                this.advertisementService
-                .updateStatusAdvertisements(this.selectedAdvertisements.map(ad => ad.id_advertisement), 'INVALIDATE')
-                .subscribe({
-                    next: () => {
-                        this.selectedAdvertisements = [];
-                        this.messageService.add({
-                            severity: 'success',
-                            summary: 'Revisão Manual Confirmada',
-                            detail: 'Anúncios atualizados com sucesso!',
-                            life: 3000
-                        });
-                    },
-                    error: (error: any) => {
-                        console.error('Erro ao invalidar os anúncios:', error);
-                        this.messageService.add({
-                            severity: 'error',
-                            summary: 'Erro',
-                            detail: 'Erro ao atualizar o status dos anúncios para Revisão Manual',
-                            life: 3000
-                        });
-                    }
-                });
-            }
+            accept: () => this.updateStatusAdvertisements('INVALIDATE', 'Invalidado', 'Invalidação Confirmada')
         });
     }
 
