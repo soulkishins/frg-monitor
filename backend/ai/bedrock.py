@@ -26,7 +26,7 @@ def extract_products(advertisement, product_list, retry=False) -> list[dict]:
                         },
                         {
                             "type": "text",
-                            "text": """extraia os produtos existentes no anúncio.
+                            "text": """extraia os produtos existentes no anúncio, se possível, caso contrário retorne uma lista vazia no formato json e nada além do json.
     Retorne uma lista com os produtos encontrados, com os campos st_brand_name, st_product_name, st_variety_name e nr_quantity, caso o produto exista na base de dados preencha os campos id_product, id_variety referente ao produto localizado.
     Não retorne nada além do json no formato [{"st_product_name": "string", "st_brand_name": "string", "st_variety_name": "string", "nr_quantity": "number", "id_product": "string", "id_variety": "[string, string, ...]"}, ...]."""
                         }
@@ -36,11 +36,18 @@ def extract_products(advertisement, product_list, retry=False) -> list[dict]:
         )
 
         result = json.loads(response["body"].read().decode())
-
         # Extrai o texto da resposta
         content = result.get("content", [{}])[0].get("text", "[]")
-
-        return content
+        
+        if content is None or len(content) == 0:
+            print(f'Erro ao extrair produtos: {result}')
+            return []
+        
+        if content == 'null' or content[0] != '[':
+            print(f'Retorno inválido ao extrair produtos: {content}')
+            return []
+        
+        return json.loads(content)
     except Exception as e:
         if retry:
             print(f'Erro ao extrair produtos: {e}')

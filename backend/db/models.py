@@ -298,6 +298,7 @@ class SchedulerStatistics(Base):
     nr_manual_revision = Column(Integer, nullable=False)
     nr_reported = Column(Integer, nullable=False)
     nr_already_reported = Column(Integer, nullable=False)
+    nr_invalidate = Column(Integer, nullable=False)
     nr_reconcile = Column(Integer, nullable=False)
     en_status = Column(String, nullable=False)
     
@@ -307,5 +308,6 @@ class SchedulerStatistics(Base):
         return [
             "id_scheduler", "dt_created", "nr_pages", "nr_total",
             "nr_processed", "nr_created", "nr_updated", "nr_error",
-            "nr_manual_revision", "nr_reported", "nr_already_reported"
+            "nr_manual_revision", "nr_reported", "nr_already_reported",
+            "nr_invalidate", "nr_reconcile", "en_status"
         ]

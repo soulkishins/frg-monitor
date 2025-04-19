@@ -6,7 +6,8 @@ from sqlalchemy import func, update
 from datetime import datetime
 import json
 import traceback
-
+import uuid
+import os
 ADVERTISEMENT_STATUS_NEW = 'NEW'
 ADVERTISEMENT_STATUS_ERROR = 'ERROR'
 ADVERTISEMENT_STATUS_REPORT = 'REPORT'
@@ -14,6 +15,8 @@ ADVERTISEMENT_STATUS_REPORTED = 'REPORTED'
 ADVERTISEMENT_STATUS_MANUAL = 'MANUAL'
 ADVERTISEMENT_STATUS_REVIEWED = 'REVIEWED'
 ADVERTISEMENT_STATUS_INVALIDATE = 'INVALIDATE'
+
+AI_ENABLED = os.getenv('AI_ENABLED', 'false').lower() == 'true'
 
 def find_advertisement(session: Session, advertisement: str) -> Advertisement | None:
     advertisement = session.query(Advertisement).filter(Advertisement.id_advertisement == advertisement).all()
@@ -61,7 +64,7 @@ def lookup_products(session: Session, advertisement: Advertisement) -> list[dict
 
 def extract_products_by_ai(advertisement: Advertisement, product_list: list[dict]) -> list[dict]:
     advertisement_text = f"Título: {advertisement.st_title}\nDescrição: {advertisement.st_description}"
-    advertisement_products = json.loads(extract_products(advertisement_text, product_list))
+    advertisement_products = extract_products(advertisement_text, product_list)
     #print('Produtos encontrados:')
     #print(json.dumps(advertisement_products, default=str, indent=4))
     advertisement_products_list = []
@@ -83,11 +86,16 @@ def extract_products_by_ai(advertisement: Advertisement, product_list: list[dict
     return advertisement_products_list
 
 def reconcile_products_from_advertisement(advertisement: Advertisement, products_extracted: list[dict], product_list: list[dict]) -> list[dict]:
+    #print('Produtos vinculados ao anúncio:')
+    #print(json.dumps(advertisement.products, default=str, indent=4))
+    
     products_included = []
     for product in advertisement.products:
         for product_extracted in products_extracted:
             if str(product.id_product) == str(product_extracted['id_product']) and str(product.st_varity_seq) == str(product_extracted['id_variety']):
                 product_extracted['reconciled'] = True
+                product.nr_quantity = product_extracted['nr_quantity']
+                product.en_status = 'AR'
                 products_included.append({
                     'included': product,
                     'extracted': product_extracted,
@@ -96,36 +104,48 @@ def reconcile_products_from_advertisement(advertisement: Advertisement, products
                 })
     return products_included
 
-def ai_included_products(advertisement: Advertisement, products_extracted: list[dict], product_list: list[dict]) -> list[dict]:
+def ai_included_products(session: Session, advertisement: Advertisement, products_extracted: list[dict], product_list: list[dict]) -> list[dict]:
     products_included = []
     for product_extracted in products_extracted:
         if not product_extracted['reconciled'] and product_extracted['id_product'] and product_extracted['id_variety']:
+            product_extracted['reconciled'] = True
+            product = AdvertisementProduct(
+                id_advertisement=advertisement.id_advertisement,
+                id_product=uuid.UUID(product_extracted['id_product']),
+                st_varity_seq=product_extracted['id_variety'],
+                st_varity_name=product_extracted['st_variety_name'],
+                nr_quantity=product_extracted['nr_quantity'],
+                en_status='AI'
+            )
+            session.add(product)
             products_included.append({
-                'included': AdvertisementProduct(
-                    id_advertisement=advertisement.id_advertisement,
-                    id_product=product_extracted['id_product'],
-                    st_varity_seq=product_extracted['id_variety'],
-                    st_varity_name=product_extracted['st_variety_name'],
-                    nr_quantity=product_extracted['nr_quantity'],
-                    en_status='AI'
-                ),
+                'included': product,
                 'extracted': product_extracted,
                 'price': find_price(product_extracted['id_product'], product_extracted['id_variety'], product_list),
                 'status': 'AI'
             })
     return products_included
 
+def find_price(id_product: str, st_varity_seq: str, product_list: list[dict]) -> float:
+    for product in product_list:
+        if str(product['id_product']) == str(id_product):
+            for variety in product['variety']:
+                if str(variety['id_variety']) == str(st_varity_seq):
+                    return variety['price']
+    return 0.0
+
 def extract_products_from_advertisement(session: Session, advertisement: Advertisement):
     try:
         product_list = lookup_products(session, advertisement)
         products_extracted = extract_products_by_ai(advertisement, product_list)
         products_included = reconcile_products_from_advertisement(advertisement, products_extracted, product_list)
-        products_included += ai_included_products(advertisement, products_extracted, product_list)
+        products_included += ai_included_products(session, advertisement, products_extracted, product_list)
 
-        print('Produtos Incluídos:')
+        session.flush()
+        print('Produtos Incluídos + AI:')
         print(json.dumps(products_included, default=str, indent=4))
 
-        st_status = ADVERTISEMENT_STATUS_NEW
+        st_status = ADVERTISEMENT_STATUS_REVIEWED
         for product_extracted in products_extracted:
             if not product_extracted['reconciled']:
                 st_status = ADVERTISEMENT_STATUS_MANUAL
@@ -145,14 +165,9 @@ def extract_products_from_advertisement(session: Session, advertisement: Adverti
             elif percentage < 100:
                 st_status = ADVERTISEMENT_STATUS_REPORT
 
-        for product_included in products_included:
-            if product_included['status'] == 'AI':
-                session.add(product_included['included'])
-            else:
-                product_included['included'].en_status = product_included['status']
-                product_included['included'].nr_quantity = product_included['extracted']['nr_quantity']
         advertisement.st_status = st_status
         advertisement.bl_reconcile = True
+        session.flush()
 
         advertisementHistory = AdvertisementHistory(
             id_advertisement=advertisement.id_advertisement,
@@ -169,6 +184,7 @@ def extract_products_from_advertisement(session: Session, advertisement: Adverti
         return True, st_status
     except Exception as e:
         print(f'Erro ao processar anúncio {advertisement.id_advertisement}: {e}')
+        print(traceback.extract_tb(e.__traceback__))
         session.rollback()
         advertisement.st_status = ADVERTISEMENT_STATUS_MANUAL
         advertisement.bl_reconcile = True
@@ -183,13 +199,43 @@ def extract_products_from_advertisement(session: Session, advertisement: Adverti
         session.commit()
         return False, ADVERTISEMENT_STATUS_MANUAL
 
-def find_price(id_product: str, st_varity_seq: str, product_list: list[dict]) -> float:
-    for product in product_list:
-        if str(product['id_product']) == str(id_product):
-            for variety in product['variety']:
-                if str(variety['id_variety']) == str(st_varity_seq):
-                    return variety['price']
-    return 0.0
+def check_price_from_advertisement(session: Session, advertisement: Advertisement):
+    try:
+        product_list = lookup_products(session, advertisement)
+        price = 0
+        for product in advertisement.products:
+            if product.en_status == 'AR' or product.en_status == 'AI' or product.en_status == 'MI' or product.en_status == 'MR':
+                price += find_price(product.id_product, product.st_varity_seq, product_list) * product.nr_quantity
+                
+        print(f'Preço do anúncio {advertisement.id_advertisement}: {price} | {advertisement.db_price}')
+
+        st_status = advertisement.st_status
+        percentage = (advertisement.db_price / price) * 100
+        if percentage <= 70:
+            st_status = ADVERTISEMENT_STATUS_MANUAL
+        elif percentage < 100:
+            st_status = ADVERTISEMENT_STATUS_REPORT
+
+        if advertisement.st_status != st_status:
+            advertisement.st_status = st_status
+            session.flush()
+
+            advertisementHistory = AdvertisementHistory(
+                id_advertisement=advertisement.id_advertisement,
+                dt_history=datetime.now(),
+                st_status=st_status,
+                st_action='CRAWLER_RECONCILE',
+                st_history=json.dumps(advertisement.products, default=str)
+            )
+            session.add(advertisementHistory)
+
+            print(f'Status do anúncio: {st_status}')
+            session.commit()
+        return True, st_status
+    except Exception as e:
+        print(f'Erro ao reprocessar preço do anúncio {advertisement.id_advertisement}: {e}')
+        print(traceback.extract_tb(e.__traceback__))
+        return False, ADVERTISEMENT_STATUS_ERROR
 
 def process_advertisements(data: dict):
     db = DB()
@@ -200,6 +246,7 @@ def process_advertisements(data: dict):
     error = 0
     reported = 0
     manual_revision = 0
+    invalidate = 0
     print(f'Total de anúncios a processar: {count}')
     while len(data['advertisements']) > 0:
         advertisement_id = data['advertisements'].pop(0)
@@ -210,23 +257,41 @@ def process_advertisements(data: dict):
                 if advertisement is None:
                     error += 1
                     continue
+                if advertisement.st_status == ADVERTISEMENT_STATUS_INVALIDATE:
+                    invalidate += 1
+                    continue
+                if advertisement.st_status == ADVERTISEMENT_STATUS_ERROR:
+                    error += 1
+                    continue
+
                 result = True
+                st_status = None
                 if not advertisement.bl_reconcile:
-                    result, st_status = extract_products_from_advertisement(session, advertisement)
+                    if AI_ENABLED:
+                        result, st_status = extract_products_from_advertisement(session, advertisement)
+                    else:
+                        count -= 1
+                        continue
+                else:
+                    result, st_status = check_price_from_advertisement(session, advertisement)
                 success += 1 if result else 0
                 error += 0 if result else 1
                 if st_status == ADVERTISEMENT_STATUS_REPORT:
                     reported += 1
                 elif st_status == ADVERTISEMENT_STATUS_MANUAL:
                     manual_revision += 1
+                elif st_status == ADVERTISEMENT_STATUS_INVALIDATE:
+                    invalidate += 1
         except Exception as e:
             print(f'Erro ao processar anúncio {advertisement_id}: {e}')
+            print(traceback.extract_tb(e.__traceback__))
             error += 1
 
+    print(f'Total de anúncios processados: {count}')
     print(f'Total de anúncios processados com sucesso: {success}')
     print(f'Total de anúncios processados com erro: {error}')
     print(f'Total de anúncios restantes: {len(data["advertisements"])}')
-    
+
     with db:
         session = db.session
         stmt = (
@@ -235,7 +300,8 @@ def process_advertisements(data: dict):
             .values(
                 nr_reconcile=SchedulerStatistics.nr_reconcile + count,
                 nr_reported=SchedulerStatistics.nr_reported + reported,
-                nr_manual_revision=SchedulerStatistics.nr_manual_revision + manual_revision
+                nr_manual_revision=SchedulerStatistics.nr_manual_revision + manual_revision,
+                nr_invalidate=SchedulerStatistics.nr_invalidate + invalidate
             )
         )
         session.execute(stmt)

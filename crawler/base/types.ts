@@ -45,6 +45,7 @@ export interface IStatistics {
     nr_reported: number;
     nr_already_reported: number;
     nr_reconcile: number;
+    nr_invalidate: number;
     st_status: 'SE' | 'EP' | 'ET' | 'PE' | 'GE' | null;
 }
 

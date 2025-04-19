@@ -23,6 +23,7 @@ export class AdvertisementService {
                 nr_manual_revision: 0,
                 nr_reported: 0,
                 nr_already_reported: 0,
+                nr_invalidate: 0,
                 nr_reconcile: 0,
                 st_status: null
             };
@@ -58,12 +59,21 @@ export class AdvertisementService {
         );
 
         const sqsAds = advertisements.map(ad => ad.id_advertisement);
-        const sqsMessage = {
-            messageBody: JSON.stringify({advertisements: sqsAds, scheduler_id: params.scheduler_id, scheduler_date: params.datetime})
-        };
-
-        const messageId = await this.sqsService.sendMessage(sqsMessage);
-        console.log('Message sent with ID:', messageId);
+        
+        // Enviar mensagens em lotes de 50 registros
+        const batchSize = 50;
+        for (let i = 0; i < sqsAds.length; i += batchSize) {
+            const batch = sqsAds.slice(i, i + batchSize);
+            const sqsMessage = {
+                messageBody: JSON.stringify({
+                    advertisements: batch,
+                    scheduler_id: params.scheduler_id,
+                    scheduler_date: params.datetime
+                })
+            };
+            const messageId = await this.sqsService.sendMessage(sqsMessage);
+            console.log(`Message sent with ID: ${messageId} (batch ${Math.floor(i/batchSize) + 1})`);
+        }
     }
 
     private async processAdvertisement(

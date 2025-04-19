@@ -109,9 +109,10 @@ export class AdvertisementManager {
     async updateStatistics(params: IKeyword): Promise<void> {
         const query = `
             insert into tb_scheduler_statistics(
-                id_scheduler, dt_created, nr_pages, nr_total, nr_processed, nr_created, nr_updated, nr_error, nr_manual_revision, nr_reported, nr_already_reported
+                id_scheduler, dt_created, nr_pages, nr_total, nr_processed, nr_created, nr_updated,
+                nr_error, nr_manual_revision, nr_reported, nr_already_reported, nr_invalidate, nr_reconcile, en_status
             ) values (
-                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
             ) on conflict (id_scheduler, dt_created) do update set
                 nr_pages = tb_scheduler_statistics.nr_pages + EXCLUDED.nr_pages,
                 nr_total = tb_scheduler_statistics.nr_total + EXCLUDED.nr_total,
@@ -121,8 +122,11 @@ export class AdvertisementManager {
                 nr_error = tb_scheduler_statistics.nr_error + EXCLUDED.nr_error,
                 nr_manual_revision = tb_scheduler_statistics.nr_manual_revision + EXCLUDED.nr_manual_revision,
                 nr_reported = tb_scheduler_statistics.nr_reported + EXCLUDED.nr_reported,
-                nr_already_reported = tb_scheduler_statistics.nr_already_reported + EXCLUDED.nr_already_reported
-        `;
+                nr_already_reported = tb_scheduler_statistics.nr_already_reported + EXCLUDED.nr_already_reported,
+                nr_invalidate = tb_scheduler_statistics.nr_invalidate + EXCLUDED.nr_invalidate,
+                nr_reconcile = tb_scheduler_statistics.nr_reconcile + EXCLUDED.nr_reconcile,
+                en_status = EXCLUDED.en_status
+            `;
         
         const values = [
             params.scheduler_id,
@@ -135,7 +139,10 @@ export class AdvertisementManager {
             params.statistics.nr_error || 0,
             params.statistics.nr_manual_revision || 0,
             params.statistics.nr_reported || 0,
-            params.statistics.nr_already_reported || 0
+            params.statistics.nr_already_reported || 0,
+            params.statistics.nr_reconcile || 0,
+            params.statistics.nr_invalidate || 0,
+            params.statistics.st_status,
         ];
 
         await this.pool.query(query, values);
