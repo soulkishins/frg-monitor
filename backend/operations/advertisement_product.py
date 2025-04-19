@@ -6,7 +6,9 @@ class AdvertisementProductCrud(Crud):
         return AdvertisementProduct
 
     def filter_by_pk(self, indexes) -> list:
-        return (AdvertisementProduct.id_advertisement == indexes['advertisement'],)
+        return (AdvertisementProduct.id_advertisement == indexes['advertisement'],
+                AdvertisementProduct.id_product == indexes['product'], 
+                AdvertisementProduct.st_varity_seq == indexes['varity-seq'])
     
     def filter_by(self, indexes, filters) -> list:
         where = []

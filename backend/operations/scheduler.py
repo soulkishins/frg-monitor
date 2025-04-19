@@ -157,50 +157,39 @@ class SchedulerCrud(Crud):
         return 200, None
 
     def list(self, indexes, filters) -> tuple[int, list]:
+        total = 0
         # Executa a consulta SQL baseada no filtro
         if 'id_keyword' in filters:
             result = self._session.execute(text(self.get_scheduler_by_id_keyword({'id_keyword': filters['id_keyword']})))
             rows = result.fetchall()
             # Converte os resultados em objetos SchedulerResult com as colunas específicas
             data = [SchedulerResult(id=row[0], id_keyword=row[1], st_platform=row[2], st_cron=row[3]) for row in rows]
+            total = len(data)
         else:
-            result = self._session.execute(text(self.get_scheduler_enabled()))
+            stmtc = self.get_scheduler_count()
+            stmt = self.get_scheduler_enabled()
+            if 'search_global' in filters:
+                stmt += f" WHERE st_keyword ILIKE '%{filters['search_global']}%'"
+            if 'page.sort' in filters:
+                sort_field, sort_order = filters['page.sort'].split('.')
+                stmt += f" ORDER BY {sort_field} {sort_order}"
+            if 'page.limit' in filters:
+                stmt += f" LIMIT {filters['page.limit']}"
+            else:
+                stmt += f" LIMIT {self._default_page_size}"
+            if 'page.offset' in filters:
+                stmt += f" OFFSET {filters['page.offset']}"
+            result = self._session.execute(text(stmt))
+            result_count = self._session.execute(text(stmtc))
             rows = result.fetchall()
+            rows_count = result_count.fetchall()
             # Converte os resultados em objetos SchedulerResult com as colunas padrão
             data = [SchedulerResult(id_keyword=row[0], st_keyword=row[1], st_status=row[2]) for row in rows]
-        
-        # Aplica filtros em memória
-        if self.has_filters(indexes, filters):
-            if 'search_global' in filters:
-                search = filters['search_global'].lower()
-                if 'id_keyword' in filters:
-                    data = [item for item in data if 
-                           (item.st_platform and search in item.st_platform.lower()) or
-                           (item.st_cron and search in item.st_cron.lower())]
-                else:
-                    data = [item for item in data if 
-                           (item.st_keyword and search in item.st_keyword.lower()) or 
-                           (item.st_status and search in item.st_status.lower())]
-            
-            if 'st_keyword' in filters and 'id_keyword' not in filters:
-                keyword = filters['st_keyword'].lower()
-                data = [item for item in data if item.st_keyword and keyword in item.st_keyword.lower()]
-            
-            if 'st_status' in filters and 'id_keyword' not in filters:
-                status = filters['st_status'].lower()
-                data = [item for item in data if item.st_status and status in item.st_status.lower()]
-
-        # Aplica ordenação
-        if 'page.sort' in filters:
-            sort_field, sort_order = filters['page.sort'].split('.')
-            reverse = sort_order == 'desc'
-            data.sort(key=lambda x: getattr(x, sort_field), reverse=reverse)
+            total = rows_count[0][0]
 
         # Aplica paginação
-        total = len(data)
         limit = int(filters.get('page.limit', self._default_page_size))
-        offset = int(filters.get('page.offset', 0))
-        
+        offset = int(filters.get('page.offset', 0))        
         paginated_data = data[offset:offset + limit]
 
         return Page(
@@ -225,8 +214,22 @@ class SchedulerCrud(Crud):
             ke.id_keyword, ke.st_keyword
             )
             select * from schedules
-            where
-            st_status = 'enable'
+        """
+    
+    def get_scheduler_count(self) -> str:
+        return f"""
+            with schedules as
+            (
+            select ke.id_keyword, ke.st_keyword, case count(distinct sc.id) when 0 then 'disable' else 'enable' end st_status
+            from {os.getenv("db_schema")}.tb_keyword ke
+            left join {os.getenv("db_schema")}.tb_scheduler sc on
+                ke.id_keyword = sc.id_keyword
+            where 
+                ke.st_status = 'active'
+            group by
+            ke.id_keyword, ke.st_keyword
+            )
+            select count(*) from schedules
         """
 
     def get_scheduler_by_id_keyword(self, indexes: dict) -> str:

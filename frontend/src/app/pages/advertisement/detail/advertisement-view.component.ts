@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -123,7 +123,7 @@ export class AdvertisementDetail implements OnInit {
         private router: Router,
         private route: ActivatedRoute,
         private productService: ProductService
-    ) { }
+    ) {}
 
     ngOnInit() {
         this.statuses = this.advertisementService.getStatuses();
@@ -142,17 +142,7 @@ export class AdvertisementDetail implements OnInit {
                             this.advertisement.db_price = this.advertisement.db_price?.toString().replace(".", ",");
                             this.brand = advertisement.brand;
                             this.client = advertisement.brand?.client;
-                            this.products = advertisement.products.map(
-                                product => {
-                                    product.product.st_variety = JSON.parse(product.product.st_variety as string);
-                                    const varieties = product.product.st_variety as Variety[];
-                                    product.product.st_variety_name = varieties.find((v: Variety) => v.seq == product.st_varity_seq)?.variety;
-                                    product.product.db_price = varieties.find((v: Variety) => v.seq == product.st_varity_seq)?.price;
-                                    product.product.nr_quantity = product.nr_quantity;
-                                    product.product.st_status = product.en_status;
-                                    return product.product;
-                                }
-                            );
+                            this.products = advertisement.products.map(product => this.mapProduct(product));
                             const details = JSON.parse(advertisement.st_details as string);
                             if (details.details?.originalPrice) {
                                 advertisement.db_original_price = details.details.originalPrice.toString().replace(".", ",");
@@ -335,7 +325,7 @@ export class AdvertisementDetail implements OnInit {
         }
     }
 
-    saveProduct() {
+    postProduct() {
         if (this.selectedProduct && this.selectedVariety && this.quantity > 0) {
             this.productSave.id_advertisement = this.advertisement.id_advertisement!;
             this.productSave.id_product = this.selectedProduct.id_product!;
@@ -349,17 +339,7 @@ export class AdvertisementDetail implements OnInit {
                     this.displayModal = false;
                     this.advertisementService.getAdvertisementProduct(this.advertisement.id_advertisement!).subscribe({
                         next: (products: Page<AdvertisementProduct>) => {
-                            this.products = products.list?.map(
-                                product => {
-                                    product.product.st_variety = JSON.parse(product.product.st_variety as string);
-                                    const varieties = product.product.st_variety as Variety[];
-                                    product.product.st_variety_name = varieties.find((v: Variety) => v.seq == product.st_varity_seq)?.variety;
-                                    product.product.db_price = varieties.find((v: Variety) => v.seq == product.st_varity_seq)?.price;
-                                    product.product.nr_quantity = product.nr_quantity;
-                                    product.product.st_status = product.en_status;
-                                    return product.product;
-                                }
-                            );
+                            this.products = products.list?.map(product => this.mapProduct(product));
                             this.messageService.add({
                                 severity: 'success',
                                 summary: 'Sucesso',
@@ -457,33 +437,48 @@ export class AdvertisementDetail implements OnInit {
         });
     }
 
-    getActionProduct(status: string): any[] {
-        let dropdownActions = [];
+    getActionProduct(product: ClientBrandProduct): any[] {
+        let dropdownActions: MenuItem[] = [];
 
-        if (status == 'MI') {
-            dropdownActions.push({ label: 'Delete', icon: 'pi pi-fw pi-trash' });
+        if (product.st_status == 'MI') {
+            dropdownActions.push({
+                 label: 'Delete', 
+                 icon: 'pi pi-fw pi-trash', 
+                 command: () => {this.deleteAdvertisementProduct(product);}
+            });
         }
-        if (status == 'MR' || status == 'AR' || status == 'AI') {
-            dropdownActions.push({ label: 'Marcar Erro', icon: 'pi pi-fw pi-exclamation-triangle' });
+        if (product.st_status == 'MR' || product.st_status == 'AR' || product.st_status == 'AI') {
+            dropdownActions.push({
+                 label: 'Marcar Erro', 
+                 icon: 'pi pi-fw pi-exclamation-triangle', 
+                 command: () => {this.changeStatusAdvertisementProduct(product, 'ER');} });
         }
-        if (status == 'NR' || status == 'ER') {
-            dropdownActions.push({ label: 'Marcar como Conciliação Manual', icon: 'pi pi-fw pi-user-edit' });
+        if (product.st_status == 'NR' || product.st_status == 'ER') {
+            dropdownActions.push({ 
+                label: 'Marcar como Conciliação Manual', 
+                icon: 'pi pi-fw pi-user-edit', 
+                command: () => {this.changeStatusAdvertisementProduct(product, 'MR');} });
         }
 
         dropdownActions.push({ separator: true });
-        dropdownActions.push({ 
+        dropdownActions.push({
             label: 'Trocar Quantidade', 
             icon: 'pi pi-fw pi-refresh',
-            command: () => this.showQuantityModal()
+            command: () => {this.showQuantityModal();}
         });
 
         return dropdownActions;
     }
 
+    clickActionProduct(event: any) {
+        console.log(event);
+    }
+
     showQuantityModal() { 
-        console.log("showQuantityModal");
-        this.selectedProductForEdit = { ...this.dt?.selection };
-        this.displayQuantityModal = true;
+        if (this.dt?.selection) {
+            this.selectedProductForEdit = { ...this.dt.selection };
+            this.displayQuantityModal = true;
+        }
     }
 
     saveQuantityChange() {
@@ -507,17 +502,7 @@ export class AdvertisementDetail implements OnInit {
                     // Recarregar os produtos
                     this.advertisementService.getAdvertisementProduct(this.advertisement.id_advertisement!).subscribe({
                         next: (products: Page<AdvertisementProduct>) => {
-                            this.products = products.list?.map(
-                                product => {
-                                    product.product.st_variety = JSON.parse(product.product.st_variety as string);
-                                    const varieties = product.product.st_variety as Variety[];
-                                    product.product.st_variety_name = varieties.find((v: Variety) => v.seq == product.st_varity_seq)?.variety;
-                                    product.product.db_price = varieties.find((v: Variety) => v.seq == product.st_varity_seq)?.price;
-                                    product.product.nr_quantity = product.nr_quantity;
-                                    product.product.st_status = product.en_status;
-                                    return product.product;
-                                }
-                            );
+                            this.products = products.list?.map(product => this.mapProduct(product));
                         },
                         error: (error: any) => {
                             console.error('Erro ao recarregar os produtos:', error);
@@ -547,5 +532,83 @@ export class AdvertisementDetail implements OnInit {
         if (this.dt) {
             this.dt.selection = product;
         }
+    }
+
+    changeStatusAdvertisementProduct(product: ClientBrandProduct, status: string) {
+        let params = {
+            en_status: status
+        };
+        this.advertisementService.putAdvertisementProduct(this.advertisement.id_advertisement!, product.id_product!, product.st_variety_seq!, params).subscribe({
+            next: () => {
+                this.advertisementService.getAdvertisementProduct(this.advertisement.id_advertisement!).subscribe({
+                    next: (products: Page<AdvertisementProduct>) => {
+                        this.products = products.list?.map(product => this.mapProduct(product));
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Sucesso',
+                            detail: 'Status do produto atualizado com sucesso!',
+                            life: 3000
+                        });
+                    },
+                    error: (error: any) => {
+                        console.error('Erro ao recarregar os produtos:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao recarregar os produtos',
+                            life: 3000
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    deleteAdvertisementProduct(product: ClientBrandProduct) {
+        this.advertisementService.deleteAdvertisementProduct(this.advertisement.id_advertisement!, product.id_product!, product.st_variety_seq!).subscribe({
+            next: () => {
+                this.advertisementService.getAdvertisementProduct(this.advertisement.id_advertisement!).subscribe({
+                    next: (products: Page<AdvertisementProduct>) => {
+                        this.products = products.list?.map(product => this.mapProduct(product));
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Sucesso',
+                            detail: 'Produto deletado com sucesso!',
+                            life: 3000
+                        });                        
+                    },
+                    error: (error: any) => {
+                        console.error('Erro ao recarregar os produtos:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao recarregar os produtos',
+                            life: 3000
+                        });
+                    }
+                });
+            },
+            error: (error: any) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: 'Erro ao deletar o produto',
+                    life: 3000
+                });
+            }
+        });
+    }
+
+    private mapProduct(product: any): any {
+        product.product.st_variety = JSON.parse(product.product.st_variety as string);
+        const varieties = product.product.st_variety as Variety[];
+        product.product.st_variety_name = varieties.find((v: Variety) => v.seq == product.st_varity_seq)?.variety;
+        product.product.db_price = varieties.find((v: Variety) => v.seq == product.st_varity_seq)?.price;
+        product.product.nr_quantity = product.nr_quantity;
+        product.product.st_status = product.en_status;
+        product.product.id_product = product.id_product;
+        product.product.items = this.getActionProduct(product.product);
+        product.product.st_variety_seq = product.st_varity_seq;
+        return product.product;
     }
 }

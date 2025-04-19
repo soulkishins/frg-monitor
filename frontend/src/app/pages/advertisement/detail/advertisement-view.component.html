@@ -24,7 +24,7 @@
     </div>
     <ng-template pTemplate="footer">
         <p-button label="Cancelar" icon="pi pi-times" (onClick)="displayModal = false" severity="secondary" />
-        <p-button label="Salvar" icon="pi pi-check" (onClick)="saveProduct()" />
+        <p-button label="Salvar" icon="pi pi-check" (onClick)="postProduct()" />
     </ng-template>
 </p-dialog>
 
@@ -32,14 +32,14 @@
     <div class="grid">
         <div class="col-12 mb-3">
             <p-iftalabel>
-                <input pInputText id="edit_st_product" [(ngModel)]="selectedProductForEdit.st_product" readonly="true"/>
-                <label for="edit_st_product">Produto</label>
+                <p-select [(ngModel)]="selectedProductForEdit" inputId="edit_product" [options]="products" optionLabel="st_product" styleClass="w-full" readonly="true"/>
+                <label for="edit_product">Produto</label>
             </p-iftalabel>
         </div>
         <div class="col-12 mb-3">
             <p-iftalabel>
-                <input pInputText id="edit_st_variety" [(ngModel)]="selectedProductForEdit.st_variety_name" readonly="true"/>
-                <label for="edit_st_variety">Variedade</label>
+                <p-select [(ngModel)]="selectedProductForEdit" inputId="edit_variety" [options]="products" optionLabel="st_variety_name" styleClass="w-full" readonly="true"/>
+                <label for="edit_variety">Variedade</label>
             </p-iftalabel>
         </div>
         <div class="col-12 mb-3">
@@ -224,7 +224,7 @@
                 <td>{{ getQuantity(product.nr_quantity) }}</td>
                 <td>{{ getStatusProduct(product.st_status) }}</td>
                 <td>
-                    <p-splitbutton label="Ações" appendTo="body" (onClick)="actionAdvertisementProductRow(product.st_status)" [model]="getActionProduct(product.st_status)" />
+                    <p-splitbutton label="Ações" appendTo="body" [model]="product.items" />
                 </td>
             </tr>
         </ng-template>

@@ -6,6 +6,11 @@ import { AdvertisementListDto, Advertisement, AdvertisementExport, Advertisement
 import { Page } from '../models/global.model';
 import { CognitoService } from './cognito.service';
 
+export interface AdvertisementProductPutRequest {
+  en_status?: string;
+  st_quantity?: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -104,6 +109,14 @@ export class AdvertisementService {
 
   getAdvertisementProduct(id: string): Observable<Page<AdvertisementProduct>> {
     return this.http.get<Page<AdvertisementProduct>>(`${this.baseUrl}/${id}/produto`);
+  }
+
+  putAdvertisementProduct(id: string, id_product: string, varity_seq: string, params: AdvertisementProductPutRequest): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${id}/produto/${id_product}/variedade/${varity_seq}`, params);
+  }
+
+  deleteAdvertisementProduct(id: string, id_product: string, varity_seq: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}/produto/${id_product}/variedade/${varity_seq}`);
   }
 
 }
