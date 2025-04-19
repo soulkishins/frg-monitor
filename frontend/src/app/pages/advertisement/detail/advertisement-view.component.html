@@ -1,6 +1,32 @@
 <p-toast />
 <p-confirmdialog [style]="{ width: '450px' }" />
-
+<p-dialog [header]="titleModal" [(visible)]="displayModal" [style]="{width: '450px'}" [modal]="true" [draggable]="false" [resizable]="false">
+    <div class="grid">
+        <div class="col-12 mb-3" *ngIf="!isEditQuantityProduct">
+            <p-iftalabel>
+                <p-select [(ngModel)]="selectedProduct" inputId="product" [options]="filteredProducts" optionLabel="st_product" styleClass="w-full" (onChange)="onProductChange()" 
+                    (onFilter)="filterProducts($event)" [filter]="true" placeholder="Selecione um Produto" [loading]="loading" [disabled]="isEditQuantityProduct"/>
+                <label for="product">Produto</label>
+            </p-iftalabel>
+        </div>
+        <div class="col-12 mb-3" *ngIf="!isEditQuantityProduct">
+            <p-iftalabel>
+                <p-select [(ngModel)]="selectedVariety" inputId="variety" [options]="availableVarieties" optionLabel="variety" styleClass="w-full" [disabled]="isEditQuantityProduct"/>
+                <label for="variety">Variedade</label>
+            </p-iftalabel>
+        </div>
+        <div class="col-12 mb-3">
+            <p-iftalabel>
+                <p-inputnumber [(ngModel)]="quantity" inputId="quantity" [min]="1" styleClass="w-full"/>
+                <label for="quantity">Quantidade</label>
+            </p-iftalabel>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <p-button label="Cancelar" icon="pi pi-times" (onClick)="displayModal = false" severity="secondary" />
+        <p-button label="Salvar" icon="pi pi-check" (onClick)="saveProduct()" />
+    </ng-template>
+</p-dialog>
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
         <div class="flex items-center gap-2">
@@ -117,6 +143,9 @@
             <span class="font-bold">Produtos</span>
         </div>
     </ng-template>
+    <ng-template #icons>
+        <p-button label="Novo" icon="pi pi-plus" severity="secondary" (onClick)="showModal()" />
+    </ng-template>
     <p-table
         #dt
         [value]="products || []"
@@ -146,6 +175,15 @@
                     Preço Base
                     <p-sortIcon field="db_price" />
                 </th>
+                <th pSortableColumn="db_quantity" style="min-width: 6rem">
+                    Qtde
+                    <p-sortIcon field="db_quantity" />
+                </th>
+                <th pSortableColumn="st_status" style="min-width: 8rem">
+                    Status
+                    <p-sortIcon field="st_status" />
+                </th>
+                <th style="min-width: 10rem"></th>
             </tr>
         </ng-template>
         <ng-template #body let-product>
@@ -155,6 +193,11 @@
                 <td>{{ product.st_product }}</td>
                 <td>{{ product.st_variety_name }}</td>
                 <td>{{ product.db_price | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}</td>
+                <td>{{ getQuantity(product.nr_quantity) }}</td>
+                <td>{{ getStatusProduct(product.st_status) }}</td>
+                <td>
+                    <p-splitbutton label="Ações" appendTo="body" [model]="product.items" />
+                </td>
             </tr>
         </ng-template>
     </p-table>

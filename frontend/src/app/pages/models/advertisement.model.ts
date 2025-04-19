@@ -1,3 +1,5 @@
+import { MenuItem } from "primeng/api";
+
 export interface AdvertisementListDto {
     id_advertisement: string;
     id_client: string;
@@ -46,12 +48,20 @@ export interface ClientBrandProduct {
     subcategory: Subcategory;
     db_price?: number;
     st_variety_name?: string;
+    st_variety_seq?: string;
+    nr_quantity?: number;
+    st_status?: string;
+    items?: MenuItem[];
+    id_product?: string;
 }
 
 export interface AdvertisementProduct {
     st_varity_seq: string;
     st_varity_name: string;
+    en_status: string;
+    nr_quantity: number;
     product: ClientBrandProduct;
+    id_product: string;
 }
 
 export interface SellerDetails {
@@ -104,4 +114,13 @@ export interface AdvertisementHistory {
 export interface AdvertisementExport {
     id_export: string;
     st_status: string;
+}
+
+export interface AdvertisementProductPostRequest {
+    id_advertisement: string;
+    id_product: string;
+    st_varity_seq: string;
+    st_varity_name: string;
+    en_status: string;
+    nr_quantity: number;
 }

@@ -232,7 +232,7 @@ class AdvertisementProduct(Base, Audit):
         return ["id_advertisement", "id_product", "st_varity_seq", "st_varity_name", "en_status", "product"] + super()._json_fields()
 
     def _json_fields_advertisement(self):
-        return ["st_varity_seq", "st_varity_name", "en_status", "product"]
+        return ["st_varity_seq", "st_varity_name", "en_status", "product", "nr_quantity", "id_product"]
 
     def _json_fields_resume(self):
         return ["id_product", "st_varity_seq", "st_varity_name", "en_status"]

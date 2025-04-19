@@ -2,9 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { map, Observable, Subject } from 'rxjs';
 import { environment } from '../../../environment/environment';
-import { AdvertisementListDto, Advertisement, AdvertisementExport, AdvertisementHistory } from '../models/advertisement.model';
+import { AdvertisementListDto, Advertisement, AdvertisementExport, AdvertisementHistory, AdvertisementProduct, AdvertisementProductPostRequest } from '../models/advertisement.model';
 import { Page } from '../models/global.model';
 import { CognitoService } from './cognito.service';
+
+export interface AdvertisementProductPutRequest {
+  en_status?: string;
+  nr_quantity?: number;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -72,7 +77,7 @@ export class AdvertisementService {
         { label: 'Denuciado', value: 'REPORTED', color: 'secondary' },
         { label: 'Para Revisão', value: 'MANUAL', color: 'contrast' },
         { label: 'Revisado', value: 'REVIEWED', color: 'contrast' },
-        { label: 'Invalidado', value: 'INVALIDATE', color: 'contrast' },
+        { label: 'Invalidado', value: 'INVALIDATE', color: 'contrast' }
     ];
     if (all) {
       return [
@@ -96,6 +101,22 @@ export class AdvertisementService {
 
   getPhotoUrl(platform: string, platformID: string, photo: string): string {
     return `${environment.api_url}/anuncio/imagem?plataform=${platform}&plataform_id=${platformID}&file=${photo}`;
+  }
+
+  postAdvertisementProduct(id: string, params: AdvertisementProductPostRequest): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${id}/produto`, params);
+  }
+
+  getAdvertisementProduct(id: string): Observable<Page<AdvertisementProduct>> {
+    return this.http.get<Page<AdvertisementProduct>>(`${this.baseUrl}/${id}/produto`);
+  }
+
+  putAdvertisementProduct(id: string, id_product: string, varity_seq: string, params: AdvertisementProductPutRequest): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${id}/produto/${id_product}/variedade/${varity_seq}`, params);
+  }
+
+  deleteAdvertisementProduct(id: string, id_product: string, varity_seq: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}/produto/${id_product}/variedade/${varity_seq}`);
   }
 
 }
