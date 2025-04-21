@@ -1,5 +1,5 @@
 from operations.crud_base import Crud, Page
-from db.models import Scheduler, SchedulerStatistics
+from db.models import Scheduler, SchedulerStatistics, AdvertisementHistory
 import boto3
 import json
 import os
@@ -252,3 +252,25 @@ class SchedulerCrud(Crud):
         self._session.delete(scheduler)
         self._session.flush()
         return scheduler
+    
+    def insert_history(self, indexes, filters, body) -> tuple:
+        from sqlalchemy import func
+        
+        action = body.get("action")
+        if action is None:
+            action = body["status"]
+            action = f'USER_{action}'
+
+        history = AdvertisementHistory(
+            id_advertisement=body['id'],
+            dt_history=func.current_timestamp(),
+            st_status=body['status'],
+            st_action=action
+        )
+        
+        self._session.add(history)
+        
+        self._session.commit()
+        
+        return (200, "Histórico inserido com sucesso")
+        
