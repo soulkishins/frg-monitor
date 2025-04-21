@@ -149,21 +149,13 @@ export class AdvertisementDetail implements OnInit {
                             } else {
                                 advertisement.db_original_price = advertisement.db_price;
                             }
+                            this.getHistory(id);
                         },
                         error: (error: any) => {
                             console.log(error);
                         }
                     });
-                    this.advertisementService
-                    .getAdvertisementHistory(id)
-                    .subscribe({
-                        next: (history: AdvertisementHistory[]) => {
-                            this.history = history;
-                        },
-                        error: (error: any) => {
-                            console.log(error);
-                        }
-                    });
+
                 }
             },
             error: (error: any) => {
@@ -187,7 +179,8 @@ export class AdvertisementDetail implements OnInit {
         const ac = this.actions.filter(a => a.value === action)[0];
         if (ac)
             return ac.label;
-        return undefined;
+        else
+            return action;
     }
 
     openUrl() {
@@ -353,15 +346,10 @@ export class AdvertisementDetail implements OnInit {
             this.advertisementService.postAdvertisementProduct(this.advertisement.id_advertisement!, this.productSave).subscribe({  
                 next: () => {
                     this.displayModal = false;
+                    this.addHistory(this.advertisement.id_advertisement!, 'INSERTED', `No anuncio, adição manual do produto: ${this.selectedProduct?.st_product}`);
                     this.advertisementService.getAdvertisementProduct(this.advertisement.id_advertisement!).subscribe({
                         next: (products: Page<AdvertisementProduct>) => {
                             this.products = products.list?.map(product => this.mapProduct(product));
-                            this.messageService.add({
-                                severity: 'success',
-                                summary: 'Sucesso',
-                                detail: 'Produto adicionado com sucesso!',
-                                life: 3000
-                            });
                         },
                         error: (error: any) => {
                             console.error('Erro ao recarregar os produtos:', error);
@@ -399,6 +387,7 @@ export class AdvertisementDetail implements OnInit {
             nr_quantity: this.quantity
         }).subscribe({
             next: () => {
+                this.addHistory(this.advertisement.id_advertisement!, 'UPDATED', `No anuncio, alteração manual da quantidade do produto: ${this.editProduct?.st_product}`);
                 this.advertisementService.getAdvertisementProduct(this.advertisement.id_advertisement!).subscribe({
                     next: (products: Page<AdvertisementProduct>) => {
                         this.products = products.list?.map(product => this.mapProduct(product));
@@ -535,6 +524,7 @@ export class AdvertisementDetail implements OnInit {
         };
         this.advertisementService.putAdvertisementProduct(this.advertisement.id_advertisement!, product.id_product!, product.st_variety_seq!, params).subscribe({
             next: () => {
+                this.addHistory(this.advertisement.id_advertisement!, status, `No anuncio, alteração manual do status do produto: ${product.st_product}`);
                 this.advertisementService.getAdvertisementProduct(this.advertisement.id_advertisement!).subscribe({
                     next: (products: Page<AdvertisementProduct>) => {
                         this.products = products.list?.map(product => this.mapProduct(product));
@@ -562,6 +552,7 @@ export class AdvertisementDetail implements OnInit {
     deleteAdvertisementProduct(product: ClientBrandProduct) {
         this.advertisementService.deleteAdvertisementProduct(this.advertisement.id_advertisement!, product.id_product!, product.st_variety_seq!).subscribe({
             next: () => {
+                this.addHistory(this.advertisement.id_advertisement!, 'DELETED', `No anuncio, exclusão manual do produto: ${product.st_product}`);
                 this.advertisementService.getAdvertisementProduct(this.advertisement.id_advertisement!).subscribe({
                     next: (products: Page<AdvertisementProduct>) => {
                         this.products = products.list?.map(product => this.mapProduct(product));
@@ -605,5 +596,34 @@ export class AdvertisementDetail implements OnInit {
         product.product.items = this.getActionProduct(product.product);
         product.product.st_variety_seq = product.st_varity_seq;
         return product.product;
+    }
+
+    private getHistory(id: string) {
+        this.advertisementService
+        .getAdvertisementHistory(id)
+        .subscribe({
+            next: (history: AdvertisementHistory[]) => {
+                this.history = history;
+            },
+            error: (error: any) => {
+                console.log(error);
+            }
+        });        
+    }
+
+    private addHistory(id_advertisement: string, status: string, action: string) {
+        let paramsHistory = {
+            id: id_advertisement,
+            status: status,
+            action: action
+        };
+        this.advertisementService.postAdvertisementProductHistory(id_advertisement, paramsHistory).subscribe({
+            next: () => {
+                this.getHistory(id_advertisement);
+            },
+            error: (error: any) => {
+                console.error('Erro ao adicionar o histórico do produto:', error);
+            }
+        });
     }
 }
