@@ -179,6 +179,7 @@ class SchedulerCrud(Crud):
                 stmt += f" LIMIT {self._default_page_size}"
             if 'page.offset' in filters:
                 stmt += f" OFFSET {filters['page.offset']}"
+            print(stmt)
             result = self._session.execute(text(stmt))
             result_count = self._session.execute(text(stmtc))
             rows = result.fetchall()
@@ -189,11 +190,10 @@ class SchedulerCrud(Crud):
 
         # Aplica paginação
         limit = int(filters.get('page.limit', self._default_page_size))
-        offset = int(filters.get('page.offset', 0))        
-        paginated_data = data[offset:offset + limit]
+        offset = int(filters.get('page.offset', 0))
 
         return Page(
-            paginated_data,
+            data,
             total,
             limit,
             offset,
