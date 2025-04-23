@@ -90,25 +90,104 @@ export class SubCategoryList implements OnInit {
         private router: Router
     ) {}
 
-    exportCSV() {
-        const data = this.subCategories().map(subCategory => ({
-            'Categoria': subCategory.category?.st_category || '',
-            'Subcategoria': subCategory.st_subcategory,
-            'Status': this.getStatusLabel(subCategory.st_status)
-        }));
-        
-        const csvContent = this.convertToCSV(data);
-        const BOM = '\uFEFF';
-        const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        
-        link.setAttribute('href', url);
-        link.setAttribute('download', 'lista_subcategorias.csv');
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    async exportCSV() {
+        try {
+            this.messageService.add({
+                key: 'export',
+                severity: 'info',
+                summary: 'Exportação em andamento',
+                detail: 'Exportação em andamento, aguarde alguns instantes...',
+                closable: false,
+                sticky: true,
+                icon: 'pi pi-spin pi-spinner'
+            });
+
+            const initialParams: { [key: string]: string | number } = {
+                'page.limit': 1,
+                'page.offset': 0
+            };
+
+            if (this.page.sort) {
+                initialParams['page.sort'] = this.page.sort;
+            }
+
+            const initialData = await this.subCategoryService.getSubCategories(initialParams).toPromise();
+            const totalRecords = initialData?.page.total || 0;
+            
+            if (totalRecords === 0) {
+                this.messageService.clear('export');
+                this.messageService.add({
+                    severity: 'info',
+                    summary: 'Informação',
+                    detail: 'Não há registros para exportar',
+                    life: 3000
+                });
+                return;
+            }
+
+            const limit = this.page.limit;
+            const totalPages = Math.ceil(totalRecords / limit);
+            
+            let allSubCategories: SubCategoryResponse[] = [];
+
+            for (let page = 0; page < totalPages; page++) {
+                const params: { [key: string]: string | number } = {
+                    'page.limit': limit,
+                    'page.offset': page * limit
+                };
+
+                if (this.page.sort) {
+                    params['page.sort'] = this.page.sort;
+                }
+
+                const data = await this.subCategoryService.getSubCategories(params).toPromise();
+                if (data?.list) {
+                    allSubCategories = [...allSubCategories, ...data.list];
+                }
+            }
+
+            const data = allSubCategories.map(subCategory => ({
+                'Categoria': subCategory.category?.st_category || '',
+                'Subcategoria': subCategory.st_subcategory,
+                'Status': this.getStatusLabel(subCategory.st_status),
+                'Criado por': subCategory.st_created_by,
+                'Data Criação': subCategory.dt_created
+            }));
+            
+            const csvContent = this.convertToCSV(data);
+            const BOM = '\uFEFF';
+            const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'lista_subcategorias.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Aguardar um pequeno intervalo para garantir que o download foi iniciado
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            this.messageService.clear('export');
+            this.messageService.add({
+                key: 'export',
+                severity: 'success',
+                summary: 'Sucesso',
+                detail: `Exportação concluída com ${totalRecords} registros`,
+                life: 3000
+            });
+        } catch (error) {
+            console.error('Erro ao exportar dados:', error);
+            this.messageService.clear('export');
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Erro',
+                detail: 'Erro ao exportar os dados',
+                life: 3000
+            });
+        }
     }
 
     private convertToCSV(data: any[]): string {
