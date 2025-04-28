@@ -124,3 +124,14 @@ export interface AdvertisementProductPostRequest {
     en_status: string;
     nr_quantity: number;
 }
+
+export interface AdvertisementProductPutRequest {
+    en_status?: string;
+    nr_quantity?: number;
+  }
+  
+  export interface AdvertisementProductHistoryPostRequest {
+    id: string;
+    status: string;
+    action?: string;
+  }

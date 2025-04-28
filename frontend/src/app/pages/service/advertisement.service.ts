@@ -2,14 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { map, Observable, Subject } from 'rxjs';
 import { environment } from '../../../environment/environment';
-import { AdvertisementListDto, Advertisement, AdvertisementExport, AdvertisementHistory, AdvertisementProduct, AdvertisementProductPostRequest } from '../models/advertisement.model';
+import { AdvertisementListDto, Advertisement, AdvertisementExport, AdvertisementHistory, AdvertisementProduct, AdvertisementProductPostRequest, AdvertisementProductPutRequest, AdvertisementProductHistoryPostRequest } from '../models/advertisement.model';
 import { Page } from '../models/global.model';
 import { CognitoService } from './cognito.service';
 
-export interface AdvertisementProductPutRequest {
-  en_status?: string;
-  nr_quantity?: number;
-}
 
 @Injectable({
   providedIn: 'root'
@@ -77,7 +73,16 @@ export class AdvertisementService {
         { label: 'Denuciado', value: 'REPORTED', color: 'secondary' },
         { label: 'Para Revisão', value: 'MANUAL', color: 'contrast' },
         { label: 'Revisado', value: 'REVIEWED', color: 'contrast' },
-        { label: 'Invalidado', value: 'INVALIDATE', color: 'contrast' }
+        { label: 'Invalidado', value: 'INVALIDATE', color: 'contrast' },
+        { label: 'Inserido', value: 'INSERTED', color: 'info' },
+        { label: 'Atualizado', value: 'UPDATED', color: 'info' },
+        { label: 'Excluído', value: 'DELETED', color: 'danger' },
+        { label: 'Marcado Localizado', value: 'AR', color: 'info' },
+        { label: 'Marcado Não Localizado', value: 'NR', color: 'info' },
+        { label: 'Automático', value: 'AI', color: 'info' },
+        { label: 'Inclusão Manual', value: 'MI', color: 'info' },
+        { label: 'Marcado Conciliação Manual', value: 'MR', color: 'info' },
+        { label: 'Marcado Erro', value: 'ER', color: 'danger' },
     ];
     if (all) {
       return [
@@ -122,4 +127,7 @@ export class AdvertisementService {
     return this.http.delete<void>(`${this.baseUrl}/${id}/produto/${id_product}/variedade/${varity_seq}`);
   }
 
+  postAdvertisementProductHistory(id: string, params: AdvertisementProductHistoryPostRequest): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${id}/produto`, params);
+  }
 }
