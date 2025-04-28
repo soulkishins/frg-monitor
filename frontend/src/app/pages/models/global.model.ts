@@ -47,4 +47,19 @@ export interface AdsReport {
     rpts: number;
 }
 
+export interface SchedulerStatisticsReport {
+    nr_pages: number;
+    nr_total: number;
+    nr_error: number;
+    nr_reported: number;
+    nr_manual_revision: number;
+    nr_already_reported: number;
+    nr_invalidate: number;
+}
 
+export interface SchedulerReport {
+    count_scheduler: number;
+    count_keywords: number;
+    avg_keywords: number;
+    exec_keywords: number;
+}

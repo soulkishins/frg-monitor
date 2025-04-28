@@ -12,6 +12,10 @@ class Dashboard(Crud):
             results = self._session.execute(text(self.get_top_keywords())).fetchall()
         elif dash_type == 'ads_report':
             results = self._session.execute(text(self.get_ads_report())).fetchall()
+        elif dash_type == 'scheduler_counts':
+            results = self._session.execute(text(self.get_scheduler_counts())).fetchall()
+        elif dash_type == 'schedulers_statistics':
+            results = self._session.execute(text(self.get_schedulers_statistics())).fetchall()
 
         return [self.tuple_to_dict(result, dash_type) for result in results]
     
@@ -40,6 +44,24 @@ class Dashboard(Crud):
                 'upds': result[2],
                 'rpts': result[3],
             }
+        elif data_type == 'scheduler_counts':
+            return {
+                'count_scheduler': result[0],
+                'count_keywords': result[1],
+                'avg_keywords': result[2],
+                'exec_keywords': result[3],
+            }
+        elif data_type == 'schedulers_statistics':
+            return {
+                'nr_pages': result[0],
+                'nr_total': result[1],
+                'nr_error': result[2],
+                'nr_reported': result[3],
+                'nr_manual_revision': result[4],
+                'nr_already_reported': result[5],
+                'nr_invalidate': result[6],
+            }
+
 
     def get_status(self) -> str:
         return f"""
@@ -100,4 +122,56 @@ class Dashboard(Crud):
                 ah.dt_created::date = l7.dt 
             group by
                 l7.dt
+        """
+
+    def get_scheduler_counts(self) -> str:
+        return f"""
+            with keywords_per_cron as (
+                select
+                    sc.st_cron,
+                    count(distinct sc.id_keyword) as count_keywords
+                from
+                    {os.getenv("db_schema")}.tb_scheduler sc
+                    join {os.getenv("db_schema")}.tb_keyword ke on sc.id_keyword = ke.id_keyword
+                where 
+                    ke.st_status = 'active'
+                group by
+                    sc.st_cron
+            )
+            select
+                count(distinct sc.st_cron) as count_scheduler,
+                count(distinct sc.id_keyword) as count_keywords,
+                avg(kpc.count_keywords) as avg_keywords,
+                count(ss.id_scheduler) as exec_keywords
+            from
+                {os.getenv("db_schema")}.tb_scheduler sc
+                join {os.getenv("db_schema")}.tb_keyword ke on sc.id_keyword = ke.id_keyword
+                left join {os.getenv("db_schema")}.tb_scheduler_statistics ss on
+                    sc.id = ss.id_scheduler
+                    and ss.dt_created >= current_date
+                left join keywords_per_cron kpc on
+                    sc.st_cron = kpc.st_cron
+            where 
+                ke.st_status = 'active';
+        """
+    
+    def get_schedulers_statistics(self) -> str:
+        return f"""
+            select
+                sum(ss.nr_pages) nr_pages,
+                sum(ss.nr_total) nr_total,
+                sum(ss.nr_error) nr_error,
+                sum(ss.nr_reported) nr_reported,
+                sum(ss.nr_manual_revision) nr_manual_revision,
+                sum(ss.nr_already_reported) nr_already_reported,
+                sum(ss.nr_invalidate) nr_invalidate
+            from
+                {os.getenv("db_schema")}.tb_scheduler sc
+                join {os.getenv("db_schema")}.tb_keyword ke on
+                    sc.id_keyword = ke.id_keyword
+                join {os.getenv("db_schema")}.tb_scheduler_statistics ss on
+                    sc.id = ss.id_scheduler
+                and ss.dt_created >= current_date
+            where 
+                ke.st_status = 'active'
         """

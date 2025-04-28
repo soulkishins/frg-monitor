@@ -23,6 +23,13 @@ export class ReportManager {
         });
     }
 
+    async listProductsByBrand(id: string): Promise<any[]> {
+        const query = `
+            select id_product, st_product, st_variety from tb_client_brand_product where id_brand = $1
+        `;
+        return (await this.pool.query(query, [id])).rows;
+    }
+
     async insertAdvertisementExport(st_key: string, st_status: string): Promise<void> {
         const query = `
             INSERT INTO tb_advertisement_export (st_key, st_status, dt_created)
@@ -42,14 +49,41 @@ export class ReportManager {
         console.log(`Registro atualizado: ${st_key}, ${st_status}`);
     }
 
-    async listAdvertisements(ids: string[]): Promise<any[]> {
+    async listAdvertisements(ids: string[], offset: number = 0, limit: number = 500): Promise<any[]> {
         // Recuperar registros da tabela tb_advertisement
-        var query = `SELECT * FROM tb_advertisement`;
+        var query = `
+with products as (
+	select
+		ap.id_advertisement,
+		string_agg(concat(ap.id_product, '|', ap.st_varity_seq, '|', ap.nr_quantity), '!') products
+	from
+		tb_advertisement_product ap
+	where 
+		ap.en_status = any(array['AR', 'AI', 'MI', 'MR'])
+	group by
+		ap.id_advertisement
+)
+select
+	ad.id_advertisement,
+    ad.id_brand,
+	ad.st_vendor,
+    ad.st_url,
+    ad.st_title,
+    ad.db_price,
+    ad.st_status,
+    p.products,
+    ad.dt_created,
+    ad.dt_modified
+from
+	tb_advertisement ad
+	left join products p on
+		ad.id_advertisement = p.id_advertisement
+`;
         if (ids.length > 0) {
-            query += ` WHERE id_advertisement = ANY($1::uuid[])`;
+            query += ` WHERE ad.id_advertisement = ANY($1::uuid[]) order by ad.id_brand asc, ad.id_advertisement asc`;
             return (await this.pool.query(query, [ids])).rows;
         }
-        query += ` WHERE st_status = 'REPORT' limit 500`;
+        query += ` WHERE ad.st_status = 'REPORT' order by ad.id_brand asc, ad.id_advertisement asc limit ${limit} offset ${offset}`;
         return (await this.pool.query(query)).rows;
     }
 
