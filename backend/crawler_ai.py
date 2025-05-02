@@ -267,7 +267,7 @@ def process_advertisements(data: dict):
                 result = True
                 st_status = None
                 if not advertisement.bl_reconcile:
-                    if AI_ENABLED:
+                    if AI_ENABLED or ('ai' in data and data['ai']):
                         result, st_status = extract_products_from_advertisement(session, advertisement)
                     else:
                         count -= 1

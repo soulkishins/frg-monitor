@@ -10,15 +10,15 @@ import { TableModule } from 'primeng/table';
 import { CheckboxModule } from 'primeng/checkbox';
 import { Router, ActivatedRoute } from '@angular/router';
 import { SchedulerService } from '../../../service/scheduler.service';
-import { KeywordService } from '../../../service/keyword.service';
-import { SchedulerResponse, SchedulerRequest, SchedulerKeyword } from '../../../models/scheduler.model';
-import { KeywordResponse } from '../../../models/keyword.model';
+import { SchedulerResponse, SchedulerRequest, SchedulerBrand } from '../../../models/scheduler.model';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { Page } from '../../../models/global.model';
+import { BrandService } from '../../../service/brand.service';
+import { BrandResponse } from '../../../models/brand.model';
 interface SchedulerForm {
-    st_keyword: string;
+    st_brand: string;
     st_status: string;
     platform: string;
     executionTime: Date;
@@ -48,11 +48,11 @@ interface SchedulerForm {
         CheckboxModule
     ],
     templateUrl: './scheduler-view.component.html',
-    providers: [MessageService, SchedulerService, KeywordService]
+    providers: [MessageService, SchedulerService, BrandService]
 })
 export class SchedulerView implements OnInit {
     scheduler: SchedulerForm = {
-        st_keyword: '',
+        st_brand: '',
         st_status: 'active',
         platform: '',
         executionTime: new Date(),
@@ -66,8 +66,8 @@ export class SchedulerView implements OnInit {
     };
     id: string | null = null;
     submitted: boolean = false;
-    schedulers: SchedulerKeyword[] = [];
-    editingScheduler: SchedulerKeyword | null = null;
+    schedulers: SchedulerBrand[] = [];
+    editingScheduler: SchedulerBrand | null = null;
 
     platforms = [
         { label: 'Mercado Livre', value: 'ML' }
@@ -80,7 +80,7 @@ export class SchedulerView implements OnInit {
 
     constructor(
         private schedulerService: SchedulerService,
-        private keywordService: KeywordService,
+        private brandService: BrandService,
         private messageService: MessageService,
         private router: Router,
         private route: ActivatedRoute
@@ -89,14 +89,14 @@ export class SchedulerView implements OnInit {
     ngOnInit() {
         this.id = this.route.snapshot.paramMap.get('id');
         if (this.id && this.id !== 'novo') {
-            this.loadKeyword(this.id);
+            this.loadBrand(this.id);
             this.loadScheduler(this.id);
         }
     }
 
     loadScheduler(id: string) {
-        this.schedulerService.getSchedulerByKeyword({ id_keyword: id }).subscribe({
-            next: (data: Page<SchedulerKeyword>) => {
+        this.schedulerService.getSchedulerByBrand({ id_brand: id }).subscribe({
+            next: (data: Page<SchedulerBrand>) => {
                 this.schedulers = data.list;
             },
             error: (error) => {
@@ -110,16 +110,16 @@ export class SchedulerView implements OnInit {
         });
     }
 
-    loadKeyword(id: string) {
-        this.keywordService.getKeyword(id).subscribe({
-            next: (data: KeywordResponse) => {
-                this.scheduler.st_keyword = data.st_keyword;
+    loadBrand(id: string) {
+        this.brandService.getBrand(id).subscribe({
+            next: (data: BrandResponse) => {
+                this.scheduler.st_brand = data.st_brand;
             },
             error: (error) => {
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Erro',
-                    detail: 'Erro ao carregar palavra-chave',
+                    detail: 'Erro ao carregar marca',
                     life: 3000
                 });
             }
@@ -174,7 +174,7 @@ export class SchedulerView implements OnInit {
 
     private resetFormFields() {
         this.scheduler = {
-            st_keyword: this.scheduler.st_keyword,
+            st_brand: this.scheduler.st_brand,
             st_status: this.scheduler.st_status,
             platform: '',
             executionTime: new Date(),
@@ -197,7 +197,7 @@ export class SchedulerView implements OnInit {
         }
 
         const schedulerRequest: SchedulerRequest = {
-            id_keyword: this.id ?? '',
+            id_brand: this.id ?? '',
             st_platform: this.scheduler.platform,
             st_cron: `${this.scheduler.executionTime.getMinutes()}_${this.scheduler.executionTime.getHours()}_${this.getFormattedDaysForCron()}`
         };
@@ -207,7 +207,7 @@ export class SchedulerView implements OnInit {
             : this.schedulerService.postScheduler(schedulerRequest);
 
         observable.subscribe({
-            next: (data: Page<SchedulerKeyword>) => {
+            next: (data: Page<SchedulerBrand>) => {
                 this.messageService.add({
                     severity: 'success',
                     summary: 'Sucesso',
@@ -285,7 +285,7 @@ export class SchedulerView implements OnInit {
         return selectedDays.join(', ');
     }
 
-    editScheduler(scheduler: SchedulerKeyword) {
+    editScheduler(scheduler: SchedulerBrand) {
         this.editingScheduler = scheduler;
         this.scheduler.platform = scheduler.st_platform;
         
@@ -354,7 +354,7 @@ export class SchedulerView implements OnInit {
         this.scheduler.sunday = false;
     }
 
-    deleteScheduler(scheduler: SchedulerKeyword) {
+    deleteScheduler(scheduler: SchedulerBrand) {
         this.schedulerService.deleteScheduler(scheduler.id).subscribe({
             next: () => {
                 this.messageService.add({

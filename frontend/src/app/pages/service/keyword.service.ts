@@ -33,8 +33,4 @@ export class KeywordService {
     return this.http.delete<KeywordResponse[]>(`${this.baseUrl}/${id}`);
   }
 
-  startCrawler(msg: any): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}`, msg);
-  }
-
 }

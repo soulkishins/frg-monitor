@@ -34,9 +34,17 @@
             label="Invalidar"
             icon="pi pi-trash"
             severity="secondary"
+            class="mr-2"
             outlined
             [disabled]="!selectedAdvertisements || !selectedAdvertisements.length"
             (onClick)="invalidateAdvertisements()"
+        />
+        <p-button
+            label="Qualificar"
+            icon="pi pi-check"
+            severity="help"
+            [disabled]="!selectedAdvertisements || !selectedAdvertisements.length"
+            (onClick)="qualifyAdvertisements()"
         />
     </ng-template>
 

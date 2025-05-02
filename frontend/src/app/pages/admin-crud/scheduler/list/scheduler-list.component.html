@@ -43,26 +43,27 @@
     </ng-template>
     <ng-template #header>
         <tr>
-            <th pSortableColumn="st_keyword" style="min-width:16rem">
-                Palavra-chave
-                <p-sortIcon field="st_keyword" />
+            <th pSortableColumn="st_brand" style="min-width:16rem">
+                Marca
+                <p-sortIcon field="st_brand" />
             </th>
-            <th pSortableColumn="st_status" style="min-width:10rem">
+            <th pSortableColumn="st_status" style="width:10rem">
                 Status
                 <p-sortIcon field="st_status" />
             </th>
-            <th style="min-width: 9rem"></th>
+            <th style="width: 9rem"></th>
         </tr>
     </ng-template>
     <ng-template #body let-scheduler>
         <tr>
-            <td>{{ scheduler.st_keyword }}</td>
+            <td>{{ scheduler.st_brand }}</td>
             <td>
                 <p-tag [value]="scheduler.st_status === 'enable' ? 'Ativo' : 'Inativo'"
                        [severity]="scheduler.st_status === 'enable' ? 'success' : 'danger'" />
             </td>
             <td>
                 <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editScheduler(scheduler)" />
+                <p-button icon="pi pi-cog" severity="help" [rounded]="true" [outlined]="true" (click)="startCrawler(scheduler)" />
             </td>
         </tr>
     </ng-template>

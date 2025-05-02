@@ -204,6 +204,39 @@ export class AdvertisementList implements OnInit {
         });
     }
 
+    qualifyAdvertisements() {
+        this.confirmationService.confirm({
+            message: 'Confirmar a qualificação dos anúncios pela AI?',
+            header: 'Confirmar Qualificação',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => this.sendQualification()
+        });
+    }
+
+    sendQualification() {
+        this.advertisementService
+        .qualifyAdvertisements({
+            "advertisements": this.selectedAdvertisements.map(ad => ad.id_advertisement),
+            "scheduler_id": "00000000-0000-0000-0000-000000000000",
+            "scheduler_date": new Date().toISOString(),
+            "ai": true
+        })
+        .subscribe({
+            next: () => {
+                this.messageService.add({ severity: 'success', summary: 'Qualificação em andamento', detail: 'Aguarde alguns instantes...' });
+            },
+            error: (error: any) => {
+                console.error('Erro ao enviar a qualificação dos anúncios para a AI:', error);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: 'Erro ao enviar a qualificação dos anúncios para a AI',
+                    life: 3000
+                });
+            }
+        });
+    }
+
     exportReported() {
         this.confirmationService.confirm({
             message: 'Confirmar a exportação dos anúncios denunciados?',

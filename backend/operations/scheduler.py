@@ -1,9 +1,9 @@
 from operations.crud_base import Crud, Page
 from db.models import Scheduler, SchedulerStatistics, AdvertisementHistory
+from sqlalchemy import text
 import boto3
 import json
 import os
-from sqlalchemy import text
 
 crawler_sqs = os.getenv('crawler_sqs')
 scheduler_region = os.getenv('scheduler_region')
@@ -11,33 +11,6 @@ scheduler_role_arn = os.getenv('scheduler_role_arn')
 
 # Inicializa o cliente do EventBridge Schedule
 client = boto3.client('scheduler', region_name=scheduler_region)
-
-class SchedulerResult:
-    def __init__(self, id_keyword=None, st_keyword=None, st_status=None, id=None, st_platform=None, st_cron=None):
-        self.id_keyword = id_keyword
-        self.st_keyword = st_keyword
-        self.st_status = st_status
-        self.id = id
-        self.st_platform = st_platform
-        self.st_cron = st_cron
-    
-    def to_dict(self):
-        if self.id is not None:
-            # Retorna apenas os campos quando o filtro é id_keyword
-            return {
-                'id': self.id,
-                'id_keyword': self.id_keyword,
-                'st_platform': self.st_platform,
-                'st_cron': self.st_cron
-            }
-        else:
-            # Retorna os campos padrão quando não há filtro id_keyword
-            return {
-                'id_keyword': self.id_keyword,
-                'st_keyword': self.st_keyword,
-                'st_status': self.st_status
-            }
-
 class SchedulerCrud(Crud):
     def get_model(self) -> Scheduler:
         return Scheduler
@@ -159,17 +132,16 @@ class SchedulerCrud(Crud):
     def list(self, indexes, filters) -> tuple[int, list]:
         total = 0
         # Executa a consulta SQL baseada no filtro
-        if 'id_keyword' in filters:
-            result = self._session.execute(text(self.get_scheduler_by_id_keyword({'id_keyword': filters['id_keyword']})))
+        if 'id_brand' in filters:
+            result = self._session.execute(text(self.get_scheduler_by_id_brand({'id_brand': filters['id_brand']})))
             rows = result.fetchall()
-            # Converte os resultados em objetos SchedulerResult com as colunas específicas
-            data = [SchedulerResult(id=row[0], id_keyword=row[1], st_platform=row[2], st_cron=row[3]) for row in rows]
+            data = [{"id": row[0], "id_brand": row[1], "st_platform": row[2], "st_cron": row[3]} for row in rows]
             total = len(data)
         else:
             stmtc = self.get_scheduler_count()
             stmt = self.get_scheduler_enabled()
             if 'search_global' in filters:
-                stmt += f" WHERE st_keyword ILIKE '%{filters['search_global']}%'"
+                stmt += f" WHERE st_brand ILIKE '%{filters['search_global']}%'"
             if 'page.sort' in filters:
                 sort_field, sort_order = filters['page.sort'].split('.')
                 stmt += f" ORDER BY {sort_field} {sort_order}"
@@ -184,8 +156,7 @@ class SchedulerCrud(Crud):
             result_count = self._session.execute(text(stmtc))
             rows = result.fetchall()
             rows_count = result_count.fetchall()
-            # Converte os resultados em objetos SchedulerResult com as colunas padrão
-            data = [SchedulerResult(id_keyword=row[0], st_keyword=row[1], st_status=row[2]) for row in rows]
+            data = [{"id_brand":row[0], "st_brand":row[1], "st_status":row[2]} for row in rows]
             total = rows_count[0][0]
 
         # Aplica paginação
@@ -204,14 +175,14 @@ class SchedulerCrud(Crud):
         return f"""
             with schedules as
             (
-            select ke.id_keyword, ke.st_keyword, case count(distinct sc.id) when 0 then 'disable' else 'enable' end st_status
-            from {os.getenv("db_schema")}.tb_keyword ke
+            select cb.id_brand, cb.st_brand, case count(distinct sc.id) when 0 then 'disable' else 'enable' end st_status
+            from {os.getenv("db_schema")}.tb_client_brand cb
             left join {os.getenv("db_schema")}.tb_scheduler sc on
-                ke.id_keyword = sc.id_keyword
+                cb.id_brand = sc.id_brand
             where 
-                ke.st_status = 'active'
+                cb.st_status = 'ACTIVE'
             group by
-            ke.id_keyword, ke.st_keyword
+                cb.id_brand, cb.st_brand
             )
             select * from schedules
         """
@@ -220,23 +191,23 @@ class SchedulerCrud(Crud):
         return f"""
             with schedules as
             (
-            select ke.id_keyword, ke.st_keyword, case count(distinct sc.id) when 0 then 'disable' else 'enable' end st_status
-            from {os.getenv("db_schema")}.tb_keyword ke
+            select cb.id_brand, cb.st_brand, case count(distinct sc.id) when 0 then 'disable' else 'enable' end st_status
+            from {os.getenv("db_schema")}.tb_client_brand cb
             left join {os.getenv("db_schema")}.tb_scheduler sc on
-                ke.id_keyword = sc.id_keyword
+                cb.id_brand = sc.id_brand
             where 
-                ke.st_status = 'active'
+                cb.st_status = 'ACTIVE'
             group by
-            ke.id_keyword, ke.st_keyword
+                cb.id_brand, cb.st_brand
             )
             select count(*) from schedules
         """
 
-    def get_scheduler_by_id_keyword(self, indexes: dict) -> str:
+    def get_scheduler_by_id_brand(self, indexes: dict) -> str:
         return f"""
-            select id, id_keyword, st_platform, st_cron 
+            select id, id_brand, st_platform, st_cron 
             from {os.getenv("db_schema")}.tb_scheduler 
-            where id_keyword = '{indexes['id_keyword']}'
+            where id_brand = '{indexes['id_brand']}'
         """
 
     @staticmethod

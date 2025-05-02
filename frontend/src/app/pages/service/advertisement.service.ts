@@ -31,6 +31,10 @@ export class AdvertisementService {
     return this.http.patch<void>(`${this.baseUrl}`, { ids, status });
   }
 
+  qualifyAdvertisements(params: {advertisements: string[], scheduler_id: string, scheduler_date: string, ai: boolean}): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/qualificar`, params);
+  }
+
   exportAdvertisements(key: string, ids?: string[]): Observable<AdvertisementExport> {
     let result: Subject<AdvertisementExport> = new Subject();
     this.cognitoService.retrieveSession()

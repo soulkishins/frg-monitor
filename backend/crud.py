@@ -112,6 +112,8 @@ def return_value(status_code, body, *, headers = None, json_transform = None):
     }
 
 def to_dict(body, json_transform = None):
+    if isinstance(body, dict):
+        return body
     if json_transform:
         return body.to_custom_dict(json_transform)
     return body.to_dict()

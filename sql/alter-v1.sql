@@ -2,7 +2,7 @@ drop table if exists tb_scheduler cascade;
 
 create table if not exists tb_scheduler (
 	id uuid not null,
-	id_keyword uuid not null,
+	id_brand uuid not null,
 	st_platform varchar not null,
 	st_cron varchar not null,
 	dt_last_execution timestamp null,
@@ -11,7 +11,7 @@ create table if not exists tb_scheduler (
 	st_created_by varchar not null,
 	st_modified_by varchar,
 	constraint pk_scheduler primary key (id),
-	constraint fk_scheduler_keyword foreign key (id_keyword) references tb_keyword(id_keyword)
+	constraint fk_scheduler_brand foreign key (id_brand) references tb_client_brand(id_brand)
 );
 
 drop table if exists tb_scheduler_statistics cascade;

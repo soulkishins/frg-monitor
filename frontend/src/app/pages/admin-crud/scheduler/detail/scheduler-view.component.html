@@ -17,11 +17,11 @@
     <form (ngSubmit)="save()">
         <div class="flex flex-col gap-6 p-4">
             <div>
-                <label for="keyword" class="block font-bold mb-3">Palavra-chave *</label>
-                <input pInputText id="keyword" [(ngModel)]="scheduler.st_keyword" name="st_keyword"
-                    [ngClass]="{ 'ng-invalid ng-dirty': submitted && !scheduler.st_keyword }"
+                <label for="brand" class="block font-bold mb-3">Marca *</label>
+                <input pInputText id="brand" [(ngModel)]="scheduler.st_brand" name="st_brand"
+                    [ngClass]="{ 'ng-invalid ng-dirty': submitted && !scheduler.st_brand }"
                     [style]="{'width': '100%'}" [disabled]="id !== 'novo'" />
-                <small class="text-red-500" *ngIf="submitted && !scheduler.st_keyword">Palavra-chave é obrigatória.</small>
+                <small class="text-red-500" *ngIf="submitted && !scheduler.st_brand">Marca é obrigatória.</small>
             </div>
 
             <div class="flex flex-row gap-4">

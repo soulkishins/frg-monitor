@@ -146,6 +146,10 @@ export class ExcelGenerator {
                 continue;
             }
             const variety = product.st_variety.find((v: any) => v.seq == productArray[1]);
+            if (variety == null) {
+                console.log('Variedade não encontrada:', productArray[0], productArray[1]);
+                continue;
+            }
             price += variety.price * Number(productArray[2]);
         }
         return price;

@@ -64,7 +64,7 @@ export class SchedulerList implements OnInit {
         limit: number;
         offset: number;
         sort?: string;
-    } = {total: 0, limit: 50, offset: 0, sort: 'st_keyword'};
+    } = {total: 0, limit: 50, offset: 0, sort: 'st_brand'};
     searchTerm: string = '';
     loading: boolean = false;
 
@@ -151,7 +151,7 @@ export class SchedulerList implements OnInit {
             }
 
             const data = allSchedulers.map(scheduler => ({
-                'Palavra-chave': scheduler.st_keyword || '',
+                'Marca': scheduler.st_brand || '',
                 'Status': this.getStatusLabel(scheduler.st_status)
             }));
             
@@ -237,7 +237,7 @@ export class SchedulerList implements OnInit {
                 this.selectedSchedulers = null;
                 const mappedData = data.list.map(item => ({
                     ...item,
-                    keyword: item.st_keyword,
+                    brand: item.st_brand,
                     status: item.st_status
                 }));
                 this.schedulers.set(mappedData);   
@@ -258,7 +258,7 @@ export class SchedulerList implements OnInit {
         });
 
         this.cols = [
-            { field: 'keyword', header: 'Palavra-chave' },
+            { field: 'brand', header: 'Marca' },
             { field: 'status', header: 'Status' }
         ];
 
@@ -281,7 +281,7 @@ export class SchedulerList implements OnInit {
     }
 
     editScheduler(scheduler: SchedulerResponse) {
-        this.router.navigate(['/cadastro/agendador/detalhe', scheduler.id_keyword]);
+        this.router.navigate(['/cadastro/agendador/detalhe', scheduler.id_brand]);
     }
 
     hideDialog() {
@@ -295,5 +295,28 @@ export class SchedulerList implements OnInit {
 
     getStatusLabel(status: string): string {
         return status === 'enable' ? 'Ativo' : 'Inativo';
+    }
+
+    startCrawler(scheduler: SchedulerResponse) {
+        this.schedulerService.startCrawler({
+            id_brand: scheduler.id_brand
+        }).subscribe({
+            next: (response) => {
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Sucesso',
+                    detail: 'Crawler iniciado com sucesso',
+                    life: 3000
+                });
+            },
+            error: (error) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: 'Erro ao iniciar crawler',
+                    life: 3000
+                });
+            }
+        });
     }
 }

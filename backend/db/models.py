@@ -269,20 +269,20 @@ class AdvertisementExport(Base):
 
 class Scheduler(Base, Audit):
     __tablename__ = "tb_scheduler"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, onupdate=None)
-    id_keyword = Column(UUID(as_uuid=True), ForeignKey(os.getenv("db_schema") + ".tb_keyword.id_keyword"), nullable=False)
+    id_brand = Column(UUID(as_uuid=True), ForeignKey(os.getenv("db_schema") + ".tb_client_brand.id_brand"), nullable=False)
     st_platform = Column(String, nullable=False)
     st_cron = Column(String, nullable=False)
     dt_last_execution = Column(TIMESTAMP)
-    
+
     statistics = relationship("SchedulerStatistics", back_populates="scheduler", lazy=True)
 
     def _json_fields(self):
-        return ["id", "id_keyword", "st_platform", "st_cron", "dt_last_execution"] + super()._json_fields()
-    
+        return ["id", "id_brand", "st_platform", "st_cron", "dt_last_execution"] + super()._json_fields()
+
     def _json_fields_scheduler(self):
-        return ["id", "id_keyword", "st_platform", "st_cron", "dt_last_execution", "statistics"]
+        return ["id", "id_brand", "st_platform", "st_cron", "dt_last_execution", "statistics"]
 
 class SchedulerStatistics(Base):
     __tablename__ = "tb_scheduler_statistics"

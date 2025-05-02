@@ -24,6 +24,7 @@ import { Router, RouterModule } from '@angular/router';
 import { KeywordService } from '../../../service/keyword.service';
 import { KeywordResponse } from '../../../models/keyword.model';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import { SchedulerService } from '../../../service/scheduler.service';
 @Component({
     selector: 'app-keyword-list',
     standalone: true,
@@ -88,6 +89,7 @@ export class KeywordList implements OnInit {
 
     constructor(
         private keywordService: KeywordService,
+        private schedulerService: SchedulerService,
         private messageService: MessageService,
         private confirmationService: ConfirmationService,
         private router: Router
@@ -382,18 +384,9 @@ export class KeywordList implements OnInit {
     }
 
     startCrawler(keyword: KeywordResponse) {
-        this.keywordService.startCrawler(
-            {
-                scheduler_id: null,
-                cron: 'manual',
-                platform: 'ML',
-                datetime: null,
-                keyword_id: keyword.id_keyword,
-                brand_id: keyword.id_brand,
-                keyword: keyword.st_keyword,
-                products: JSON.parse(keyword.st_product)
-            }
-        ).subscribe({
+        this.schedulerService.startCrawler({
+            id_keyword: keyword.id_keyword
+        }).subscribe({
             next: (response) => {
                 this.messageService.add({
                     severity: 'success',

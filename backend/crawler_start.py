@@ -15,25 +15,62 @@ def lookup_keywords(cron: dict):
     with db:
         session: Session = db.session
 
-        stmt = text(
-            "select " +
-            "    sc.id, " +
-            "    ke.id_keyword, " +
-            "    ke.st_keyword, " +
-            "    ke.id_brand, " +
-            "    ke.st_product " +
-            "from " +
-            f"    {os.getenv('db_schema')}.tb_scheduler sc " +
-            f"    join {os.getenv('db_schema')}.tb_keyword ke on " +
-            "        sc.id_keyword = ke.id_keyword " +
-            f"    left join {os.getenv('db_schema')}.tb_scheduler_statistics ss on " +
-            "        sc.id  = ss.id_scheduler " +
-            "        and sc.dt_last_execution = ss.dt_created " +
-            "where " +
-            "    sc.st_cron = :cron" +
-            "    and sc.st_platform = :platform" +
-            "    and ke.st_status = 'active'"
-        )
+        if 'cron' not in cron:
+            stmt = text(
+                "select " +
+                "    sc.id, " +
+                "    sc.st_cron, " +
+                "    sc.st_platform, " +
+                "    ke.id_keyword, " +
+                "    ke.st_keyword, " +
+                "    sc.id_brand, " +
+                "    ke.st_product " +
+                "from " +
+                f"    {os.getenv('db_schema')}.tb_scheduler sc " +
+                f"    join {os.getenv('db_schema')}.tb_keyword ke on " +
+                "        sc.id_brand = ke.id_brand " +
+                f"    left join {os.getenv('db_schema')}.tb_scheduler_statistics ss on " +
+                "        sc.id  = ss.id_scheduler " +
+                "        and sc.dt_last_execution = ss.dt_created " +
+                "where " +
+                "    sc.st_cron = :cron" +
+                "    and sc.st_platform = :platform" +
+                "    and ke.st_status = 'active'"
+            )
+        elif 'id_brand' in cron:
+            stmt = text(
+                "select " +
+                "    sc.id, " +
+                "    sc.st_cron, " +
+                "    sc.st_platform, " +
+                "    ke.id_keyword, " +
+                "    ke.st_keyword, " +
+                "    ke.id_brand, " +
+                "    ke.st_product " +
+                "from " +
+                f"    {os.getenv('db_schema')}.tb_scheduler sc " +
+                f"    join {os.getenv('db_schema')}.tb_keyword ke on " +
+                "        sc.st_cron = 'MANUAL' " +
+                "where " +
+                "    ke.id_brand = :id_brand"
+            )
+        elif 'id_keyword' not in cron:
+            stmt = text(
+                "select " +
+                "    sc.id, " +
+                "    sc.st_cron, " +
+                "    sc.st_platform, " +
+                "    ke.id_keyword, " +
+                "    ke.st_keyword, " +
+                "    ke.id_brand, " +
+                "    ke.st_product " +
+                "from " +
+                f"    {os.getenv('db_schema')}.tb_scheduler sc " +
+                f"    join {os.getenv('db_schema')}.tb_keyword ke on " +
+                "        sc.st_cron = 'MANUAL' " +
+                "where " +
+                "    ke.id_keyword = :id_keyword"
+            )
         
         records = session.execute(stmt, cron).fetchall()
         
@@ -42,13 +79,13 @@ def lookup_keywords(cron: dict):
         for record in records:
             sqs_message = {
                 "scheduler_id": str(record[0]),
-                "cron": cron["cron"],
-                "platform": cron["platform"],
+                "cron": record[1],
+                "platform": record[2],
                 "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "keyword_id": str(record[1]),
-                "keyword": record[2],
-                "brand_id": str(record[3]),
-                "products": json.loads(record[4])
+                "keyword_id": str(record[3]),
+                "keyword": record[4],
+                "brand_id": str(record[5]),
+                "products": json.loads(record[6])
             }
             
             client.send_message(
