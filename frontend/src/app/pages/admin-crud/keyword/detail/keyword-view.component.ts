@@ -258,7 +258,8 @@ export class KeywordView implements OnInit {
             
             // Carregar produtos da marca selecionada
             const params = {
-                id_brand: event.value
+                id_brand: event.value,
+                "page.sort": "st_product.asc"
             };
             
             this.productService.getProducts(params).subscribe({
@@ -361,7 +362,8 @@ export class KeywordView implements OnInit {
                     // Carregar produtos da marca selecionada
                     if (this.keyword.id_brand) {
                         const params = {
-                            id_brand: this.keyword.id_brand
+                            id_brand: this.keyword.id_brand,
+                            "page.sort": "st_product.asc"
                         };
                         
                         // Processar st_product para ter os produtos selecionados
