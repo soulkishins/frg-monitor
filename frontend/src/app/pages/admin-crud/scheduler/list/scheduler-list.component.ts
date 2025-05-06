@@ -19,6 +19,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { DropdownModule } from 'primeng/dropdown';
+import { CheckboxModule } from 'primeng/checkbox';
 import { Column, ExportColumn, Page } from '../../../models/global.model';
 import { Router, RouterModule } from '@angular/router';
 import { SchedulerService } from '../../../service/scheduler.service';
@@ -48,13 +49,22 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
         InputIconModule,
         IconFieldModule,
         ConfirmDialogModule,
-        DropdownModule
+        DropdownModule,
+        CheckboxModule
     ],
     templateUrl: './scheduler-list.component.html',
     providers: [MessageService, SchedulerService, ConfirmationService]
 })
 export class SchedulerList implements OnInit {
     schedulerDialog: boolean = false;
+    crawlerDialog: boolean = false;
+    selectedOptions: { [key: string]: boolean } = {
+        mercadoLivre: false
+    };
+
+    crawlerOptions = [
+        { label: 'Mercado Livre', value: 'mercadoLivre' }
+    ];
 
     schedulers = signal<SchedulerResponse[]>([]);
     
@@ -298,8 +308,25 @@ export class SchedulerList implements OnInit {
     }
 
     startCrawler(scheduler: SchedulerResponse) {
+        this.scheduler = scheduler;
+        this.crawlerDialog = true;
+    }
+
+    hideCrawlerDialog() {
+        this.crawlerDialog = false;
+        this.selectedOptions = {
+            mercadoLivre: false
+        };
+    }
+
+    saveCrawlerOptions() {
+        const selectedOptions = Object.entries(this.selectedOptions)
+            .filter(([_, value]) => value)
+            .map(([key]) => key);
+
         this.schedulerService.startCrawler({
-            id_brand: scheduler.id_brand
+            id_brand: this.scheduler.id_brand,
+            options: selectedOptions
         }).subscribe({
             next: (response) => {
                 this.messageService.add({
@@ -308,6 +335,7 @@ export class SchedulerList implements OnInit {
                     detail: 'Crawler iniciado com sucesso',
                     life: 3000
                 });
+                this.hideCrawlerDialog();
             },
             error: (error) => {
                 this.messageService.add({

@@ -70,3 +70,21 @@
 </p-table>
 
 <p-confirmdialog [style]="{ width: '450px' }" />
+
+<p-dialog [(visible)]="crawlerDialog" [style]="{width: '450px'}" header="Iniciar Crawler" [modal]="true" styleClass="p-fluid">
+    <div class="mb-4">
+        <label class="font-bold">Selecione a plataforma</label>
+    </div>
+    <div class="field-checkbox">
+        <div *ngFor="let option of crawlerOptions" class="mb-3">
+            <div class="flex align-items-center">
+                <p-checkbox [binary]="true" [(ngModel)]="selectedOptions[option.value]"></p-checkbox>
+                <label class="ml-2">{{option.label}}</label>
+            </div>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideCrawlerDialog()"></button>
+        <button pButton pRipple label="Salvar" icon="pi pi-check" class="p-button-text" (click)="saveCrawlerOptions()"></button>
+    </ng-template>
+</p-dialog>

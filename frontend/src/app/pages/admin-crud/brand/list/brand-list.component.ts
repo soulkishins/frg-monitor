@@ -18,11 +18,13 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { CheckboxModule } from 'primeng/checkbox';
 import { BrandService } from '../../../../pages/service/brand.service';
 import { Brand } from '../../../../pages/models/brand.model';
 import { Column, ExportColumn } from '../../../../pages/models/global.model';
 import { Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { SchedulerService } from '../../../../pages/service/scheduler.service';
 
 @Component({
     selector: 'app-brand-list',
@@ -45,13 +47,22 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
         TagModule,
         InputIconModule,
         IconFieldModule,
-        ConfirmDialogModule
+        ConfirmDialogModule,
+        CheckboxModule
     ],
     templateUrl: './brand-list.component.html',
     providers: [MessageService, BrandService, ConfirmationService]
 })
 export class BrandList implements OnInit {
     brandDialog: boolean = false;
+    crawlerDialog: boolean = false;
+    selectedOptions: { [key: string]: boolean } = {
+        mercadoLivre: false
+    };
+
+    crawlerOptions = [
+        { label: 'Mercado Livre', value: 'mercadoLivre' }
+    ];
 
     brands = signal<Brand[]>([]);
     
@@ -85,7 +96,8 @@ export class BrandList implements OnInit {
         private brandService: BrandService,
         private messageService: MessageService,
         private confirmationService: ConfirmationService,
-        private router: Router
+        private router: Router,
+        private schedulerService: SchedulerService
     ) {}
 
     async exportCSV() {
@@ -462,5 +474,46 @@ export class BrandList implements OnInit {
             default:
                 return status || 'Desconhecido';
         }
+    }
+
+    startCrawler(brand: Brand) {
+        this.brand = brand;
+        this.crawlerDialog = true;
+    }
+
+    hideCrawlerDialog() {
+        this.crawlerDialog = false;
+        this.selectedOptions = {
+            mercadoLivre: false
+        };
+    }
+
+    saveCrawlerOptions() {
+        const selectedOptions = Object.entries(this.selectedOptions)
+            .filter(([_, value]) => value)
+            .map(([key]) => key);
+
+        this.schedulerService.startCrawler({
+            id_brand: this.brand.id,
+            options: selectedOptions
+        }).subscribe({
+            next: _ => {
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Sucesso',
+                    detail: 'Crawler iniciado com sucesso',
+                    life: 3000
+                });
+                this.hideCrawlerDialog();
+            },
+            error: _ => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: 'Erro ao iniciar crawler',
+                    life: 3000
+                });
+            }
+        });
     }
 }
