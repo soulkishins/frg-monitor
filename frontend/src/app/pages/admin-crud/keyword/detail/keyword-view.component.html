@@ -57,6 +57,12 @@
         </div>
 
         <div class="mt-4">
+            <div class="flex items-center justify-end mb-4">
+                <p-iconfield>
+                    <p-inputicon styleClass="pi pi-search" />
+                    <input pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Buscar produtos..." />
+                </p-iconfield>
+            </div>
             <p-table [value]="produtosFiltrados" [paginator]="true" [rows]="10" [responsive]="true" [(selection)]="selectedProducts">
                 <ng-template pTemplate="header">
                     <tr>

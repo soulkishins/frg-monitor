@@ -8,6 +8,8 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 import { KeywordService } from '../../../service/keyword.service';
 import { CompanyService } from '../../../service/company.service';
 import { BrandService } from '../../../service/brand.service';
@@ -44,7 +46,9 @@ interface ProcessedProduct extends ProductResponse {
         ToolbarModule,
         InputTextModule,
         SelectModule,
-        TableModule
+        TableModule,
+        IconFieldModule,
+        InputIconModule
     ],
     templateUrl: './keyword-view.component.html',
     providers: [MessageService, KeywordService, CompanyService, BrandService, ProductService]
@@ -603,5 +607,13 @@ export class KeywordView implements OnInit {
     filterClients(event: any) {
         const query = event.filter.toLowerCase();
         this.searchSubject.next(query);
+    }
+
+    onGlobalFilter(event: any) {
+        const searchText = event.target.value.toLowerCase();
+        this.produtosFiltrados = this.produtos.filter(produto => 
+            produto.st_product.toLowerCase().includes(searchText) ||
+            produto.variety.toLowerCase().includes(searchText)
+        );
     }
 }
