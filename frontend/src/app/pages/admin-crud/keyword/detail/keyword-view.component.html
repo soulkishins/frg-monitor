@@ -71,7 +71,7 @@
                 <ng-template pTemplate="body" let-produto>
                     <tr>
                         <td>
-                            <p-tableCheckbox [value]="produto" />
+                            <p-tableCheckbox [value]="produto" [disabled]="produto.disabled" />
                         </td>
                         <td>{{produto.st_product}}</td>
                         <td>{{produto.variety}}</td>

@@ -30,6 +30,7 @@ interface ProcessedProduct extends ProductResponse {
     variety: string;
     price: number;
     flagCadastro?: string;
+    disabled?: boolean;
 }
 
 @Component({
@@ -268,23 +269,47 @@ export class KeywordView implements OnInit {
                         try {
                             const variedades: ProductVariety[] = JSON.parse(produto.st_variety || '[]');
                             
-                            variedades.forEach(variedade => {
-                                if (variedade.status !== 'deleted') {
+                            if (variedades.length === 0) {
+                                produtosProcessados.push({
+                                    ...produto,
+                                    variety: "Variedade não cadastrada",
+                                    price: 0,
+                                    flagCadastro: new Date(produto.dt_created).toLocaleDateString('pt-BR'),
+                                    disabled: true
+                                });
+                            } else {
+                                let temVariedadeValida = false;
+                                variedades.forEach(variedade => {
+                                    if (variedade.status !== 'deleted' && variedade.variety.trim() !== '') {
+                                        temVariedadeValida = true;
+                                        produtosProcessados.push({
+                                            ...produto,
+                                            variety: variedade.variety,
+                                            price: variedade.price,
+                                            flagCadastro: new Date(produto.dt_created).toLocaleDateString('pt-BR'),
+                                            disabled: false
+                                        });
+                                    }
+                                });
+                                
+                                if (!temVariedadeValida) {
                                     produtosProcessados.push({
                                         ...produto,
-                                        variety: variedade.variety,
-                                        price: variedade.price,
-                                        flagCadastro: new Date(produto.dt_created).toLocaleDateString('pt-BR')
+                                        variety: "Variedade não cadastrada",
+                                        price: 0,
+                                        flagCadastro: new Date(produto.dt_created).toLocaleDateString('pt-BR'),
+                                        disabled: true
                                     });
                                 }
-                            });
+                            }
                         } catch (e) {
                             console.error('Erro ao processar variedades do produto:', e);
                             produtosProcessados.push({
                                 ...produto,
-                                variety: 'N/A',
+                                variety: "Variedade não cadastrada",
                                 price: 0,
-                                flagCadastro: new Date(produto.dt_created).toLocaleDateString('pt-BR')
+                                flagCadastro: new Date(produto.dt_created).toLocaleDateString('pt-BR'),
+                                disabled: true
                             });
                         }
                     });
@@ -355,19 +380,66 @@ export class KeywordView implements OnInit {
                                     try {
                                         const variedades: ProductVariety[] = JSON.parse(produto.st_variety || '[]');
                                         
-                                        variedades.forEach(variedade => {
-                                            if (variedade.status !== 'deleted') {
+                                        if (variedades.length === 0) {
+                                            const produtoProcessado = {
+                                                ...produto,
+                                                variety: "Variedade não cadastrada",
+                                                price: 0,
+                                                flagCadastro: new Date(produto.dt_created).toLocaleDateString('pt-BR'),
+                                                disabled: true
+                                            };
+                                            
+                                            // Verificar se o produto está no st_product
+                                            const produtoSelecionado = produtosSelecionados.find(
+                                                (p: any) => p.id_product === produto.id_product && 
+                                                           p.st_varity_name === "Variedade não cadastrada"
+                                            );
+                                            
+                                            if (produtoSelecionado) {
+                                                this.selectedProducts.push(produtoProcessado);
+                                            }
+                                            
+                                            produtosProcessados.push(produtoProcessado);
+                                        } else {
+                                            let temVariedadeValida = false;
+                                            variedades.forEach(variedade => {
+                                                if (variedade.status !== 'deleted' && variedade.variety.trim() !== '') {
+                                                    temVariedadeValida = true;
+                                                    const produtoProcessado = {
+                                                        ...produto,
+                                                        variety: variedade.variety,
+                                                        price: variedade.price,
+                                                        flagCadastro: new Date(produto.dt_created).toLocaleDateString('pt-BR'),
+                                                        disabled: false
+                                                    };
+                                                    
+                                                    // Verificar se o produto está no st_product
+                                                    const produtoSelecionado = produtosSelecionados.find(
+                                                        (p: any) => p.id_product === produto.id_product && 
+                                                                   p.st_varity_name === variedade.variety
+                                                    );
+                                                    
+                                                    if (produtoSelecionado) {
+                                                        this.selectedProducts.push(produtoProcessado);
+                                                    }
+                                                    
+                                                    produtosProcessados.push(produtoProcessado);
+                                                }
+                                            });
+                                            
+                                            if (!temVariedadeValida) {
                                                 const produtoProcessado = {
                                                     ...produto,
-                                                    variety: variedade.variety,
-                                                    price: variedade.price,
-                                                    flagCadastro: new Date(produto.dt_created).toLocaleDateString('pt-BR')
+                                                    variety: "Variedade não cadastrada",
+                                                    price: 0,
+                                                    flagCadastro: new Date(produto.dt_created).toLocaleDateString('pt-BR'),
+                                                    disabled: true
                                                 };
                                                 
                                                 // Verificar se o produto está no st_product
                                                 const produtoSelecionado = produtosSelecionados.find(
                                                     (p: any) => p.id_product === produto.id_product && 
-                                                               p.st_varity_name === variedade.variety
+                                                               p.st_varity_name === "Variedade não cadastrada"
                                                 );
                                                 
                                                 if (produtoSelecionado) {
@@ -376,15 +448,28 @@ export class KeywordView implements OnInit {
                                                 
                                                 produtosProcessados.push(produtoProcessado);
                                             }
-                                        });
+                                        }
                                     } catch (e) {
                                         console.error('Erro ao processar variedades do produto:', e);
-                                        produtosProcessados.push({
+                                        const produtoProcessado = {
                                             ...produto,
-                                            variety: 'N/A',
+                                            variety: "Variedade não cadastrada",
                                             price: 0,
-                                            flagCadastro: new Date(produto.dt_created).toLocaleDateString('pt-BR')
-                                        });
+                                            flagCadastro: new Date(produto.dt_created).toLocaleDateString('pt-BR'),
+                                            disabled: true
+                                        };
+                                        
+                                        // Verificar se o produto está no st_product
+                                        const produtoSelecionado = produtosSelecionados.find(
+                                            (p: any) => p.id_product === produto.id_product && 
+                                                       p.st_varity_name === "Variedade não cadastrada"
+                                        );
+                                        
+                                        if (produtoSelecionado) {
+                                            this.selectedProducts.push(produtoProcessado);
+                                        }
+                                        
+                                        produtosProcessados.push(produtoProcessado);
                                     }
                                 });
                                 
