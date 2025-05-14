@@ -15,7 +15,8 @@ def lookup_keywords(cron: dict):
     with db:
         session: Session = db.session
 
-        if 'cron' not in cron:
+        if 'cron' in cron:
+            print("cron", cron)
             stmt = text(
                 "select " +
                 "    sc.id, " +
@@ -38,6 +39,7 @@ def lookup_keywords(cron: dict):
                 "    and ke.st_status = 'active'"
             )
         elif 'id_brand' in cron:
+            print("brand", cron)
             stmt = text(
                 "select " +
                 "    sc.id, " +
@@ -54,7 +56,8 @@ def lookup_keywords(cron: dict):
                 "where " +
                 "    ke.id_brand = :id_brand"
             )
-        elif 'id_keyword' not in cron:
+        elif 'id_keyword' in cron:
+            print("keyword", cron)
             stmt = text(
                 "select " +
                 "    sc.id, " +
@@ -71,6 +74,9 @@ def lookup_keywords(cron: dict):
                 "where " +
                 "    ke.id_keyword = :id_keyword"
             )
+        else:
+            print("Error", cron)
+            return
         
         records = session.execute(stmt, cron).fetchall()
         
