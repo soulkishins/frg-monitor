@@ -22,7 +22,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ProductService } from '../../../service/product.service';
-import { ProductResponse } from '../../../models/product.model';
+import { ProductResponse, Variety } from '../../../models/product.model';
 import { CompanyService } from '../../../service/company.service';
 import { BrandService } from '../../../service/brand.service';
 import { CompanyResponse } from '../../../models/company.model';
@@ -81,16 +81,16 @@ export class ProductView implements OnInit {
     productDialog: boolean = false;
     isEditing: boolean = false;
     products = signal<ProductResponse[]>([]);
-    product!: ProductResponse;
+    product: ProductResponse = {} as any;
     selectedProducts!: ProductResponse[] | null;
     submitted: boolean = false;
     statuses!: any[];
 
     // Novas propriedades para variedades e preços
     currentVariety: string = '';
-    currentPrice: number = 0;
-    varietyList: Array<{seq: number, variety?: string, price?: number, status?: string}> = [];
-    selectedVarietyIndex: number = -1;
+    currentPrice: string | number = 0;
+    varietyList: Array<Variety> = [];
+    selectedVariety: Variety | undefined = undefined;
 
     // Getter para lista filtrada
     get filteredVarietyList() {
@@ -461,7 +461,7 @@ export class ProductView implements OnInit {
         this.productDialog = true;
         this.isEditing = false;
         this.varietyList = [];
-        this.selectedVarietyIndex = -1;
+        this.selectedVariety = undefined;
         this.currentVariety = '';
         this.currentPrice = 0;
         this.selectedClient = '';
@@ -615,39 +615,21 @@ export class ProductView implements OnInit {
             return;
         }
 
-        // Validar variedades existentes
-        let existingVarieties: any[] = [];
-        try {
-            existingVarieties = this.product.st_variety ? JSON.parse(this.product.st_variety) : [];
-        } catch (error) {
-            console.error('Erro ao parsear variedades existentes:', error);
-            existingVarieties = [];
-        }
-
-        // Marcar como deletadas as variedades que não estão mais na lista
-        existingVarieties.forEach(existingVariety => {
-            const stillExists = this.varietyList.some(v => 
-                v.variety === existingVariety.variety && 
-                v.price === existingVariety.price
-            );
-            if (!stillExists) {
-                existingVariety.status = 'deleted';
+        // Ajustar sequencia
+        let seq = 1;
+        this.varietyList = this.varietyList.filter(v => v.seq !== -1 || v.status !== 'deleted');
+        this.varietyList.forEach(v => {
+            if (v.seq === -1) {
+                v.seq = seq;
+                seq++;
             }
-        });
-
-        // Adicionar novas variedades à lista existente
-        this.varietyList.forEach(newVariety => {
-            const exists = existingVarieties.some(v => 
-                v.variety === newVariety.variety && 
-                v.price === newVariety.price
-            );
-            if (!exists) {
-                existingVarieties.push(newVariety);
+            else if (seq <= v.seq) {
+                seq = v.seq + 1;
             }
-        });
+        })
 
         // Converter a lista de variedades para JSON string
-        this.product.st_variety = JSON.stringify(existingVarieties);
+        this.product.st_variety = JSON.stringify(this.varietyList);
 
         const productRequest: ProductRequest = {
             id_brand: this.product.id_brand,
@@ -686,55 +668,51 @@ export class ProductView implements OnInit {
         table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
     }
 
+    converterPrice(value: string | number): number {
+        if (typeof value == 'string') {
+            return Number(value.replace('.', '').replace(',', '.'));
+        }
+        return value;
+    }
+
     // Método para adicionar ou atualizar variedade na lista
     addVariety() {
-        if (this.currentVariety && this.currentPrice > 0) {
-            if (this.selectedVarietyIndex > -1) {
+        if (this.currentVariety && this.currentPrice != 0) {
+            if (this.selectedVariety) {
                 // Atualiza a linha existente
-                this.varietyList[this.selectedVarietyIndex] = {
-                    seq: this.varietyList[this.selectedVarietyIndex].seq,
-                    variety: this.currentVariety,
-                    price: Number(this.currentPrice),
-                    status: 'active'
-                };
+                console.log(`price ${this.currentPrice}`)
+                this.selectedVariety.variety = this.currentVariety;
+                this.selectedVariety.price = this.converterPrice(this.currentPrice);
                 this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Variedade atualizada', life: 3000 });
             } else {
                 // Adiciona nova linha
                 this.varietyList.push({
-                    seq: this.varietyList.length + 1,
+                    seq: -1,
                     variety: this.currentVariety,
-                    price: Number(this.currentPrice),
+                    price: this.converterPrice(this.currentPrice),
                     status: 'active'
                 });
                 this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Variedade adicionada', life: 3000 });
             }
             this.currentVariety = '';
             this.currentPrice = 0;
-            this.selectedVarietyIndex = -1;
+            this.selectedVariety = undefined;
         } else {
             this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Preencha a variedade e o preço', life: 3000 });
         }
     }
 
     // Método para remover variedade da lista
-    removeVariety(index: number, event: Event) {
-        event.stopPropagation(); // Evita que o evento de clique da linha seja disparado
-        this.varietyList.splice(index, 1);
-        if (this.selectedVarietyIndex === index) {
-            this.currentVariety = '';
-            this.currentPrice = 0;
-            this.selectedVarietyIndex = -1;
-        }
+    removeVariety(variety: Variety) {
+        variety.status = 'deleted';
     }
 
     // Método para selecionar variedade da lista
-    selectVariety(variety: {variety: string, price: number, status?: string}, index: number) {
-        if (variety.status !== 'deleted') {
-            this.currentVariety = variety.variety;
-            this.currentPrice = variety.price;
-            this.selectedVarietyIndex = index;
-            this.messageService.add({ severity: 'info', summary: 'Selecionado', detail: 'Variedade selecionada para edição', life: 3000 });
-        }
+    selectVariety(variety: Variety) {
+        this.currentVariety = variety.variety!;
+        this.currentPrice = variety.price!.toString().replace(".", ",");
+        this.selectedVariety = variety;
+        this.messageService.add({ severity: 'info', summary: 'Selecionado', detail: 'Variedade selecionada para edição', life: 3000 });
     }
 
     filterCategories(event: any) {

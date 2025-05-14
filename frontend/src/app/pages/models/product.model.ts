@@ -66,3 +66,10 @@ export interface ProductRequest {
     st_variety: string;
     st_status: string;
 }
+
+export interface Variety {
+    seq: number;
+    variety?: string;
+    price?: number;
+    status?: string
+}

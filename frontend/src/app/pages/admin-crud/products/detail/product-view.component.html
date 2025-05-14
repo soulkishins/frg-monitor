@@ -78,8 +78,8 @@
                             [style]="{'width': '100%'}" />
                     </div>
                     <div>
-                        <p-button icon="pi pi-plus" (onClick)="addVariety()" [disabled]="!currentVariety || currentPrice <= 0" 
-                            [label]="selectedVarietyIndex > -1 ? 'Atualizar' : 'Adicionar'" />
+                        <p-button icon="pi pi-plus" (onClick)="addVariety()" [disabled]="!currentVariety || converterPrice(currentPrice) <= 0"
+                            [label]="selectedVariety ? 'Atualizar' : 'Adicionar'" />
                     </div>
                 </div>
 
@@ -93,12 +93,11 @@
                             </tr>
                         </ng-template>
                         <ng-template pTemplate="body" let-variety let-i="rowIndex">
-                            <tr (click)="selectVariety(variety, i)" 
-                                [ngClass]="{'cursor-pointer': true, 'bg-primary-50': selectedVarietyIndex === i}">
+                            <tr (click)="selectVariety(variety)" class="cursor-pointer" >
                                 <td>{{variety.variety}}</td>
                                 <td>{{variety.price | currency:'BRL':'symbol':'1.2-2':'pt-BR'}}</td>
                                 <td>
-                                    <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (onClick)="removeVariety(i, $event)" />
+                                    <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (onClick)="removeVariety(variety)" />
                                 </td>
                             </tr>
                         </ng-template>
