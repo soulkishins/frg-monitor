@@ -20,7 +20,9 @@ class VW_Advertisement(Base):
     st_title = Column(String)
     db_price = Column(FLOAT)
     db_original_price = Column(FLOAT)
+    db_base_price = Column(FLOAT)
     st_status = Column(String)
+    dt = Column(TIMESTAMP)
 
     def _json_fields(self):
         return [
@@ -35,5 +37,7 @@ class VW_Advertisement(Base):
             "st_title",
             "db_price",
             "db_original_price",
-            "st_status"
+            "db_base_price",
+            "st_status",
+            "dt"
         ]

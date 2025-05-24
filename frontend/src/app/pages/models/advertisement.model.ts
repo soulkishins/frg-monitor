@@ -13,7 +13,9 @@ export interface AdvertisementListDto {
     st_product: string;
     st_title: string;
     db_price: number;
+    db_base_price: number;
     st_status: string;
+    dt: Date;
 }
 
 export interface Client {

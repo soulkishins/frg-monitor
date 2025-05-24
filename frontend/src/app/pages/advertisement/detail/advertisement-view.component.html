@@ -1,17 +1,35 @@
 <p-toast />
-<p-confirmdialog [style]="{ width: '450px' }" />
-<p-dialog [header]="titleModal" [(visible)]="displayModal" [style]="{width: '450px'}" [modal]="true" [draggable]="false" [resizable]="false">
+<p-confirmdialog [style]="{ width: '700px' }" />
+<p-dialog [header]="titleModal" [(visible)]="displayModal" [style]="{width: '700px'}" [modal]="true" [draggable]="false" [resizable]="false">
     <div class="grid">
         <div class="col-12 mb-3" *ngIf="!isEditQuantityProduct">
             <p-iftalabel>
-                <p-select [(ngModel)]="selectedProduct" inputId="product" [options]="filteredProducts" optionLabel="st_product" styleClass="w-full" (onChange)="onProductChange()" 
-                    (onFilter)="filterProducts($event)" [filter]="true" placeholder="Selecione um Produto" [loading]="loading" [disabled]="isEditQuantityProduct"/>
+                <p-select
+                    [(ngModel)]="selectedProduct"
+                    inputId="product"
+                    [options]="filteredProducts" optionLabel="st_product"
+                    styleClass="w-full"
+                    (onChange)="onProductChange()" 
+                    (onFilter)="filterProducts($event)"
+                    [filter]="true" placeholder="Selecione um Produto"
+                    [loading]="loading"
+                    [disabled]="isEditQuantityProduct"
+                    [appendTo]="'body'"
+                />
                 <label for="product">Produto</label>
             </p-iftalabel>
         </div>
         <div class="col-12 mb-3" *ngIf="!isEditQuantityProduct">
             <p-iftalabel>
-                <p-select [(ngModel)]="selectedVariety" inputId="variety" [options]="availableVarieties" optionLabel="variety" styleClass="w-full" [disabled]="isEditQuantityProduct"/>
+                <p-select
+                    [(ngModel)]="selectedVariety"
+                    inputId="variety"
+                    [options]="availableVarieties"
+                    optionLabel="variety"
+                    styleClass="w-full"
+                    [disabled]="isEditQuantityProduct"
+                    [appendTo]="'body'"
+                />
                 <label for="variety">Variedade</label>
             </p-iftalabel>
         </div>
@@ -76,7 +94,7 @@
             <div>
                 <p-iftalabel>
                     <p-inputnumber [(ngModel)]="advertisement.db_price" mode="currency" inputId="db_price" currency="BRL" locale="pt-BR" readonly="true"/>
-                    <label for="db_price">Preço</label>
+                    <label for="db_price">Preço Final</label>
                 </p-iftalabel>
             </div>
             <div>

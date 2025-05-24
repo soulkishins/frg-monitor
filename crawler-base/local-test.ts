@@ -14,22 +14,22 @@ handler({
         "messageId": "19dd0b57-b21e-4ac1-bd88-01bbb068cb78",
         "receiptHandle": "MessageReceiptHandle",
         "body": JSON.stringify({
-          "scheduler_id": "ea01587c-d246-404c-b4b5-34255b3e3788",
-          "cron": "15_15_0",
-          "platform": "ML",
-          "datetime": "2025-04-18 20:35:28",
-          "keyword_id": "aa6fac64-1e6a-4dda-80c5-6c02c2f4457b",
-          "keyword": "7897230305820",
-          "brand_id": "7f510ac5-5442-46a2-9bfd-ec6b482fda40",
+          "scheduler_id": " ",
+          "cron": "40_18_7",
+          "platform": "MAGALU",
+          "datetime": "2025-05-23 23:00:00",
+          "keyword_id": "d85b0d1c-07b4-4d0f-98ca-87cc5f060b29",
+          "keyword": "Paris Elysees Perfume Caviar Intense",
+          "brand_id": "06c11762-d384-4264-8051-1957b8a421ac",
           "products": [
-            {
-              "id_product": "28c336c9-a6b0-4c2c-a9af-dc87f5046997",
-              "st_varity_seq": 1,
-              "st_varity_name": "5 g",
-              "db_price": 12.4
-            }
+              {
+                  "id_product": "969892b9-4813-46d1-9028-c00e98dd7892",
+                  "st_varity_seq": 8,
+                  "st_varity_name": "Paris Elysees Perfume Caviar Intense ",
+                  "db_price": 78.9
+              }
           ]
-        }),
+      }),
         "attributes": {
           "ApproximateReceiveCount": "1",
           "SentTimestamp": "1523232000000",

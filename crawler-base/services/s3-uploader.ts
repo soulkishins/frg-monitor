@@ -1,7 +1,8 @@
 import { S3 } from "@aws-sdk/client-s3";
 import axios from "axios";
 import { UploadError } from "../errors";
-import { AWSConfig } from "../base/types";
+import { AWSConfig } from "../base/config";
+
 export class S3Uploader {
     private s3: S3;
     private bucketName: string;

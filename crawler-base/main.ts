@@ -1,15 +1,15 @@
 import { ConfigManager } from './base/config';
 import { AdvertisementManager } from './aws/rds';
 import { S3Uploader } from './services/s3-uploader';
-import { MLParser } from './services/ml-parser';
-import { MLScraper } from './services/ml-scraper';
 import { AdvertisementService } from './services/advertisement-service';
 import { SQSService } from './aws/sqs';
+import { getPlatformScraper } from './platforms/helper';
+
 export const handler = async (event: any) => {
     try {
         for (const record of event.Records) {
             console.log('Iniciando crawler...');
-            
+
             console.log('Dados recebidos:', record.body);
             // Extrair dados da mensagem SQS
             const messageBody = JSON.parse(record.body);
@@ -23,17 +23,19 @@ export const handler = async (event: any) => {
             console.log('Iniciando serviços...');
             // Inicializar serviços com as configurações
             const uploader = new S3Uploader(config.aws);
-            const parser = new MLParser(uploader);
-            const scraper = new MLScraper(parser);
+            const scraper = getPlatformScraper(messageBody.platform, uploader);
             const sqsService = new SQSService(config.aws.region, config.aws.queueUrl);
             const adManager = new AdvertisementManager(config.database);
-            
             const adService = new AdvertisementService(
                 scraper,
                 adManager,
                 sqsService
             );
             console.log('Serviços iniciados com sucesso.');
+
+            console.log('Validando IP de Saída...');
+            const ip = await scraper.validateIP();
+            console.log('IP de Saída:', ip);
 
             console.log('Iniciando busca...');
             // Executar a busca com os dados da mensagem SQS

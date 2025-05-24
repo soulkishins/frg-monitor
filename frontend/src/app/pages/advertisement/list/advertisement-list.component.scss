@@ -1,0 +1,5 @@
+::ng-deep .tabela-scroll .p-datatable-wrapper {
+    transition: max-height 0.4s ease;
+    overflow: auto; /* mantém scrolls visíveis */
+    max-height: 100% !important;
+}

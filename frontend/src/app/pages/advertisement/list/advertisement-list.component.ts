@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -18,6 +18,7 @@ import { DialogModule } from 'primeng/dialog';
 import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
+import { DatePickerModule } from 'primeng/datepicker';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { AdvertisementService } from '../../service/advertisement.service';
 import { AdvertisementListDto } from '../../models/advertisement.model';
@@ -26,6 +27,7 @@ import { MenuModule } from 'primeng/menu';
 import { AvatarModule } from 'primeng/avatar';
 import { FluidModule } from 'primeng/fluid';
 import { TooltipModule } from 'primeng/tooltip';
+import { ContextMenuModule } from 'primeng/contextmenu';
 import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
 import { Router } from '@angular/router';
@@ -59,9 +61,12 @@ registerLocaleData(localePt);
         IconFieldModule,
         DialogModule,
         ToastModule,
-        ConfirmDialogModule
+        ConfirmDialogModule,
+        ContextMenuModule,
+        DatePickerModule
     ],
     templateUrl: './advertisement-list.component.html',
+    styleUrls: ['./advertisement-list.component.scss'],
     providers: [MessageService, AdvertisementService, ConfirmationService]
 })
 export class AdvertisementList implements OnInit {
@@ -76,7 +81,12 @@ export class AdvertisementList implements OnInit {
 
     advertisements = signal<AdvertisementListDto[]>([]);
     selectedAdvertisements: AdvertisementListDto[] = [];
+    selectedAdvertisement: AdvertisementListDto | null = null;
     statuses!: any[];
+
+    offsetScroll = 370;
+
+    items!: MenuItem[];
 
     constructor(
         private advertisementService: AdvertisementService,
@@ -91,9 +101,15 @@ export class AdvertisementList implements OnInit {
     }
 
     ngOnInit() {
-
         this.statuses = this.advertisementService.getStatuses(true);
+        this.filters = localStorage.getItem('advertisement-filters') ? JSON.parse(localStorage.getItem('advertisement-filters') || '{}') : {};
+        if (!this.filters['st_status'])
         this.filters['st_status'] = this.statuses[0];
+
+        this.items = [
+            { label: 'Visualizar', icon: 'pi pi-eye', command: () => this.viewAdvertisement(this.selectedAdvertisement!) },
+            { label: 'Abrir URL', icon: 'pi pi-external-link', command: () => this.openUrl(this.selectedAdvertisement!) }
+        ];
     }
 
     loadData(event?: any) {
@@ -102,11 +118,24 @@ export class AdvertisementList implements OnInit {
         if (!event) {
             event = {first: this.page.offset, rows: this.page.limit};
         }
+        
+        // Remover atributos que não possuem valor
+        Object.keys(this.filters).forEach(key => {
+            if (this.filters[key] === null || this.filters[key] === undefined || this.filters[key] === '') {
+                delete this.filters[key];
+            }
+        });
+
+        localStorage.setItem('advertisement-filters', JSON.stringify(this.filters));
 
         this.loading = true;
         const {st_status, ...query} = this.filters;
         if (this.filters['st_status'].value !== 'ALL')
         query['st_status'] = this.filters['st_status'].value;
+        if (this.filters['dt_start'])
+            query['dt_start'] = this.filters['dt_start'].toISOString().substring(0, 10);
+        if (this.filters['dt_end'])
+            query['dt_end'] = this.filters['dt_end'].toISOString().substring(0, 10);
         query['page.limit'] = event.rows;
         query['page.offset'] = event.first;
         query['page.sort'] = `${event.sortField || this.page.sort}${event.sortOrder !== -1 ? '.asc' : '.desc'}`;
@@ -138,6 +167,18 @@ export class AdvertisementList implements OnInit {
             st_status: this.statuses[0],
         };
         dt.reset();
+    }
+
+    onAfterCollapsedChange(event: any) {
+        if (event.collapsed) {
+            this.offsetScroll = 370;
+        }
+    }
+
+    onBeforeCollapsedChange(event: any) {
+        if (event.collapsed) {
+            this.offsetScroll = 580;
+        }
     }
 
     viewAdvertisement(advertisement: AdvertisementListDto) {

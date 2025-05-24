@@ -1,6 +1,6 @@
 import { SecretsManager } from '@aws-sdk/client-secrets-manager';
 
-interface DatabaseConfig {
+export interface DatabaseConfig {
     user: string;
     host: string;
     database: string;
@@ -9,13 +9,13 @@ interface DatabaseConfig {
     schema: string;
 }
 
-interface AWSConfig {
+export interface AWSConfig {
     region: string;
     bucketName: string;
     queueUrl: string;
 }
 
-interface AppConfig {
+export interface AppConfig {
     database: DatabaseConfig;
     aws: AWSConfig;
 }

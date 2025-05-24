@@ -1,0 +1,23 @@
+<app-floating-configurator />
+<div class="flex items-center justify-center min-h-screen overflow-hidden">
+    <div class="flex flex-col items-center justify-center">
+        <img width="225" height="64" src="https://www.frgconsultoria.com/wp-content/uploads/2019/08/cropped-logo-frg-p-04.png" class="logo-login" alt="FRG Consultoria" decoding="async">
+        <div style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, color-mix(in srgb, var(--primary-color), transparent 60%) 10%, var(--surface-ground) 30%)">
+            <div class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20 flex flex-col items-center" style="border-radius: 53px">
+                <h1 class="text-surface-900 dark:text-surface-0 font-bold text-3xl lg:text-5xl mb-2">Captcha Detectado</h1>
+                <div class="text-surface-600 dark:text-surface-200 mb-8">Por favor, clique em continuar para resolver o captcha.</div>
+                
+                <div class="flex flex-col items-center gap-4 w-full">
+                    <div class="text-surface-600 dark:text-surface-200 text-center">
+                        <i class="pi pi-shield text-4xl mb-2"></i>
+                        <p>Após clicar no botão abaixo, você será redirecionado para a página original e terá 60 segundos para resolver o captcha.</p>
+                    </div>
+                    
+                    <button id="continueButton" class="p-button p-component p-button-primary p-button-lg" onclick="window.dispatchEvent(new CustomEvent('captchaContinue'))">
+                        <span class="p-button-label">Continuar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

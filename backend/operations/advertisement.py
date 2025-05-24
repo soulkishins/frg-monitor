@@ -2,6 +2,7 @@ from operations.crud_base import Crud, Page
 from db.models import Advertisement, ClientBrand, ClientBrandProduct, AdvertisementProduct, Subcategory, AdvertisementHistory, AdvertisementExport
 from db.views import VW_Advertisement
 from sqlalchemy.orm import contains_eager
+from datetime import datetime
 
 class AdvertisementCrud(Crud):
     def get_model(self) -> Advertisement:
@@ -58,6 +59,14 @@ class AdvertisementCrud(Crud):
             where.append(VW_Advertisement.db_price >= float(filters['st_price_min']))
         if 'st_price_max' in filters:
             where.append(VW_Advertisement.db_price <= float(filters['st_price_max']))
+        if 'st_base_price_min' in filters:
+            where.append(VW_Advertisement.db_base_price >= float(filters['st_base_price_min']))
+        if 'st_base_price_max' in filters:
+            where.append(VW_Advertisement.db_base_price <= float(filters['st_base_price_max']))
+        if 'dt_start' in filters:
+            where.append(VW_Advertisement.dt >= datetime.strptime(filters['dt_start'] + ' 00:00:00', '%Y-%m-%d %H:%M:%S'))
+        if 'dt_end' in filters:
+            where.append(VW_Advertisement.dt <= datetime.strptime(filters['dt_end'] + ' 23:59:59', '%Y-%m-%d %H:%M:%S'))
         if 'st_status' in filters:
             where.append(VW_Advertisement.st_status == filters['st_status'])
 

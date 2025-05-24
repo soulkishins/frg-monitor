@@ -1,5 +1,6 @@
 import { Pool } from 'pg';
-import { DatabaseConfig, IAdvertisement, IAdvertisementHistory, IAdvertisementProduct, IKeyword } from '../base/types';
+import { IAdvertisement, IAdvertisementHistory, IAdvertisementProduct, IKeyword } from '../base/types';
+import { DatabaseConfig } from '../base/config';
 
 export class AdvertisementManager {
     private pool: Pool;
@@ -45,7 +46,9 @@ export class AdvertisementManager {
 
             await client.query(query, values);
             await client.query('COMMIT');
-            return data.id_advertisement;
+
+            // Retorna o ID do anúncio
+            return data.id_advertisement!;
         } catch (error) {
             await client.query('ROLLBACK');
             throw error;
@@ -57,14 +60,14 @@ export class AdvertisementManager {
     async addProduct(data: IAdvertisementProduct): Promise<void> {
         const query = `
             INSERT INTO tb_advertisement_product (
-                id_advertisement, id_product, st_varity_seq, st_varity_name, st_created_by, dt_created
-            ) VALUES ($1, $2, $3, $4, 'crawler', CURRENT_TIMESTAMP)
+                id_advertisement, id_product, st_varity_seq, st_varity_name, en_status, st_created_by, dt_created
+            ) VALUES ($1, $2, $3, $4, 'NR', 'crawler', CURRENT_TIMESTAMP)
             ON CONFLICT (id_advertisement, id_product, st_varity_seq) 
             DO UPDATE SET
                 st_varity_name = EXCLUDED.st_varity_name
             WHERE tb_advertisement_product.st_varity_name <> EXCLUDED.st_varity_name
         `;
-        
+
         const values = [
             data.id_advertisement, data.id_product,
             data.st_varity_seq, data.st_varity_name
@@ -83,7 +86,7 @@ export class AdvertisementManager {
                 st_keyword = EXCLUDED.st_keyword
             WHERE tb_advertisement_keyword.st_keyword <> EXCLUDED.st_keyword
         `;
-        
+
         const values = [
             data.id_advertisement, data.id_keyword, data.st_keyword
         ];
@@ -113,7 +116,7 @@ export class AdvertisementManager {
                 id_scheduler, dt_created, nr_pages, nr_total, nr_processed, nr_created, nr_updated,
                 nr_error, nr_manual_revision, nr_reported, nr_already_reported, nr_invalidate, nr_reconcile, en_status
             ) values (
-                coalesce($1, '00000000-0000-0000-0000-000000000000'), coalesce($2, CURRENT_TIMESTAMP), $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
+                coalesce($1::uuid, '00000000-0000-0000-0000-000000000000'::uuid), coalesce($2, CURRENT_TIMESTAMP), $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
             ) on conflict (id_scheduler, dt_created) do update set
                 nr_pages = tb_scheduler_statistics.nr_pages + EXCLUDED.nr_pages,
                 nr_total = tb_scheduler_statistics.nr_total + EXCLUDED.nr_total,
@@ -132,29 +135,25 @@ export class AdvertisementManager {
         const values = [
             params.scheduler_id || null,
             params.datetime || null,
-            params.statistics.nr_pages || 0,
-            params.statistics.nr_total || 0,
-            params.statistics.nr_processed || 0,
-            params.statistics.nr_created || 0,
-            params.statistics.nr_updated || 0,
-            params.statistics.nr_error || 0,
-            params.statistics.nr_manual_revision || 0,
-            params.statistics.nr_reported || 0,
-            params.statistics.nr_already_reported || 0,
-            params.statistics.nr_reconcile || 0,
-            params.statistics.nr_invalidate || 0,
-            params.statistics.st_status,
+            params.statistics?.nr_pages || 0,
+            params.statistics?.nr_total || 0,
+            params.statistics?.nr_processed || 0,
+            params.statistics?.nr_created || 0,
+            params.statistics?.nr_updated || 0,
+            params.statistics?.nr_error || 0,
+            params.statistics?.nr_manual_revision || 0,
+            params.statistics?.nr_reported || 0,
+            params.statistics?.nr_already_reported || 0,
+            params.statistics?.nr_reconcile || 0,
+            params.statistics?.nr_invalidate || 0,
+            params.statistics?.st_status,
         ];
 
         await this.pool.query(query, values);
     }
 
     async getAdvertisement(id: string): Promise<IAdvertisement | null> {
-        const query = `
-            SELECT * FROM tb_advertisement 
-            WHERE id_advertisement = $1
-        `;
-        
+        const query = `SELECT * FROM tb_advertisement WHERE id_advertisement = $1`;
         const result = await this.pool.query(query, [id]);
         return result.rows[0] || null;
     }
@@ -199,7 +198,7 @@ export class AdvertisementManager {
         return result.rows;
     }
 
-    async updateAdvertisement(record: IAdvertisement, data: IAdvertisement): Promise<void> {
+    async updateAdvertisement(record: IAdvertisement, data: IAdvertisement): Promise<boolean> {
         const client = await this.pool.connect();
         try {
             await client.query('BEGIN');
@@ -268,15 +267,17 @@ export class AdvertisementManager {
                     SET ${query}
                     WHERE id_advertisement = $${param}
                 `, values);
+                await client.query('COMMIT');
+                return true;
             }
-
-            await client.query('COMMIT');
         } catch (error) {
             await client.query('ROLLBACK');
             throw error;
         } finally {
             client.release();
         }
+
+        return false;
     }
 
     async close(): Promise<void> {

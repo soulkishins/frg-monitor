@@ -68,7 +68,7 @@
 </p-toolbar>
 
 
-<p-panel #panel [toggleable]="true" [collapsed]="true">
+<p-panel #panel [toggleable]="true" [collapsed]="true" (onBeforeToggle)="onBeforeCollapsedChange($event)" (onAfterToggle)="onAfterCollapsedChange($event)">
     <ng-template #header>
         <div class="flex items-center gap-2">
             <i class="pi pi-shop"></i>
@@ -81,14 +81,14 @@
         <p-button icon="pi pi-search" severity="info" rounded text (click)="dt.reset()" pTooltip="Aplicar Filtros" tooltipPosition="top" />
     </ng-template>
     <p-fluid>
-        <div class="grid grid-cols-4 gap-4">
-            <div>
+        <div class="grid grid-cols-8 gap-4">
+            <div class="col-span-2">
                 <p-iftalabel>
                     <p-select [(ngModel)]="filters['st_status']" inputId="st_status" [options]="statuses" optionLabel="label" styleClass="w-full" />
                     <label for="st_status">Status</label>
                 </p-iftalabel>
             </div>
-            <div>
+            <div class="col-span-2">
                 <p-iftalabel>
                     <input pInputText id="st_plataform_id" [(ngModel)]="filters['st_plataform_id']" />
                     <label for="st_plataform_id">Plataforma ID</label>
@@ -97,50 +97,76 @@
             <div>
                 <p-iftalabel>
                     <p-inputnumber [(ngModel)]="filters['st_price_min']" mode="currency" inputId="st_price_min" currency="BRL" locale="pt-BR" />
-                    <label for="st_price_min">Preço Mínimo</label>
+                    <label for="st_price_min">Preço Final Mínimo</label>
                 </p-iftalabel>
             </div>
             <div>
                 <p-iftalabel>
                     <p-inputnumber [(ngModel)]="filters['st_price_max']" mode="currency" inputId="st_price_max" currency="BRL" locale="pt-BR" />
-                    <label for="st_price_max">Preço Máximo</label>
+                    <label for="st_price_max">Preço Final Máximo</label>
+                </p-iftalabel>
+            </div>
+            <div>
+                <p-iftalabel>
+                    <p-inputnumber [(ngModel)]="filters['st_base_price_min']" mode="currency" inputId="st_base_price_min" currency="BRL" locale="pt-BR" />
+                    <label for="st_base_price_min">Preço Base Mínimo</label>
+                </p-iftalabel>
+            </div>
+            <div>
+                <p-iftalabel>
+                    <p-inputnumber [(ngModel)]="filters['st_base_price_max']" mode="currency" inputId="st_base_price_max" currency="BRL" locale="pt-BR" />
+                    <label for="st_base_price_max">Preço Base Máximo</label>
                 </p-iftalabel>
             </div>
 
-            <div>
+            <div class="col-span-2">
                 <p-iftalabel>
                     <input pInputText id="st_name" [(ngModel)]="filters['st_name']" />
                     <label for="st_name">Cliente</label>
                 </p-iftalabel>
             </div>
-            <div>
+            <div class="col-span-2">
                 <p-iftalabel>
                     <input pInputText id="st_seller" [(ngModel)]="filters['st_seller']" />
                     <label for="st_seller">Vendedor</label>
                 </p-iftalabel>
             </div>
-            <div>
+            <div class="col-span-2">
                 <p-iftalabel>
                     <input pInputText id="st_brand" [(ngModel)]="filters['st_brand']" />
                     <label for="st_brand">Marca</label>
                 </p-iftalabel>
             </div>
-            <div>
+            <div class="col-span-2">
                 <p-iftalabel>
                     <input pInputText id="st_product" [(ngModel)]="filters['st_product']" />
                     <label for="st_product">Produto</label>
                 </p-iftalabel>
             </div>
-            <div class="col-span-full">
+
+            <div class="col-span-4">
                 <p-iftalabel>
                     <input pInputText id="st_title" [(ngModel)]="filters['st_title']" />
                     <label for="st_title">Título do Anúncio</label>
+                </p-iftalabel>
+            </div>
+            <div class="col-span-2">
+                <p-iftalabel>
+                    <p-datepicker [(ngModel)]="filters['dt_start']" [iconDisplay]="'input'" [showIcon]="true" inputId="dt_start" dateFormat="dd/mm/yy" />
+                    <label for="dt_start">Atualizado desde</label>
+                </p-iftalabel>
+            </div>
+            <div class="col-span-2">
+                <p-iftalabel>
+                    <p-datepicker [(ngModel)]="filters['dt_end']" [iconDisplay]="'input'" [showIcon]="true" inputId="dt_end" dateFormat="dd/mm/yy" />
+                    <label for="dt_end">Atualizado até</label>
                 </p-iftalabel>
             </div>
         </div>
     </p-fluid>
 </p-panel>
 
+<p-contextmenu #cm [model]="items" (onHide)="selectedAdvertisement = null" />
 <p-table
     #dt
     [value]="advertisements()"
@@ -159,6 +185,11 @@
     (onLazyLoad)="loadData($event)"
     [(rows)]="page.limit"
     [lazyLoadOnInit]="true"
+    scrollable="true"
+    [scrollHeight]="'calc(100vh - ' + offsetScroll + 'px)'"
+    styleClass="tabela-scroll"
+    [(contextMenuSelection)]="selectedAdvertisement"
+    [contextMenu]="cm"
 >
     <ng-template #header>
         <tr>
@@ -177,13 +208,21 @@
                 Vendedor
                 <p-sortIcon field="st_seller" />
             </th>
+            <th pSortableColumn="db_base_price" style="min-width: 9rem">
+                Preço Base
+                <p-sortIcon field="db_base_price" />
+            </th>
             <th pSortableColumn="db_price" style="min-width: 9rem">
-                Preço
+                Preço Final
                 <p-sortIcon field="db_price" />
             </th>
             <th pSortableColumn="db_original_price" style="min-width: 12rem">
                 Preço Original
                 <p-sortIcon field="db_original_price" />
+            </th>
+            <th pSortableColumn="dt" style="min-width: 12rem">
+                Última Atualização
+                <p-sortIcon field="dt" />
             </th>
             <th pSortableColumn="st_plataform" style="min-width: 10rem">
                 Plataforma
@@ -209,7 +248,7 @@
         </tr>
     </ng-template>
     <ng-template #body let-advertisement>
-        <tr>
+        <tr [pContextMenuRow]="advertisement">
             <td style="width: 3rem">
                 <p-tableCheckbox [value]="advertisement" />
             </td>
@@ -218,8 +257,10 @@
             </td>
             <td>{{ advertisement.st_title }}</td>
             <td>{{ advertisement.st_seller }}</td>
+            <td>{{ advertisement.db_base_price || 0 | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}</td>
             <td>{{ advertisement.db_price | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}</td>
             <td>{{ advertisement.db_original_price | currency: 'BRL':'symbol':'1.2-2':'pt-BR' }}</td>
+            <td>{{ advertisement.dt | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
             <td>{{ advertisement.st_plataform }}</td>
             <td>{{ advertisement.st_plataform_id }}</td>
             <td>{{ advertisement.st_name }}</td>
