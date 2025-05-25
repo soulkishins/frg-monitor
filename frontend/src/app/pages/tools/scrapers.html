@@ -25,24 +25,19 @@
         </ng-template>
     </p-toolbar>
 
-    <!-- Conteúdo das ações -->
     <div class="p-4">
-        <!-- Listar palavras chaves -->
         <p-card *ngIf="acaoSelecionada === 'Listar palavras chaves'">
             <app-keyword></app-keyword>
         </p-card>
 
-        <!-- Listar marcas -->
         <p-card *ngIf="acaoSelecionada === 'Listar marcas'">
             <app-brand></app-brand>
         </p-card>
 
-        <!-- Última execução -->
         <p-card *ngIf="acaoSelecionada === 'Última execução'">
             <app-last-run></app-last-run>
         </p-card>
 
-        <!-- Configurações -->
         <p-card *ngIf="acaoSelecionada === 'Configurações'">
             <app-configuration></app-configuration>
         </p-card>

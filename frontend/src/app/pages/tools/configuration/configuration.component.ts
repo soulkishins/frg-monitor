@@ -72,7 +72,6 @@ export class ConfigurationComponent implements OnInit {
             return;
         }
 
-        // TODO: Implementar a lógica de salvamento
         this.messageService.add({
             severity: 'success',
             summary: 'Sucesso',

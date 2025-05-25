@@ -83,7 +83,6 @@ export class BrandComponent implements OnInit {
 
     brands = signal<Brand[]>([]);
     
-    // Propriedades de paginação
     page: {
         total: number;
         limit: number;
@@ -107,9 +106,9 @@ export class BrandComponent implements OnInit {
 
     cols!: Column[];
 
-    filterChange = new EventEmitter<string>(); // Emissor de eventos
+    filterChange = new EventEmitter<string>();
 
-    offsetScroll = 400; // Valor padrão similar ao usado no advertisement-list
+    offsetScroll = 400;
 
     constructor(
         private brandService: BrandService,
@@ -119,128 +118,9 @@ export class BrandComponent implements OnInit {
         private schedulerService: SchedulerService
     ) {}
 
-    async exportCSV() {
-        try {
-            this.messageService.add({
-                key: 'export',
-                severity: 'info',
-                summary: 'Exportação em andamento',
-                detail: 'Exportação em andamento, aguarde alguns instantes...',
-                closable: false,
-                sticky: true,
-                icon: 'pi pi-spin pi-spinner'
-            });
-
-            const initialParams: { [key: string]: string | number } = {
-                'page.limit': 1,
-                'page.offset': 0
-            };
-
-            if (this.page.sort) {
-                initialParams['page.sort'] = this.page.sort;
-            }
-
-            const initialData = await this.brandService.getBrands(initialParams).toPromise();
-            const totalRecords = initialData?.page.total || 0;
-            
-            if (totalRecords === 0) {
-                this.messageService.clear('export');
-                this.messageService.add({
-                    severity: 'info',
-                    summary: 'Informação',
-                    detail: 'Não há registros para exportar',
-                    life: 3000
-                });
-                return;
-            }
-
-            const limit = this.page.limit;
-            const totalPages = Math.ceil(totalRecords / limit);
-            
-            let allBrands: Brand[] = [];
-
-            for (let page = 0; page < totalPages; page++) {
-                const params: { [key: string]: string | number } = {
-                    'page.limit': limit,
-                    'page.offset': page * limit
-                };
-
-                if (this.page.sort) {
-                    params['page.sort'] = this.page.sort;
-                }
-
-                const data = await this.brandService.getBrands(params).toPromise();
-                if (data?.list) {
-                    const mappedBrands: Brand[] = data.list.map((brand) => ({
-                        id: brand.id_brand,
-                        name: brand.st_brand,
-                        status: brand.st_status,
-                        client_name: brand.client.st_name
-                    }));
-                    allBrands = [...allBrands, ...mappedBrands];
-                }
-            }
-
-            const data = allBrands.map(brand => ({
-                'Cliente': brand.client_name,
-                'Marca': brand.name,
-                'Status': this.getStatusLabel(brand.status)
-            }));
-            
-            const csvContent = this.convertToCSV(data);
-            const BOM = '\uFEFF';
-            const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'lista_marcas.csv');
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            // Aguardar um pequeno intervalo para garantir que o download foi iniciado
-            await new Promise(resolve => setTimeout(resolve, 100));
-
-            this.messageService.clear('export');
-            this.messageService.add({
-                key: 'export',
-                severity: 'success',
-                summary: 'Sucesso',
-                detail: `Exportação concluída com ${totalRecords} registros`,
-                life: 3000
-            });
-        } catch (error) {
-            console.error('Erro ao exportar dados:', error);
-            this.messageService.clear('export');
-            this.messageService.add({
-                severity: 'error',
-                summary: 'Erro',
-                detail: 'Erro ao exportar os dados',
-                life: 3000
-            });
-        }
-    }
-
-    private convertToCSV(data: any[]): string {
-        const headers = Object.keys(data[0]);
-        const csvRows = [headers.join(',')];
-        
-        for (const row of data) {
-            const values = headers.map(header => {
-                const value = row[header] || '';
-                return `"${value}"`;
-            });
-            csvRows.push(values.join(','));
-        }
-        
-        return csvRows.join('\n');
-    }
-
     ngOnInit() {
         this.filterChange.pipe(
-            debounceTime(500), // Espera 500ms para evitar chamadas excessivas
+            debounceTime(500),
             distinctUntilChanged(),
             switchMap(value => value)
         ).subscribe(response => {
@@ -316,161 +196,6 @@ export class BrandComponent implements OnInit {
         if (value === '') {
             this.dt.reset();
         }
-    }
-
-    openNew() {
-        this.router.navigate(['/cadastro/marca/detalhe','novo']);
-    }
-
-    deleteSelectedBrands() {
-        this.confirmationService.confirm({
-            message: 'Tem certeza que deseja excluir as marcas selecionadas?',
-            header: 'Confirmar',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                this.brands.set(this.brands().filter((val) => !this.selectedBrands?.includes(val)));
-                this.selectedBrands = null;
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Sucesso',
-                    detail: 'Marcas excluídas',
-                    life: 3000
-                });
-            }
-        });
-    }
-
-    editBrand(brand: Brand) {
-        this.router.navigate(['/cadastro/marca/detalhe', brand.id]);
-    }
-
-    deleteBrand(brand: Brand) {
-        this.confirmationService.confirm({
-            message: 'Tem certeza que deseja excluir a marca ' + brand.name + '?',
-            header: 'Confirmar',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                if (brand.id) {
-                    this.brandService.deleteBrand(brand.id).subscribe({
-                        next: () => {
-                            this.messageService.add({
-                                severity: 'success',
-                                summary: 'Sucesso',
-                                detail: 'Marca excluída',
-                                life: 3000
-                            });
-                            this.loadBrandData(); // Recarregar os dados
-                            this.brand = {};
-                        },
-                        error: (error) => {
-                            this.messageService.add({
-                                severity: 'error',
-                                summary: 'Erro',
-                                detail: 'Erro ao excluir marca',
-                                life: 3000
-                            });
-                            console.error('Erro ao excluir marca:', error);
-                        }
-                    });
-                }
-            }
-        });
-    }
-
-    hideDialog() {
-        this.brandDialog = false;
-        this.submitted = false;
-    }
-
-    saveBrand() {
-        this.submitted = true;
-
-        if (this.brand.name?.trim() && this.brand.client_id && this.brand.status) {
-            if (this.brand.id) {
-                const index = this.findIndexById(this.brand.id);
-                if (index >= 0) {
-                    // Criar brandRequest para atualização
-                    const brandRequest = {
-                        st_brand: this.brand.name,
-                        st_status: this.brand.status,
-                        id_client: this.brand.client_id
-                    };
-
-                    this.brandService.putBrand(this.brand.id, brandRequest).subscribe({
-                        next: (response: any) => {
-                            this.messageService.add({
-                                severity: 'success',
-                                summary: 'Sucesso',
-                                detail: 'Marca atualizada',
-                                life: 3000
-                            });
-                            this.loadBrandData(); // Recarregar os dados
-                            this.brandDialog = false;
-                            this.brand = {};
-                        },
-                        error: (error: any) => {
-                            this.messageService.add({
-                                severity: 'error',
-                                summary: 'Erro',
-                                detail: 'Erro ao atualizar marca',
-                                life: 3000
-                            });
-                            console.error('Erro ao atualizar marca:', error);
-                        }
-                    });
-                }
-            } else {
-                // Criar nova marca
-                const brandRequest = {
-                    st_brand: this.brand.name,
-                    st_status: this.brand.status,
-                    id_client: this.brand.client_id
-                };
-
-                this.brandService.postBrand(brandRequest).subscribe({
-                    next: (value: any) => {
-                        this.messageService.add({
-                            severity: 'success',
-                            summary: 'Sucesso',
-                            detail: 'Marca criada',
-                            life: 3000
-                        });
-                        this.loadBrandData();
-                        this.brandDialog = false;
-                        this.brand = {};
-                    },
-                    error: (error: any) => {
-                        this.messageService.add({
-                            severity: 'error',
-                            summary: 'Erro',
-                            detail: 'Erro ao criar marca',
-                            life: 3000
-                        });
-                        console.error('Erro ao criar marca:', error);
-                    }
-                });
-            }
-        }
-    }
-
-    findIndexById(id: string): number {
-        let index = -1;
-        for (let i = 0; i < this.brands().length; i++) {
-            if (this.brands()[i].id === id) {
-                index = i;
-                break;
-            }
-        }
-        return index;
-    }
-
-    createId(): string {
-        let id = '';
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        for (var i = 0; i < 5; i++) {
-            id += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return id;
     }
 
     getSeverity(status: string) {
