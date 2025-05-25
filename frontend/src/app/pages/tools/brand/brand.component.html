@@ -1,0 +1,89 @@
+<p-table
+    #dt
+    [value]="brands()"
+    [totalRecords]="page.total"
+    [columns]="cols"
+    [paginator]="true"
+    [tableStyle]="{ 'min-width': '75rem' }"
+    [(selection)]="selectedBrands"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Mostrando {first} até {last} de {totalRecords} marcas"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[50, 100, 200, 300]"
+    [lazy]="true"
+    (onLazyLoad)="loadBrandData($event)"
+    [(rows)]="page.limit"
+    [lazyLoadOnInit]="true"
+    [loading]="loading"
+> 
+    <ng-template #caption>
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="pi pi-id-card"></i>
+                <span class="font-bold">Marcas</span>
+            </div>
+            <p-iconfield>
+                <p-inputicon styleClass="pi pi-search" />
+                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
+            </p-iconfield>
+        </div>
+    </ng-template>
+    <ng-template #header>
+        <tr>
+            <th style="width: 3rem">
+                <p-tableHeaderCheckbox />
+            </th>
+            <th pSortableColumn="st_client" style="min-width:16rem">
+                Cliente
+                <p-sortIcon field="st_client" />
+            </th>            
+            <th pSortableColumn="st_brand" style="min-width:16rem">
+                Marca
+                <p-sortIcon field="st_brand" />
+            </th>
+            <th pSortableColumn="st_status" style="min-width: 10rem">
+                Status
+                <p-sortIcon field="st_status" />
+            </th>
+            <th style="min-width: 12rem"></th>
+        </tr>
+    </ng-template>
+    <ng-template #body let-brand>
+        <tr>
+            <td style="width: 3rem">
+                <p-tableCheckbox [value]="brand" />
+            </td>
+            <td style="min-width: 16rem">{{ brand.client_name }}</td>
+            <td style="min-width: 16rem">{{ brand.name }}</td>
+            <td>
+                <p-tag [value]="getStatusLabel(brand.status)" [severity]="getSeverity(brand.status)" />
+            </td>
+            <td>
+                <p-button icon="pi pi-cog" severity="help" [rounded]="true" [outlined]="true" (click)="startCrawler(brand)" />
+            </td>
+        </tr>
+    </ng-template>
+</p-table>
+
+<p-toast />
+<p-toast key="export" position="bottom-right"></p-toast>
+<p-confirmdialog [style]="{ width: '450px' }" />
+
+<p-dialog [(visible)]="crawlerDialog" [style]="{width: '450px'}" header="Iniciar Crawler" [modal]="true" styleClass="p-fluid">
+    <div class="mb-4">
+        <label class="font-bold">Selecione a plataforma</label>
+    </div>
+    <div class="field-checkbox">
+        <div *ngFor="let option of crawlerOptions" class="mb-3">
+            <div class="flex align-items-center">
+                <p-checkbox [binary]="true" [(ngModel)]="selectedOptions[option.value]"></p-checkbox>
+                <label class="ml-2">{{option.label}}</label>
+            </div>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideCrawlerDialog()"></button>
+        <button pButton pRipple label="Executar" icon="pi pi-check" class="p-button-text" (click)="saveCrawlerOptions()"></button>
+    </ng-template>
+</p-dialog>

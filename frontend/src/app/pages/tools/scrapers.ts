@@ -8,12 +8,29 @@ import { MenuModule } from 'primeng/menu';
 import { RippleModule } from 'primeng/ripple';
 import { CardModule } from 'primeng/card';
 import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
+import { Keyword } from './keyword/keyword.component';
+import { BrandComponent } from './brand/brand.component';
+import { LastRun } from './last-run/last-run.component';
+import { ConfigurationComponent } from './configuration/configuration.component';
 
 @Component({
     selector: 'app-scrapers',
     templateUrl: './scrapers.html',
     standalone: true,
-    imports: [CommonModule, RouterModule, AppFloatingConfigurator, ToolbarModule, ButtonModule, MenuModule, RippleModule, CardModule]
+    imports: [
+        CommonModule,
+        RouterModule,
+        AppFloatingConfigurator,
+        ToolbarModule,
+        ButtonModule,
+        MenuModule,
+        RippleModule,
+        CardModule,
+        Keyword,
+        BrandComponent,
+        LastRun,
+        ConfigurationComponent
+    ]
 })
 export class Scrapers {
     crawlerSelecionado: string | null = null;

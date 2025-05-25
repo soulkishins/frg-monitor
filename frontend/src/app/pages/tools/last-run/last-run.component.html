@@ -1,0 +1,172 @@
+<p-toast />
+
+<div class="grid">
+    <!-- Card de Informações da Última Execução -->
+    <div class="col-12">
+        <p-card header="Última Execução" styleClass="shadow-2">
+            <div class="grid">
+                <div class="col-12 md:col-6 lg:col-3">
+                    <div class="surface-card p-4 border-round">
+                        <div class="flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <span class="block text-500 font-medium mb-3">Palavra-chave</span>
+                                <div class="text-900 font-medium text-xl">{{lastRun?.keyword}}</div>
+                            </div>
+                            <div class="flex align-items-center justify-content-center bg-blue-100 border-round" style="width:2.5rem;height:2.5rem">
+                                <i class="pi pi-tag text-blue-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6 lg:col-3">
+                    <div class="surface-card p-4 border-round">
+                        <div class="flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <span class="block text-500 font-medium mb-3">Marca</span>
+                                <div class="text-900 font-medium text-xl">{{lastRun?.brand}}</div>
+                            </div>
+                            <div class="flex align-items-center justify-content-center bg-orange-100 border-round" style="width:2.5rem;height:2.5rem">
+                                <i class="pi pi-bookmark text-orange-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6 lg:col-3">
+                    <div class="surface-card p-4 border-round">
+                        <div class="flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <span class="block text-500 font-medium mb-3">Data/Hora</span>
+                                <div class="text-900 font-medium text-xl">{{lastRun?.datetime | date:'dd/MM/yyyy HH:mm'}}</div>
+                            </div>
+                            <div class="flex align-items-center justify-content-center bg-cyan-100 border-round" style="width:2.5rem;height:2.5rem">
+                                <i class="pi pi-calendar text-cyan-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6 lg:col-3">
+                    <div class="surface-card p-4 border-round">
+                        <div class="flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <span class="block text-500 font-medium mb-3">Máquina</span>
+                                <div class="text-900 font-medium text-xl">{{lastRun?.machine}}</div>
+                            </div>
+                            <div class="flex align-items-center justify-content-center bg-purple-100 border-round" style="width:2.5rem;height:2.5rem">
+                                <i class="pi pi-desktop text-purple-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </p-card>
+    </div>
+
+    <!-- Métricas de Processamento -->
+    <div class="col-12">
+        <p-card header="Métricas de Processamento" styleClass="shadow-2">
+            <div class="grid">
+                <div class="col-12 md:col-6 lg:col-3">
+                    <div class="surface-card p-4 border-round">
+                        <div class="flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <span class="block text-500 font-medium mb-3">Páginas Acessadas</span>
+                                <div class="text-900 font-medium text-xl">{{metrics?.pagesAccessed}}</div>
+                            </div>
+                            <div class="flex align-items-center justify-content-center bg-green-100 border-round" style="width:2.5rem;height:2.5rem">
+                                <i class="pi pi-globe text-green-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6 lg:col-3">
+                    <div class="surface-card p-4 border-round">
+                        <div class="flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <span class="block text-500 font-medium mb-3">Palavras-chave Executadas</span>
+                                <div class="text-900 font-medium text-xl">{{metrics?.keywordsExecuted}}</div>
+                            </div>
+                            <div class="flex align-items-center justify-content-center bg-yellow-100 border-round" style="width:2.5rem;height:2.5rem">
+                                <i class="pi pi-list text-yellow-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6 lg:col-3">
+                    <div class="surface-card p-4 border-round">
+                        <div class="flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <span class="block text-500 font-medium mb-3">Anúncios Processados</span>
+                                <div class="text-900 font-medium text-xl">{{metrics?.adsProcessed}}</div>
+                            </div>
+                            <div class="flex align-items-center justify-content-center bg-indigo-100 border-round" style="width:2.5rem;height:2.5rem">
+                                <i class="pi pi-shopping-cart text-indigo-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6 lg:col-3">
+                    <div class="surface-card p-4 border-round">
+                        <div class="flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <span class="block text-500 font-medium mb-3">Desbloqueios</span>
+                                <div class="text-900 font-medium text-xl">{{metrics?.unblocks}}</div>
+                            </div>
+                            <div class="flex align-items-center justify-content-center bg-red-100 border-round" style="width:2.5rem;height:2.5rem">
+                                <i class="pi pi-unlock text-red-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </p-card>
+    </div>
+
+    <!-- Status dos Anúncios -->
+    <div class="col-12">
+        <p-card header="Status dos Anúncios" styleClass="shadow-2">
+            <div class="grid">
+                <div class="col-12 md:col-4">
+                    <div class="surface-card p-4 border-round">
+                        <div class="flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <span class="block text-500 font-medium mb-3">Novos</span>
+                                <div class="text-900 font-medium text-xl">{{metrics?.newAds}}</div>
+                            </div>
+                            <div class="flex align-items-center justify-content-center bg-green-100 border-round" style="width:2.5rem;height:2.5rem">
+                                <i class="pi pi-plus text-green-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 md:col-4">
+                    <div class="surface-card p-4 border-round">
+                        <div class="flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <span class="block text-500 font-medium mb-3">Atualizados</span>
+                                <div class="text-900 font-medium text-xl">{{metrics?.updatedAds}}</div>
+                            </div>
+                            <div class="flex align-items-center justify-content-center bg-blue-100 border-round" style="width:2.5rem;height:2.5rem">
+                                <i class="pi pi-refresh text-blue-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 md:col-4">
+                    <div class="surface-card p-4 border-round">
+                        <div class="flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <span class="block text-500 font-medium mb-3">Erros</span>
+                                <div class="text-900 font-medium text-xl">{{metrics?.errorAds}}</div>
+                            </div>
+                            <div class="flex align-items-center justify-content-center bg-red-100 border-round" style="width:2.5rem;height:2.5rem">
+                                <i class="pi pi-exclamation-triangle text-red-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </p-card>
+    </div>
+</div>
+
+<p-confirmdialog [style]="{ width: '450px' }" />

@@ -1,0 +1,32 @@
+<p-toast />
+
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+        <div class="flex items-center gap-2">
+            <i class="pi pi-cog"></i>
+            <span class="font-bold">Configuração</span>
+        </div>
+    </ng-template>
+</p-toolbar>
+
+<div class="card">
+    <form (ngSubmit)="save()">
+        <div class="flex flex-col gap-6 p-4">
+            <div>
+                <label for="username" class="block font-bold mb-3">Usuário</label>
+                <input type="text" pInputText id="username" name="username" [(ngModel)]="username" required [style]="{'width': '100%'}" />
+                <small class="text-red-500" *ngIf="submitted && !username">Usuário é obrigatório</small>
+            </div>
+
+            <div>
+                <label for="password" class="block font-bold mb-3">Senha</label>
+                <p-password id="password" [(ngModel)]="password" name="password" [toggleMask]="true" required [style]="{'width': '100%'}" [inputStyle]="{'width': '100%'}"></p-password>
+                <small class="text-red-500" *ngIf="submitted && !password">Senha é obrigatória</small>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-2 p-4 border-t-1">
+            <p-button type="submit" label="Salvar" icon="pi pi-check" />
+        </div>
+    </form>
+</div>
