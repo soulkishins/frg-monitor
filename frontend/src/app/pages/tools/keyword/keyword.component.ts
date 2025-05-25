@@ -87,6 +87,8 @@ export class Keyword implements OnInit {
 
     filterChange = new EventEmitter<string>(); // Emissor de eventos
 
+    offsetScroll = 400; // Valor padrão similar ao usado no advertisement-list
+
     constructor(
         private keywordService: KeywordService,
         private schedulerService: SchedulerService,
